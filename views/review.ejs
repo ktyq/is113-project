@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="../public/default.css">
+</head>
+
+<body>
+
+    <section>
+        <h2>Add Review</h2>
+        <form action="/movie">
+
+            <div class="review-form-row">
+                <label>Rating</label>
+                <select name="rating">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                </select>
+            </div>
+
+            <label>Title</label>
+            <input type="text" name="title">
+
+            <label>Comment</label>
+            <textarea name="comment"></textarea>
+
+            <div class="review-form-row">
+                <input type="checkbox" name="spoiler">
+                <label>Mark as spoiler</label>
+            </div>
+
+            <button type="submit">Submit Review</button>
+
+        </form>
+        <hr>
+    </section>
+
+    <section>
+        <h2>Reviews</h2>
+        <label>Sort</label>
+        <select>
+            <option>Highest Rating</option>
+            <option>Lowest Rating</option>
+            <option>Newest</option>
+            <option>Oldest</option>
+        </select>
+
+        <div>
+            <p>Rating: 0 / 5</p>
+            <pdiv>Terrible movie!</pdiv>
+            <p><i>username, date added</i></p>
+            <hr>
+        </div>
+
+        <div class="review-pagination">
+            <a href="#">Prev</a>
+            |
+            <a href="#">Next</a>
+        </div>
+
+    </section>
+
+</body>
+
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="../public/default.css">
+</head>
+
+<body>
+    <header>
+        <h1>Movie App</h1>
+    </header>
+
+    <!-- REGISTRATION VIEW -->
+    <section>
+        <h2>Register</h2>
+
+        <form action="/home">
+            <label>Username</label>
+            <input type="text" name="username">
+
+            <label>Email</label>
+            <input type="email" name="email">
+
+            <label>Password</label>
+            <input type="password" name="password">
+
+            <label>Confirm Password</label>
+            <input type="password" name="confirm_password">
+
+            <button type="submit">Register</button>
+        </form>
+
+        <a href="#login">Already have an account? Login</a>
+    </section>
+
+
+    <!-- LOGIN VIEW -->
+    <section id="login">
+        <h2>Login</h2>
+
+        <form action="/home">
+            <label>Username or Email</label>
+            <input type="text" name="login">
+
+            <label>Password</label>
+            <input type="password" name="password">
+
+            <button type="submit">Login</button>
+        </form>
+
+    </section>
+
+</body>
+
+</html>

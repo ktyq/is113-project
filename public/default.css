@@ -1,0 +1,88 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+header {
+    margin-bottom: 16px;
+}
+
+section {
+    margin-bottom: 16px;
+}
+
+form input,
+form textarea,
+form select,
+form button {
+    display: block;
+    margin-bottom: 10px;
+}
+
+img {
+    max-width: 100%;
+}
+
+/* movie card layout (home page) */
+.movie-card {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.movie-card img {
+    width: 120px;
+    height: 200px;
+    object-fit: cover;
+}
+
+.movie-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.movie-overview {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* buttons on same line */
+.button-row {
+    display: flex;
+    gap: 10px;
+}
+
+/* movie page layout */
+.movie-detail {
+    display: flex;
+    gap: 20px;
+}
+
+.movie-detail img {
+    width: 150px;
+    height: 250px;
+    object-fit: cover;
+}
+
+.movie-meta {
+    display: flex;
+    gap: 20px;
+}
+
+/* review header row */
+.review-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.review-form-row {
+    display: flex;
+    gap: 10px;
+}
+
+.review-pagination {
+    text-align: center;
+    margin-top: 20px;
+}

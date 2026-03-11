@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="../public/default.css">
+</head>
+
+<body>
+
+    <section>
+        <h2>Add New Movie</h2>
+
+        <form action="/admin/add">
+
+            <label>Movie Title</label>
+            <input type="text" name="title">
+
+            <label>Movie Photo URL</label>
+            <input type="text" name="photo">
+
+            <label>Genre</label>
+            <input type="text" name="genre">
+
+            <label>Release Year</label>
+            <input type="number" name="year">
+
+            <label>Duration</label>
+            <input type="text" name="duration">
+
+            <label>Director</label>
+            <input type="text" name="director">
+
+            <label>Cast</label>
+            <textarea name="cast"></textarea>
+
+            <label>Overview</label>
+            <textarea name="overview"></textarea>
+
+            <button type="submit">Add Movie</button>
+
+        </form>
+
+    </section>
+</body>
+
+</html>
