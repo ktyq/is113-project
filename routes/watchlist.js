@@ -1,5 +1,24 @@
 // Watchlist (kt)
-// C: create watchlist
-// R: view watchlists
 // U: update watch list
 // D: delete movie/ watchlist
+
+const express = require("express");
+const server = express();
+const path = require("path");
+
+const router = express.Router();
+
+// GET /user/movies/lists (get user movie list)
+// GET /user/reviews (get user reviews)
+//
+
+// todo view watchlists
+router.get('/lists', (req, res) => {
+
+});
+
+// todo add movie to list
+router.put('/:userid/list/:listid/:movieid', (req, res) => {
+
+});
+
