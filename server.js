@@ -9,6 +9,7 @@ server.get('/', (req, res) => {
     res.status(200).send(`success!`)
 });
 
+// set path
 server.use('/watchlist', require('./routes/account'));
 
 server.set("view engine", "ejs");
