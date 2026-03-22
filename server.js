@@ -10,8 +10,8 @@ server.get('/', (req, res) => {
 });
 
 // set path
-server.use('/watchlist', require('./routes/account'));
-
+server.use('/watchlist', require('./routes/watchlist'));
+server.use('/feedback', require('./routes/feedback'));
 server.set("view engine", "ejs");
 server.get('/watchlist', (req, res) => {
     const errors = [];

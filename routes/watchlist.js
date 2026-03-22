@@ -3,8 +3,6 @@
 // D: delete movie/ watchlist
 
 const express = require("express");
-const server = express();
-const path = require("path");
 
 const router = express.Router();
 
@@ -22,3 +20,4 @@ router.put('/:userid/list/:listid/:movieid', (req, res) => {
 
 });
 
+module.exports = router;
