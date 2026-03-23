@@ -1,19 +1,14 @@
-// WATCHLIST
-// - watchlist_id
-// - user_id
-// - {movie_id(s)}
-// - watch_status (plan to watch, completed, etc)
-// - created_at
-
 const mongoose = require('mongoose');
 
 const watchlistSchema = new mongoose.Schema({
     userID: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: [true, 'User is required']
     },
     movieID: {
         type: mongoose.Schema.Types.ObjectId,
+        ref: 'Movie',
         required: [true, 'Movie is required'],
         // unique: true
     },

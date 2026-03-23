@@ -3,14 +3,15 @@
 // D: delete movie/ watchlist
 
 const express = require("express");
-const server = express();
-const path = require("path");
-
 const router = express.Router();
 
 // GET /user/movies/lists (get user movie list)
 // GET /user/reviews (get user reviews)
 //
+
+router.get('/', (req, res) => {
+    res.send("hi")
+})
 
 // todo view watchlists
 router.get('/lists', (req, res) => {
@@ -22,3 +23,4 @@ router.put('/:userid/list/:listid/:movieid', (req, res) => {
 
 });
 
+module.exports = router;
