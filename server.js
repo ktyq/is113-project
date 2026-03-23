@@ -20,9 +20,8 @@ server.use(express.json());
 // }));
 server.get('/', (req, res) => res.status(200).send(`success!`));
 
-
 // routes
-server.use('/watchlist', require('./routes/watchlist'));
+server.use('/list', require('./routes/watchlist'));
 
 async function connectDB() {
     try {

@@ -1,26 +1,21 @@
 // Watchlist (kt)
-// U: update watch list
-// D: delete movie/ watchlist
 
 const express = require("express");
+const listController = require('./../controllers/list-controller');
 const router = express.Router();
 
-// GET /user/movies/lists (get user movie list)
-// GET /user/reviews (get user reviews)
-//
+// view planned , watched
+router.get("/", listController.viewUserList); // user, list type (planned, watched), order
 
-router.get('/', (req, res) => {
-    res.send("hi")
-})
+// update movie in watchlist | reorder, update notes, update status
+router.post("/edit", listController.editUserListItem); // userid, listtype, movieid, edit info
+router.post("/update", listController.updateListMovie); // userid, listtype, movieid, edit info
+router.post("/reorder", listController.reorderMovieList); // userid, listtype, movieid, edit info
 
-// todo view watchlists
-router.get('/lists', (req, res) => {
+// add movie to watchlist
+router.post("/add", listController.addToUserList); // userid, listtype, movieid, edit info
 
-});
-
-// todo add movie to list
-router.put('/:userid/list/:listid/:movieid', (req, res) => {
-
-});
+// delete movie from watchlist
+router.post("/del", listController.deleteFromUserList);
 
 module.exports = router;
