@@ -53,7 +53,7 @@ const watchlistSchema = new mongoose.Schema({
 
 // prevent suplicate entries
 watchlistSchema.index({ userID: 1, movieID: 1 }, { unique: true });
-watchlistSchema.index({ userID: 1, status: 1, TaskPriorityChangeEvent: -1 });
+watchlistSchema.index({ userID: 1, status: 1, priority: -1 });
 
 // reed
 watchlistSchema.statics.getListsByUser = async function (user, page = 1, number = 10, status = null, settings = null) {
@@ -109,9 +109,10 @@ watchlistSchema.statics.updateWatchlistMovie = async function (user, movie, upda
     const { status, priority, notes } = updates;
 
     const updateFields = {};
-    if (status) updateFields.status = status;
-    if (priority) updateFields.priority = priority;
-    if (notes) updateFields.notes = notes;
+
+    if (status !== undefined) updateFields.status = status;
+    if (priority !== undefined) updateFields.priority = priority;
+    if (notes !== undefined) updateFields.notes = notes;
 
     if (Object.keys(updateFields).length === 0) { throw new Error('No fields provided'); }
 
