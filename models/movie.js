@@ -27,7 +27,7 @@ const movieSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    release_year: {
+    releaseYear: {
         type: Number,
         required: true
     },
@@ -56,4 +56,4 @@ const movieSchema = new mongoose.Schema({
     { timestamps: true }
 );
 
-// todo methods
+module.exports = mongoose.model('Movie', movieSchema);

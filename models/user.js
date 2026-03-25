@@ -39,4 +39,5 @@ const userSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// todo methods
+// models/User.js
+module.exports = mongoose.model('User', userSchema);
