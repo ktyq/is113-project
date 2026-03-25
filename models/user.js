@@ -18,17 +18,17 @@ const userSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: true,
+        required: [true, 'Email is required'],
         unique: true
     },
     password: {
         type: String,
-        required: true
+        required: [true, 'Password is required']
     },
-    isAdmin: [{
-        type: Boolean,
+    role: [{
+        type: String,
         required: true,
-        default: false
+        default: 'user'
     }],
     accountStatus: {
         type: String,
