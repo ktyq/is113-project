@@ -25,11 +25,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Password is required']
     },
-    role: [{
+    role: {
         type: String,
         required: true,
         default: 'user'
-    }],
+    },
     accountStatus: {
         type: String,
         enum: ['active', 'suspended', 'disabled'],
@@ -40,4 +40,4 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // models/User.js
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);
