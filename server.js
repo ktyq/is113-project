@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 // const fs = require('fs');
 
+const friendController = require("./controllers/friendController");
 const server = express();
 server.set("view engine", "ejs");
 
@@ -23,6 +24,9 @@ server.get("/", (req, res) => res.status(200).send(`success!`));
 // routes
 server.use("/list", require("./routes/watchlist"));
 server.use("/reviews", require("./routes/reviews"));
+server.use("/friends", require("./routes/friends"));
+
+server.get('/watchlist/:friendId', friendController.viewFriendWatchlist);
 
 async function connectDB() {
   try {

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Friends</title>
+  <link rel="stylesheet" href="../public/default.css">
+</head>
+<body>
+  <main>
+    <h1>Friends</h1>
+
+    <% if (!friends || friends.length === 0) { %>
+      <p>No friends :(</p>
+    <% } else { %>
+      <table>
+        <thead>
+          <tr>
+            <th>Friend</th>
+            <th>Nickname</th>
+            <th>Change nickname</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% friends.forEach(function(f) { %>
+          <tr>
+            <td>
+              <a href="/watchlist/<%= f.recipient._id %>"><%= f.recipient.username %></a>
+              (<%= f.nickname ? f.nickname : 'no nickname' %>)
+            </td>
+            <td><%= f.nickname ? f.nickname : 'no nickname' %></td>
+            <td>
+              <form method="POST" action="/friends/nickname/<%= f.recipient._id %>">
+                <input type="text" name="nickname" value="<%= f.nickname || '' %>" />
+                <button type="submit">Change Nickname</button>
+              </form>
+            </td>
+            <td>
+              <form method="POST" action="/friends/remove/<%= f.recipient._id %>">
+                <button type="submit">Remove Friend</button>
+              </form>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+
+    <section style="margin-top: 2rem;">
+      <h2>People You May Know</h2>
+      <a href="/friends"><button type="button">Refresh</button></a>
+      <div id="suggestions-area">
+        <% if (!suggestions || suggestions.length === 0) { %>
+          <p>No suggestions available.</p>
+        <% } else { %>
+          <table>
+            <thead>
+              <tr><th>Username</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <% suggestions.forEach(function(user){ %>
+                <tr>
+                  <td><%= user.username %></td>
+                  <td>
+                    <form method="POST" action="/friends/add/<%= user._id %>">
+                      <button type="submit">Add Friend</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
