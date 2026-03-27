@@ -1,6 +1,6 @@
 # MOVIE WATCHLIST & REVIEW HUB
 Full-stack web application which allows users can add movies to a personal watchlist, mark them as watched, and leave reviews/ratings. 
-
+test 
 ## Features
 - **User Account**: Register as new user, log in/out, update and delete profile
 - **Browse Movies**: Search and filter movies on the home page
