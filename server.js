@@ -9,6 +9,7 @@ const path = require("path");
 const friendController = require("./controllers/friendController");
 const server = express();
 server.set("view engine", "ejs");
+server.set('views', path.join(__dirname, 'views')); 
 
 // Middleware
 server.use(express.urlencoded({ extended: true }));
@@ -25,6 +26,9 @@ server.get("/", (req, res) => res.status(200).send(`success!`));
 server.use("/list", require("./routes/watchlist"));
 server.use("/reviews", require("./routes/reviews"));
 server.use("/friends", require("./routes/friends"));
+server.use('/admin', require('./routes/movies'));
+server.use('/movie', require('./routes/index'));
+server.use('/index', require('./routes/index'));
 
 server.get('/watchlist/:friendId', friendController.viewFriendWatchlist);
 

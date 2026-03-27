@@ -2,121 +2,58 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Movie</title>
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="stylesheet" href="../public/default.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= movie.title %></title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/default.css">
 </head>
 
 <body>
-  <section>
-    <h2>Add Review</h2>
-    <% if (errors && errors.length>0){%>
-    <ul style="color: red;">
-      <%errors.forEach(e => {%> <li><%=e%></li><%})%
-    </ul>
-    <%}%>
+    <section>
+        <div class="movie-detail">
 
-      <% if (currentUser){%>
-      <form action="/reviews/add" method="POST">
-        <input type="hidden" name="movieID" value="<%=movie._id%>">
-        <div class="review-form-row"><label>Rating</label>
-          <select name="rating">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
-        </div>
+            <!-- Movie Poster -->
+            <img src="<%= movie.imageRef %>" alt="<%= movie.title %>" style="max-width:200px;">
 
-        <label>Comment</label>
-        <textarea name="comment"></textarea>
+            <div>
+                <!-- Title -->
+                <h2><%= movie.title %></h2>
 
-        <div class="review-form-row"><input type="checkbox" name="isAnonymous"><label>Post anonymously</label></div>
-        <button type="submit">Post review!</button>
-      </form>
-      <% }else {%>
-      <p><a href="/auth/login">Log in</a> to write a review.</p>
-      <% } %>
-      <hr>
-  </section>
+                <!-- Year and Duration -->
+                <p><%= movie.release_year %> - <%= movie.movieLength %> mins</p>
 
-  <section>
-    <h2>Reviews (<%=reviews.length %>)</h2>
-    <% if (reviews.length ===0) {%>
-    <p>No reviews yet. Be the first!</p>
-    <%}%>
+                <!-- Meta Info -->
+                <div class="movie-meta">
+                    <div>Genre: <%= movie.genre.join(', ') %></div>
+                    <div>Average Rating: <%= movie.averageRating || 0 %> / 5</div>
+                </div>
 
-    <% reviews.forEach(review=>{%>
-    <div>
-      <p>
-        Rating: <%= review.rating%>/5</p>
-      <p><%= review.comment%></p>
-      <p>
-        <i><% if (review.isAnonymous) { %>
-          Anonymous
-          <% } else { %>
-          <%= review.userID.username %>
-          <% } %>
-          , <%= review.createdAt.toDateString() %></i>
-      </p>
+                <!-- Overview -->
+                <p><%= movie.overview %></p>
 
-      <% if(currentUser && currentUser._id.toString()===review.userID._id.toString()){%>
-      <details>
-        <summary>Edit</summary>
-        <form action="/reviews/edit" method="POST">
-          <input type="hidden" name="reviewID" value="<%= review._id%>">
-          <input type="hidden" name="movieID" value="<%= movie._id%>">
-          <select name="rating">
-            <% for (let i=1;i<=5;i++){%>
-            <option value="<%=i%>" <%=review.rating===i?'selected':''%>><%=i%></option><%}%></select>
-                </form></details>
+                <!-- Director(s) -->
+                <p><strong>Directed By:</strong> <%= movie.director.join(', ') %></p>
 
-        <form action="/review/del" method="POST" onsubmit="return confirm('Delete this review?')"><input type="hidden" name="reviewID" value="<%= review._id%>"><button type="submit">Delete</button></form>
-        <%}%>
-        <hr>
-    </div>
-  </section>
-  <div class="movie-detail">
+                <!-- Cast -->
+                <p><strong>Cast:</strong> <%= movie.cast.join(', ') %></p>
 
-    <img src="movie.jpg">
+                <!-- Action Buttons -->
+                <div class="button-row">
+                    <a href="/watchlist/add/<%= movie._id %>"><button>Add to Watchlist</button></a>
+                    <a href="/watched/add/<%= movie._id %>"><button>Mark as Watched</button></a>
+                </div>
 
-    <div>
-      <h2>Movie Title</h2>
-      <p>Year Published - Duration</p>
+            </div>
+    </section>
 
-      <div class="movie-meta">
-        <div>Genre: Genre</div>
-        <div>Average Rating: 0 / 5</div>
-      </div>
-
-      <p>Overview text placeholder.</p>
-
-      <p><strong>Directed By</strong> Directors</p>
-
-      <p><strong>Cast</strong> Cast, Cast</p>
-
-      <div class="button-row">
-        <a href="/watchlist"><button>Add to Watchlist</button></a>
-        <a href="/watched"><button>Mark as Watched</button></a>
-      </div>
-
-    </div>
-
-  </div>
-
-
-  </section>
-
-  <section>
-    <div class="review-header">
-      <a href="/review?movieID=<%=movie._id%>"><%= reviews.length%>Reviews</a>
-      <a href="/review?movieID=<%=movie._id%>"><button>Add Review</button></a>
-    </div>
-  </section>
-
+        <!-- Reviews Section -->
+        <section>
+            <div class="review-header">
+                <a href="/review/<%= movie._id %>"><%= movie.reviews ? movie.reviews.length : 0 %> Reviews</a>
+                <a href="/review/<%= movie._id %>"><button>Add Review</button></a>
+            </div>
+        </section>
 </body>
 
 </html>
