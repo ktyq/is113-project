@@ -10,6 +10,8 @@
 </head>
 
 <body>
+    <%- include('partial/header', {user: user}) %>
+
     <h1>Edit Profile</h1>
 
     <% if (error) { %>
@@ -18,23 +20,35 @@
 
     <form action="/edit-profile" method="POST">
         <label>New Username:</label>
-        <input type="text" name="username" placeholder="New Username">
+        <input type="text" name="username" placeholder="Enter new username">
         <br><br>
 
         <label>New Email Address:</label>
-        <input type="email" name="email" value="<%= user.email %>">
+        <input type="email" name="email" placeholder="Enter new email">
         <br><br>
 
-        <label>Change Password:</label>
-        <input type="password" name="newPassword">
+        <h3>Change password</h3>
+        <p>Leave the password fields empty if you don't want to change your password.</p>
+
+        <label>Current Password:</label>
+        <input type="password" name="currentPassword" placeholder="Enter current password">
+
+        <br>
+        <label>New Password:</label>
+        <input type="password" name="newPassword" placeholder="Enter new password">
+
         <br>
         <label>Confirm New Password:</label>
-        <input type="password" name="confirmNewPassword">
+        <input type="password" name="confirmNewPassword" placeholder="Confirm new password">
 
         <br><br>
         <button type="submit">Save Changes</button>
     </form>
 
     <br>
-    <a href="/user-profile">Back to Profile</a>
+    <% if (user.role === 'admin') { %>
+        <a href="/admin-profile">Back to Admin Profile</a>
+    <% } else { %>  
+        <a href="/user-profile">Back to Profile</a>
+    <% } %>
 </body>

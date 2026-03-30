@@ -118,7 +118,7 @@ exports.editProfileGet = async (req, res) => {
 
 exports.editProfilePost = async(req, res) => {
     try {
-        const {username, email, newPassword, confirmNewPassword} = req.body;
+        const {username, email, currentPassword, newPassword, confirmNewPassword} = req.body;
         const user = await User.findById(req.session.user.id);
 
         if (!user) return res.redirect('/login');
@@ -144,6 +144,15 @@ exports.editProfilePost = async(req, res) => {
 
         //Only update password if user typed a new one
         if (newPassword) {
+            //Verify old password
+            if (!currentPassword) {
+                return res.render('edit-profile', {user, error: 'Please enter your current password to set a new one'});
+            }
+            const oldMatch = await bcrypt.compare(currentPassword, user.password);
+            if (!oldMatch) {
+                return res.render('edit-profile', {user, error: 'Current password is incorrect'});
+            }
+
             if (newPassword !== confirmNewPassword) {
                 return res.render('edit-profile', {user: user, error: 'New passwords do not match'});
             }
@@ -157,7 +166,7 @@ exports.editProfilePost = async(req, res) => {
         req.session.user.email = user.email;
         console.log("Profile updated:", user.username);
 
-        res.redirect('/user-profile');
+        res.render('edit-profile', {user: user, error: 'Profile updated successfully'});
         
     } catch(err) {
         console.error(err);

@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
     if (req.session.user) {
         return req.session.user.role === 'admin'
         ? res.redirect('/admin-profile')
-        : res.redirect('/user-profile');
+        : res.redirect('/home');
     }
     res.redirect('/login');
 })
@@ -24,6 +24,10 @@ router.post('/register', userController.registerPost);
 router.get('/login', userController.loginGet);
 router.post('/login', userController.loginPost);
 
+//--Home page--//
+router.get('/home', authMiddleware.isLoggedIn, (req, res) => {
+    res.render('index', {movies: [], user: req.session.user})
+})
 //--User profile--//
 router.get('/user-profile', authMiddleware.isLoggedIn, userController.profile);
 

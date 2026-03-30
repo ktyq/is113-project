@@ -25,14 +25,14 @@ server.get("/", (req, res) => res.status(200).send(`success!`));
 
 // routes
 server.use("/", require("./routes/profile"));
-// server.use("/list", require("./routes/watchlist"));
-// server.use("/reviews", require("./routes/reviews"));
-// server.use("/friends", require("./routes/friends"));
-// server.use('/admin', require('./routes/movies'));
-// server.use('/movie', require('./routes/index'));
-// server.use('/index', require('./routes/index'));
+server.use("/list", require("./routes/watchlist"));
+server.use("/reviews", require("./routes/reviews"));
+server.use("/friends", require("./routes/friends"));
+server.use('/admin', require('./routes/movies'));
+server.use('/movie', require('./routes/index'));
+server.use('/index', require('./routes/index'));
 
-// server.get('/watchlist/:friendId', friendController.viewFriendWatchlist);
+server.get('/watchlist/:friendId', friendController.viewFriendWatchlist);
 
 async function connectDB() {
   try {

@@ -2,15 +2,23 @@
     <h1>Movie App</h1>
     <nav>
         <a href="/home">Home</a>
-
-        <% if (isAdmin) { %>
-            <a href="/admin">Admin</a>
+        &nbsp;|&nbsp;
+        <a href="/watchlist">Watchlist</a>
+        &nbsp;|&nbsp;
+        <a href="/friends">Friends</a>
+        &nbsp;|&nbsp;
+        
+        <% if (user.role === 'admin') { %>
+            <a href="/admin-profile">Admin</a>
+        <% } else { %>
+            <a href="/user-profile">Account</a>
         <% } %>
-
-        <a href="/account">Account</a>
-
-        <% if (isLoggedIn) { %>
-            <a href="/logout">Logout</a>
+        &nbsp;|&nbsp;  
+        
+        <% if (user) { %>
+            <form action="/logout" method="POST" style="display:inline;">
+                <button type="submit">Logout</button>
+            </form>
         <% } else { %>
             <a href="/login">Login</a>
         <% } %>

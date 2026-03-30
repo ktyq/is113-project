@@ -10,23 +10,17 @@
 </head>
 
 <body>
-    <h1>Movie App</h1>
-    <h2>My Profile</h2>
+    <%- include('partial/header', {user: user}) %>
+    <h1>My Profile</h1>
 
-    <p>Welcome, user <%= user.username %></p>
     <p><strong>Username:</strong> <%= user.username %></p>
-    <p><strong>Email:</strong><%= user.email %></p>
+    <p><strong>Email:</strong> <%= user.email %></p>
     
     <br>
     <a href="/edit-profile">Edit Profile</a>
     
     <br><br>
-    <form action="/logout" method="POST">
-        <button type="submit">Logout</button>
-    </form>
-
-    <br>
-    <form action="/delete-profile" method="POST" id="deleteForm">
+     <form action="/delete-profile" method="POST" id="deleteForm">
         <button type="submit" onclick="confirmDelete()">Delete Account</button>
     </form>
 
