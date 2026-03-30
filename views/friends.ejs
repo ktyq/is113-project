@@ -26,18 +26,22 @@
           <% friends.forEach(function(f) { %>
           <tr>
             <td>
-              <a href="/watchlist/<%= f.recipient._id %>"><%= f.recipient.username %></a>
+              <% if (f.status === 'following') { %>
+                <a href="/watchlist/<%= f.friend._id %>"><%= f.friend.username %></a>
+              <% } else { %>
+                <span><%= (f.friend && f.friend.username) ? f.friend.username : 'Unknown user' %></span>
+              <% } %>
               (<%= f.nickname ? f.nickname : 'no nickname' %>)
             </td>
             <td><%= f.nickname ? f.nickname : 'no nickname' %></td>
             <td>
-              <form method="POST" action="/friends/nickname/<%= f.recipient._id %>">
+              <form method="POST" action="/friends/nickname/<%= f.friend._id %>">
                 <input type="text" name="nickname" value="<%= f.nickname || '' %>" />
                 <button type="submit">Change Nickname</button>
               </form>
             </td>
             <td>
-              <form method="POST" action="/friends/remove/<%= f.recipient._id %>">
+              <form method="POST" action="/friends/remove/<%= f.friend._id %>">
                 <button type="submit">Remove Friend</button>
               </form>
             </td>
