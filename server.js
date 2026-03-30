@@ -23,6 +23,7 @@ server.use(session({
 server.get("/", (req, res) => res.status(200).send(`success!`));
 
 // routes
+server.use("/", require("./routes/profile"));
 server.use("/list", require("./routes/watchlist"));
 server.use("/reviews", require("./routes/reviews"));
 server.use("/friends", require("./routes/friends"));

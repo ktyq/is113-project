@@ -4,11 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
+    <title>My Profile</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="../public/default.css">
 </head>
 
 <body>
-    <h2>Welcome, user <%= user.username %>!</h2>
+    <%- include('partial/header', {user: user}) %>
+    <h1>My Profile</h1>
+
+    <p><strong>Username:</strong> <%= user.username %></p>
+    <p><strong>Email:</strong> <%= user.email %></p>
+    
+    <br>
+    <a href="/edit-profile">Edit Profile</a>
+    
+    <br><br>
+     <form action="/delete-profile" method="POST" id="deleteForm">
+        <button type="submit" onclick="confirmDelete()">Delete Account</button>
+    </form>
+
+    <script>
+        function confirmDelete() {
+            if (confirm('Are you sure you want to delete your account?')) {
+                document.getElementById('deleteForm').submit();
+            }
+        }
+    </script>
 </body>
