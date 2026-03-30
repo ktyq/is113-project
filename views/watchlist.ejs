@@ -1,20 +1,106 @@
+<!-- views/watchlist.ejs -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>watchlist</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
+
 <body>
     <header>
+        <h1>User Watchlist</h1>
     </header>
+
     <main>
-        hay
+        <% if (!editMovieId && !removeMovieId) { %>
+
+            <!-- filter -->
+            <section>
+                <hr>
+                <form action="/list" method="get">
+
+                    <div class="row">
+                        <input type="text" name="search" value="<%= search %>" placeholder="Search by title">
+                    </div>
+
+                    <div class="row">
+
+                        <label>Status</label>
+                        <select name="status">
+                            <option value="planning" <%=status==='planning' ? 'selected' : '' %>>Planning to Watch
+                            </option>
+                            <option value="watched" <%=status==='watched' ? 'selected' : '' %>>Watched</option>
+                        </select>
+
+                        <label>Sort By</label>
+                        <select name="sort">
+                            <option value="priority_asc" <%=sort==='priority_asc' ? 'selected' : '' %>>Priority (Lowest
+                                first)</option>
+                            <option value="priority_desc" <%=sort==='priority_desc' ? 'selected' : '' %>>Priority
+                                (Highest
+                                first)</option>
+                            <option value="date_desc" <%=sort==='date_desc' ? 'selected' : '' %>>Date Added (Newest
+                                first)
+                            </option>
+                            <option value="date_asc" <%=sort==='date_asc' ? 'selected' : '' %>>Date Added (Oldest first)
+                            </option>
+                        </select>
+
+                        <label>Show</label>
+                        <select name="limit">
+                            <option value="5" <%=total==5 ? 'selected' : '' %>>5</option>
+                            <option value="10" <%=total==10 ? 'selected' : '' %>>10</option>
+                            <option value="20" <%=total==20 ? 'selected' : '' %>>20</option>
+                            <option value="50" <%=total==50 ? 'selected' : '' %>>50</option>
+                            <option value="100" <%=total==100 ? 'selected' : '' %>>100</option>
+                        </select>
+
+                        <label>Page</label>
+                        <input type="number" name="page" value="<%= page %>" style="width:60px;" min="1">
+
+                        <a href="/list" style="text-decoration: none;">
+                            <button type="button">Reset</button>
+                        </a>
+                        <button type="submit">Apply</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- movie list -->
+            <section>
+                <h2>
+                    <%= status==='planning' ? 'Planning to Watch' : 'Watched' %>
+                </h2>
+
+                <% if (watchlist.length===0) { %>
+                    <p>No movies found. <a href="/">Add one now</a>.</p>
+                    <% } else { %>
+                        <table border="1">
+                            <thead>
+                                <tr>
+                                    <th colspan="2">Movie</th>
+                                    <th>Notes</th>
+                                    <th>Priority</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <% watchlist.forEach(function(item){ %>
+                                    <%- include("partial/watchlist-row", { item: item, editMovieId: editMovieId,
+                                        removeMovieId: removeMovieId }) %>
+                                        <% }) %>
+                            </tbody>
+                        </table>
+                        <% } %>
+            </section>
+
+        <% } else { %>
+            <%- include("partial/watchlist-edit", { editMovieId, removeMovieId, movie } )%>
+        <% } %>
     </main>
-    <footer>
-    </footer>
-    <script src="js/script.js"></script>
 </body>
+
 </html>

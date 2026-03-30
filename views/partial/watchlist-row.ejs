@@ -1,0 +1,36 @@
+<!-- views/partial/watchlist-row.ejs -->
+<!-- photo -->
+<td>
+    <a href="/movie/<%= item.movieID._id %>">
+        <img src="/images/default.jpg" style="width:60px;height:90px;object-fit:cover;">
+    </a>
+</td>
+
+<!-- title -->
+<td>
+    <a href="/movie/<%= item.movieID._id %>">
+        <%= item.movieID.title %>
+    </a>
+</td>
+
+<!-- notes -->
+<td>
+    <!-- <textarea name="notes"><%= item.notes %></textarea> -->
+    Notes: <%= item.notes || "—" %>
+        <br>
+        <small>added: <%= new Date(item.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short',
+                year:'2-digit' }) %></small>
+</td>
+
+<!-- priority -->
+<td>
+    <%= item.priority %>
+    <!-- <input type="number" disabled name="priority" value="<%= item.priority %>" style="width:60px;"><br> -->
+</td>
+
+<!-- actions -->
+<td>
+    <a href="/list?edit=<%= item.movieID._id %>">Edit</a>
+    <a href="/list?remove=<%= item.movieID._id %>">Remove</a>
+</td>
+</tr>

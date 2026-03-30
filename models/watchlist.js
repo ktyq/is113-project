@@ -56,22 +56,19 @@ watchlistSchema.index({ userID: 1, movieID: 1 }, { unique: true });
 watchlistSchema.index({ userID: 1, status: 1, priority: -1 });
 
 // reed
-watchlistSchema.statics.getListsByUser = async function (user, page = 1, number = 10, status = null, settings = null) {
+watchlistSchema.statics.getListsByUser = async function (user, page = 1, number = 10, status = null, settings = null, search = '') {
     const userID = typeof user === 'string' ? new ObjectId(user) : user;
 
     let query = { userID };
-    if (status === 'planning' || status === 'watched') {
-        query.status = status;
-    }
+    if (status === 'planning' || status === 'watched') { query.status = status; }
 
-    // Build sort object based on settings
-    let sortObj = { createdAt: -1 }; // default
+    let sortObj = { priority: -1 }; // default
 
     if (settings) {
         if (settings.priority === 1 || settings.priority === -1) {
             sortObj = { priority: settings.priority }; // 1. lowest first | -1. highest first
-        } else if (settings.title === 1 || settings.title === -1) {
-            sortObj = { 'movieID.title': settings.title }; // alphabetical |  reverse alphabetical
+            // } else if (settings.title === 1 || settings.title === -1) {
+            //     sortObj = { 'movieID.title': settings.title }; // alphabetical |  reverse alphabetical
         } else if (settings.createdAt === 1 || settings.createdAt === -1) {
             sortObj = { createdAt: settings.createdAt }; // oldest first
         }
@@ -81,16 +78,33 @@ watchlistSchema.statics.getListsByUser = async function (user, page = 1, number 
         .find(query)
         .limit(number)
         .skip((page - 1) * number)
-        .sort(sortObj)  // Use settings-based sort
-        .populate('movieID', 'title director')
+        .sort(sortObj)
+        .populate({
+            path: 'movieID',
+            select: 'title director',
+            match: search && search.trim() !== '' ? { title: { $regex: search.trim(), $options: 'i' } } : {}
+        })
         .lean();
 
-    console.log('Titles:', result.map(item => item.movieID?.title));
-
+    result = result.filter(item => item.movieID); // remove non matching titles
+    // console.log('Titles:', result.map(item => item.movieID?.title));
     return result;
 };
 
 // reed
+watchlistSchema.statics.getWatchlistItem = async function (user, movie) {
+    const userID = typeof user === 'string' ? new ObjectId(user) : user;
+    const movieID = typeof movie === 'string' ? new ObjectId(movie) : movie;
+
+    const result = await Watchlist
+        .findOne({ userID, movieID })
+        .populate({
+            path: 'movieID',
+            select: 'title',
+        })
+        .lean();
+    return result || null;
+};
 watchlistSchema.statics.getMovieStatus = async function (user, movie) {
     const userID = typeof user === 'string' ? new ObjectId(user) : user;
     const movieID = typeof movie === 'string' ? new ObjectId(movie) : movie;
@@ -101,7 +115,6 @@ watchlistSchema.statics.getMovieStatus = async function (user, movie) {
         .lean();
     return entry?.status || null;
 };
-
 // updat
 watchlistSchema.statics.updateWatchlistMovie = async function (user, movie, updates) {
     const userID = typeof user === 'string' ? new ObjectId(user) : user;
@@ -148,9 +161,6 @@ watchlistSchema.statics.deleteFromUserList = async function (user, movie) {
     return result;
 };
 
-
-
 const Watchlist = mongoose.model('Watchlist', watchlistSchema);
-
 
 module.exports = Watchlist; // blehhhh 
