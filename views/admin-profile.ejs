@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Profile</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="../public/default.css">
+</head>
+
+<body>
+    <h1>Movie App</h1>
+    <h2>Welcome, Admin!</h2>
+    
+    <br>
+    <div>
+    <p><strong>Username:</strong> <%= user.username %></p>
+    <p><strong>Email:</strong> <%= user.email %></p>
+    </div>
+
+    <br>
+    
+    <a href="/admin/movies">Manage Movies</a>
+    &nbsp;|&nbsp;
+    <a href="/edit-profile">Edit Profile</a>
+
+    <br><br>
+    <form action="/logout" method="POST">
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>

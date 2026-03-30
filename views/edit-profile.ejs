@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="../public/default.css">
+</head>
+
+<body>
+    <h1>Edit Profile</h1>
+
+    <% if (error) { %>
+        <h3><%= error %></h3>
+    <% } %>
+
+    <form action="/edit-profile" method="POST">
+        <label>New Username:</label>
+        <input type="text" name="username" placeholder="New Username">
+        <br><br>
+
+        <label>New Email Address:</label>
+        <input type="email" name="email" value="<%= user.email %>">
+        <br><br>
+
+        <label>Change Password:</label>
+        <input type="password" name="newPassword">
+        <br>
+        <label>Confirm New Password:</label>
+        <input type="password" name="confirmNewPassword">
+
+        <br><br>
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <br>
+    <a href="/user-profile">Back to Profile</a>
+</body>
