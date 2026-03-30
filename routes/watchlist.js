@@ -11,10 +11,10 @@ router.get("/status", listController.getMovieStatus); // user, list type (planne
 // update movie in watchlist | reorder, update notes, update status
 router.post("/edit", listController.editUserListItem); // userid, listtype, movieid, edit info
 
+// delete movie from watchlist
+router.post("/remove", listController.deleteFromUserList);
+
 // add movie to watchlist
 router.post("/add", listController.addToUserList); // userid, listtype, movieid, edit info
-
-// delete movie from watchlist
-router.post("/del", listController.deleteFromUserList);
 
 module.exports = router;
