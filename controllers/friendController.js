@@ -5,7 +5,7 @@
 // - change nickname for a friend
 // - view friend's watchlist
 
-const User = require('../models/user');
+const User = require('../models/User');
 const Friend = require('../models/Friend');
 
 // Resolve user identity from request data (query/body/session fallback)
