@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const Movie = require('models/movie');
+const Movie = require('../models/movie');
 
 // --- CREATE MOVIE ---
 router.post('/add', async (req, res) => {

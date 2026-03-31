@@ -1,7 +1,25 @@
 const fs = require('fs/promises');
 
 const List = require('../models/Watchlist');
+const User = require('../models/user'); // Added for privacy checks
+const Friend = require('../models/Friend'); // Added for friendship verification
 const TEST_USER = '69c39ce645385a80651325ed';
+
+// Helper function to resolve current user ID from various sources
+async function resolveCurrentUser(req) {
+    if (req.session && req.session.user) {
+        return req.session.user;
+    }
+    if (req.query.userId) {
+        return req.query.userId;
+    }
+    if (req.body.userId) {
+        return req.body.userId;
+    }
+    // Fallback: get first user from DB
+    const firstUser = await User.findOne({});
+    return firstUser ? firstUser._id.toString() : TEST_USER;
+}
 
 // viewUserList // userid, list type (planned, watched), order
 exports.viewUserList = async (req, res) => {
@@ -44,6 +62,90 @@ exports.viewUserList = async (req, res) => {
         if (!movie) return res.status(404).send("Movie not found in watchlist");
 
         return res.render("watchlist", { editMovieId, removeMovieId, movie });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// viewOtherUserList // view another user's watchlist with privacy check
+exports.viewOtherUserList = async (req, res) => {
+    const targetUserId = req.params.userId;
+    const currentUserId = await resolveCurrentUser(req);
+
+    try {
+        const targetUser = await User.findById(targetUserId);
+        if (!targetUser) return res.status(404).send('User not found');
+
+        // If viewing own list, redirect to /list
+        if (targetUserId === currentUserId) {
+            return res.redirect('/list');
+        }
+
+        // Check privacy settings
+        if (targetUser.watchlistPrivacy === 'private') {
+            return res.status(403).send('This user\'s watchlist is private');
+        }
+
+        if (targetUser.watchlistPrivacy === 'friends') {
+            // Check if current user is friends with target user
+            const friendship = await Friend.findOne({
+                $or: [
+                    { requestor: currentUserId, requestee: targetUserId },
+                    { requestor: targetUserId, requestee: currentUserId }
+                ],
+                status: 'accepted'
+            });
+            if (!friendship) {
+                return res.status(403).send('This user\'s watchlist is only visible to friends');
+            }
+        }
+
+        // Privacy allows viewing (public or friends and is friend)
+        let page = parseInt(req.query.page) || 1;
+        let total = parseInt(req.query.limit) || 10;
+        let status = req.query.status || 'planning';
+        let sort = req.query.sort || 'priority_asc';
+        const search = (req.query.search || '').toString().trim();
+
+        let settings = {};
+        switch (sort) {
+            case 'priority_asc': settings.priority = 1; break;
+            case 'priority_desc': settings.priority = -1; break;
+            case 'date_asc': settings.createdAt = 1; break;
+            case 'date_desc': settings.createdAt = -1; break;
+            default: settings.priority = 1;
+        }
+
+        const editMovieId = null; // viewing only, no edit for other users
+        const removeMovieId = null;
+
+        if (!editMovieId && !removeMovieId) {
+            let watchlist = await List.getListsByUser(targetUserId, page, total, status, settings, search);
+            return res.render("watchlist", { 
+                watchlist, 
+                page, 
+                total, 
+                status, 
+                sort, 
+                search, 
+                editMovieId, 
+                removeMovieId,
+                viewingUser: targetUser // pass target user for display
+            });
+        }
+
+        const movieId = editMovieId || removeMovieId;
+        const movie = await List.getWatchlistItem(targetUserId, movieId);
+
+        if (!movie) return res.status(404).send("Movie not found in watchlist");
+
+        return res.render("watchlist", { 
+            editMovieId, 
+            removeMovieId, 
+            movie,
+            viewingUser: targetUser
+        });
 
     } catch (error) {
         res.status(500).json({ error: error.message });

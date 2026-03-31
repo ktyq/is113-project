@@ -1,11 +1,11 @@
 // friendController.js
-// Controller for friend / follow list behavior:
-// - render friends page
-// - add/remove friend (following)
-// - change nickname for a friend
-// - view friend's watchlist
+// Controller for bidirectional friend request system:
+// - render friends page with 3 sections (Friends, Requests, Recommended)
+// - send/accept/decline/block friend requests
+// - manage nicknames (only respective user can update theirs)
+// - view user profile (changed from friend-watchlist)
 
-const User = require('../models/User');
+const User = require('../models/user');
 const Friend = require('../models/Friend');
 
 // Resolve user identity from request data (query/body/session fallback)
@@ -21,29 +21,33 @@ async function resolveCurrentUser(req) {
 }
 
 // GET /friends
-// Renders the page with existing follows + suggestions
+// Renders the friends page with three sections: Friends, Requests, Recommended
 exports.getFriendsPage = async (req, res) => {
   try {
     const userId = await resolveCurrentUser(req);
 
-    // Get list of users this owner is following
-    const friends = await Friend.find({ owner: userId, status: 'following' }).populate('friend', 'username nickname');
+    // Get all accepted friendships (both directions)
+    const friends = await Friend.find({
+      $or: [
+        { requestor: userId, status: 'accepted' },
+        { requestee: userId, status: 'accepted' }
+      ]
+    }).populate('requestor requestee', 'username _id');
 
-    // Build exclusion list for suggestions: self + existing follows
-    const existingFriendIds = friends.map(f => f.friend._id);
-    const exclusions = [userId, ...existingFriendIds];
+    // Get all pending requests where userId is the requestee
+    const requests = await Friend.find({
+      requestee: userId,
+      status: 'pending'
+    }).populate('requestor', 'username _id');
 
-    // Suggestions: random 5 users not already followed
-    const suggestions = await User.aggregate([
-      { $match: { _id: { $nin: exclusions } } },
-      { $sample: { size: 5 } },
-      { $project: { username: 1 } },
-    ]);
+    // Get recommended users (not in any friend relationship)
+    const suggestions = await Friend.findSuggestedUsers(userId, 5);
 
     // Render view with model data
     res.render('friends', {
       currentUserId: userId,
       friends,
+      requests,
       suggestions,
     });
   } catch (error) {
@@ -51,84 +55,165 @@ exports.getFriendsPage = async (req, res) => {
   }
 };
 
-// POST /friends/add/:friendId
-// Follow a user (add friend). If already followed, do nothing.
-exports.addFriend = async (req, res) => {
+// POST /friends/send/:friendId
+// Send a friend request from current user to target user
+exports.sendRequest = async (req, res) => {
   try {
-    const owner = await resolveCurrentUser(req);
-    const friendId = req.params.friendId;
+    const requestor = await resolveCurrentUser(req);
+    const requestee = req.params.friendId;
 
-    if (!friendId) return res.status(400).send('friendId required');
+    if (!requestor || !requestee) return res.status(400).send('User IDs required');
+    if (requestor === requestee) return res.status(400).send('Cannot friend yourself');
 
-    // Upsert following record
-    const existing = await Friend.findOne({ owner, friend: friendId, status: 'following' });
-    if (!existing) {
-      await Friend.create({ owner, friend: friendId, status: 'following', nickname: '' });
-    }
+    // Check for existing blocked relationship (in either direction)
+    const blocked = await Friend.findOne({
+      $or: [
+        { requestor, requestee, status: 'blocked' },
+        { requestor: requestee, requestee: requestor, status: 'blocked' }
+      ]
+    });
+    if (blocked) return res.status(403).send('Cannot send request: blocked or relationship blocked');
 
-    // Redirect to refresh friends page
+    // Create or update pending request
+    await Friend.sendRequest(requestor, requestee);
+
     res.redirect('/friends');
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
 
+// POST /friends/accept/:requestorId
+// Accept a friend request (current user is requestee)
+exports.acceptRequest = async (req, res) => {
+  try {
+    const requestee = await resolveCurrentUser(req);
+    const requestor = req.params.requestorId;
+
+    if (!requestor || !requestee) return res.status(400).send('User IDs required');
+
+    // Verify request exists and is pending
+    const friendship = await Friend.findOne({
+      requestor,
+      requestee,
+      status: 'pending'
+    });
+    if (!friendship) return res.status(404).send('Request not found');
+
+    // Accept the request
+    await Friend.acceptRequest(requestor, requestee);
+
+    res.redirect('/friends');
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
+// POST /friends/decline/:requestorId
+// Decline a friend request (current user is requestee)
+exports.declineRequest = async (req, res) => {
+  try {
+    const requestee = await resolveCurrentUser(req);
+    const requestor = req.params.requestorId;
+
+    if (!requestor || !requestee) return res.status(400).send('User IDs required');
+
+    // Decline the request
+    await Friend.declineRequest(requestor, requestee);
+
+    res.redirect('/friends');
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
+// POST /friends/block/:friendId
+// Block a user (prevents further requests)
+exports.blockUser = async (req, res) => {
+  try {
+    const userId = await resolveCurrentUser(req);
+    const targetId = req.params.friendId;
+
+    if (!userId || !targetId) return res.status(400).send('User IDs required');
+    if (userId === targetId) return res.status(400).send('Cannot block yourself');
+
+    // Block the user
+    await Friend.blockUser(userId, targetId);
+
+    res.redirect('/friends');
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
 
 // POST /friends/remove/:friendId
-// Unfollow user (remove friend relationship)
+// Remove friend (delete the accepted friendship)
 exports.removeFriend = async (req, res) => {
   try {
-    const owner = await resolveCurrentUser(req);
+    const userId = await resolveCurrentUser(req);
     const friendId = req.params.friendId;
 
-    await Friend.deleteOne({ owner, friend: friendId, status: 'following' });
+    if (!userId || !friendId) return res.status(400).send('User IDs required');
 
-    // Reload to show updates
+    // Remove the friendship
+    await Friend.removeFriend(userId, friendId);
+
     res.redirect('/friends');
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
 
-
 // POST /friends/nickname/:friendId
-// Update nickname for an existing follow entry. Client-side input comes from form value.
+// Update nickname for a friend. Only the respective user can update their assigned nickname.
+// If current user is requestor, they update nickname2 (for requestee)
+// If current user is requestee, they update nickname1 (for requestor)
 exports.updateNickname = async (req, res) => {
   try {
-    const owner = await resolveCurrentUser(req);
+    const userId = await resolveCurrentUser(req);
     const friendId = req.params.friendId;
     const newNickname = (req.body.nickname || '').trim();
 
-    await Friend.updateOne(
-      { owner, friend: friendId, status: 'following' },
-      { nickname: newNickname }
-    );
+    if (!userId || !friendId) return res.status(400).send('User IDs required');
 
-    // Refresh view after update
+    // Find the friendship to determine which nickname field to update
+    const friendship = await Friend.findOne({
+      $or: [
+        { requestor: userId, requestee: friendId, status: 'accepted' },
+        { requestor: friendId, requestee: userId, status: 'accepted' }
+      ]
+    });
+
+    if (!friendship) return res.status(404).send('Friendship not found');
+
+    // Determine which nickname this user can update
+    const isNickname1 = friendship.requestee.toString() === userId.toString();
+    await Friend.updateNickname(userId, friendId, newNickname, isNickname1);
+
     res.redirect('/friends');
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
 
-
-// GET /watchlist/:friendId
-// Ensure only followed friends can be viewed.
-exports.viewFriendWatchlist = async (req, res) => {
+// GET /profile/:userId
+// View a user's profile page (own or another user's)
+exports.viewUserProfile = async (req, res) => {
   try {
-    const ownerId = await resolveCurrentUser(req);
-    const friendId = req.params.friendId;
+    const userId = req.params.userId;
+    const currentUserId = await resolveCurrentUser(req);
 
-    // Confirm page being requested exists as a user
-    const friend = await User.findById(friendId, 'username');
-    if (!friend) return res.status(404).send('Friend not found');
+    // Load the target user
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).send('User not found');
 
-    // Authorize by friend relationship
-    const friendship = await Friend.findOne({ owner: ownerId, friend: friendId, status: 'following' });
-    if (!friendship) return res.status(403).send('Forbidden: you do not follow this user');
+    // Flag to differentiate if viewing own profile
+    const isOwnProfile = user._id.toString() === currentUserId.toString();
 
-    res.render('friend-watchlist', {
-      friend,
+    res.render('user-profile', {
+      user,
+      currentUserId,
+      isOwnProfile,
     });
   } catch (error) {
     res.status(500).send(error.message);
