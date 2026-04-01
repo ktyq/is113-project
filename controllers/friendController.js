@@ -39,6 +39,10 @@ exports.getFriendsPage = async (req, res) => {
     const userId = await resolveCurrentUser(req);
     const userObjectId = toObjectId(userId);
 
+    // Fetch the current user object for the header partial
+    const user = await User.findById(userObjectId);
+    if (!user) return res.status(404).send('User not found');
+
     const friends = await Friend.find({
       $or: [
         { requestor: userObjectId, status: 'accepted' },
@@ -54,6 +58,7 @@ exports.getFriendsPage = async (req, res) => {
     const suggestions = await Friend.findSuggestedUsers(userObjectId, 5);
 
     res.render('friends', {
+      user,
       currentUserId: userObjectId,
       friends,
       requests,

@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="../public/default.css">
 </head>
 <body>
+  <%- include('partial/header', {user: user}) %>
   <main>
     <h1>Friends</h1>
 
@@ -104,7 +105,7 @@
 
     <!-- ===== RECOMMENDED SECTION ===== -->
     <section style="margin-top: 2rem;">
-      <h2>People You May Know</h2>
+      <h2>Want to find some friends?</h2>
       <a href="/friends"><button type="button">Refresh Recommendations</button></a>
       <div id="suggestions-area">
         <% if (!suggestions || suggestions.length === 0) { %>
