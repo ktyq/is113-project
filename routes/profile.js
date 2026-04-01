@@ -24,10 +24,6 @@ router.post('/register', userController.registerPost);
 router.get('/login', userController.loginGet);
 router.post('/login', userController.loginPost);
 
-//--Home page--//
-router.get('/index', authMiddleware.isLoggedIn, (req, res) => {
-    res.render('index', {movies: [], user: req.session.user})
-})
 //--User profile--//
 router.get('/user-profile', authMiddleware.isLoggedIn, userController.profile);
 
