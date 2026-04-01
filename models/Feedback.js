@@ -20,28 +20,6 @@ const formSchema = new mongoose.Schema({
         ref: 'User',            // references the User collection
         required: [true, 'User is required']
     },
-
-    // if the form is abt a movie bug, store reference to the movie (optional)
-    movieID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Movie',
-        required: false
-    },
-
-    // if the form is abt a review, store reference to the review (optional)
-    ReviewID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Review',
-        required: false
-    },
-
-    // if the form is abt a user, store reference to the user (optional)
-    UserID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: false
-    },
-
     // type of form (feedback, bug report, user report)
     type: {
         type: String,
@@ -51,9 +29,11 @@ const formSchema = new mongoose.Schema({
     // status of the form (pending review, working on it, resolved)
     status: {
         type: String,
-        enum: ['pending', 'working', 'resolved']
+        enum: ['pending', 'resolved']
     },
-
+    url: {
+        type: String
+    },
     // additional notes by admin when working on the form
     notes: {
         type: String,
