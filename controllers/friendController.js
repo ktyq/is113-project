@@ -11,9 +11,12 @@ const Friend = require('../models/Friend');
 
 // Resolve user identity from request data (query/body/session fallback)
 // For early development where auth is absent, fall back to first user in DB.
-// FIX: Guard req.body access — it is undefined if body-parser middleware is missing.
+// FIX: session.user is an object {id, username, email, role} - extract .id safely
 async function resolveCurrentUser(req) {
-  if (req.session && req.session.user && req.session.user.id) return req.session.user.id;
+  if (req.session && req.session.user) {
+    const sid = req.session.user.id || req.session.user._id;
+    if (sid) return typeof sid === 'object' ? sid.toString() : sid;
+  }
   if (req.query && req.query.userId) return req.query.userId;
   if (req.body && req.body.userId) return req.body.userId;
   if (req.user && req.user._id) return req.user._id;
@@ -36,7 +39,6 @@ exports.getFriendsPage = async (req, res) => {
     const userId = await resolveCurrentUser(req);
     const userObjectId = toObjectId(userId);
 
-    // Get all accepted friendships (both directions)
     const friends = await Friend.find({
       $or: [
         { requestor: userObjectId, status: 'accepted' },
@@ -44,16 +46,13 @@ exports.getFriendsPage = async (req, res) => {
       ]
     }).populate('requestor requestee', 'username _id');
 
-    // Get all pending requests where userId is the requestee
     const requests = await Friend.find({
       requestee: userObjectId,
       status: 'pending'
     }).populate('requestor', 'username _id');
 
-    // Get recommended users (not in any friend relationship)
     const suggestions = await Friend.findSuggestedUsers(userObjectId, 5);
 
-    // Render view with model data
     res.render('friends', {
       currentUserId: userObjectId,
       friends,
@@ -66,7 +65,6 @@ exports.getFriendsPage = async (req, res) => {
 };
 
 // POST /friends/send/:friendId
-// Send a friend request from current user to target user
 exports.sendRequest = async (req, res) => {
   try {
     const requestor = toObjectId(await resolveCurrentUser(req));
@@ -74,7 +72,6 @@ exports.sendRequest = async (req, res) => {
 
     if (requestor.equals(requestee)) return res.status(400).send('Cannot friend yourself');
 
-    // Check for existing blocked relationship (in either direction)
     const blocked = await Friend.findOne({
       $or: [
         { requestor, requestee, status: 'blocked' },
@@ -91,13 +88,11 @@ exports.sendRequest = async (req, res) => {
 };
 
 // POST /friends/accept/:requestorId
-// Accept a friend request (current user is requestee)
 exports.acceptRequest = async (req, res) => {
   try {
     const requestee = toObjectId(await resolveCurrentUser(req));
     const requestor = toObjectId(req.params.requestorId);
 
-    // Verify request exists and is pending
     const friendship = await Friend.findOne({ requestor, requestee, status: 'pending' });
     if (!friendship) return res.status(404).send('Request not found');
 
@@ -109,7 +104,6 @@ exports.acceptRequest = async (req, res) => {
 };
 
 // POST /friends/decline/:requestorId
-// Decline a friend request (current user is requestee)
 exports.declineRequest = async (req, res) => {
   try {
     const requestee = toObjectId(await resolveCurrentUser(req));
@@ -123,7 +117,6 @@ exports.declineRequest = async (req, res) => {
 };
 
 // POST /friends/block/:friendId
-// Block a user (prevents further requests)
 exports.blockUser = async (req, res) => {
   try {
     const userId = toObjectId(await resolveCurrentUser(req));
@@ -139,7 +132,6 @@ exports.blockUser = async (req, res) => {
 };
 
 // POST /friends/remove/:friendId
-// Remove friend (delete the accepted friendship)
 exports.removeFriend = async (req, res) => {
   try {
     const userId = toObjectId(await resolveCurrentUser(req));
@@ -153,16 +145,12 @@ exports.removeFriend = async (req, res) => {
 };
 
 // POST /friends/nickname/:friendId
-// Update nickname for a friend. Only the respective user can update their assigned nickname.
-// If current user is requestor, they update nickname2 (for requestee)
-// If current user is requestee, they update nickname1 (for requestor)
 exports.updateNickname = async (req, res) => {
   try {
     const userId = toObjectId(await resolveCurrentUser(req));
     const friendId = toObjectId(req.params.friendId);
     const newNickname = (req.body && req.body.nickname ? req.body.nickname : '').trim();
 
-    // Find the friendship to determine which nickname field to update
     const friendship = await Friend.findOne({
       $or: [
         { requestor: userId, requestee: friendId, status: 'accepted' },
@@ -172,7 +160,6 @@ exports.updateNickname = async (req, res) => {
 
     if (!friendship) return res.status(404).send('Friendship not found');
 
-    // Determine which nickname this user can update
     const isNickname1 = friendship.requestee.equals(userId);
     await Friend.updateNickname(userId, friendId, newNickname, isNickname1);
 
@@ -183,7 +170,6 @@ exports.updateNickname = async (req, res) => {
 };
 
 // GET /profile/:userId
-// View a user's profile page (own or another user's)
 exports.viewUserProfile = async (req, res) => {
   try {
     const userId = toObjectId(req.params.userId);
