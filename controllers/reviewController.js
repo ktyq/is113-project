@@ -4,13 +4,13 @@ const Movie = require("../models/movie");
 exports.getMoviePage = async (req, res) => {
   try {
     const movieID = req.query.movieID;
-    const movie = await Movie.findByID(movieID);
+    const movie = await Movie.findById(movieID);
 
     if (!movie) {
       return res.status(404).send("Movie not found.");
     }
 
-    const reviews = await review
+    const reviews = await Review
       .find({ movieID: movieID })
       .populate("userID", "username")
       .sort({ createdAt: -1 });
@@ -31,8 +31,8 @@ exports.createReview = async (req, res) => {
   const { movieID, comment, rating, isAnonymous } = req.body;
 
   const rerenderWithErrors = async (errors) => {
-    const movie = await Movie.findByID(movieID);
-    const reviews = await review
+    const movie = await Movie.findById(movieID);
+    const reviews = await Review
       .find({ movieID: movieID })
       .populate("userID", "username")
       .sort({ createdAt: -1 });
@@ -75,7 +75,7 @@ exports.createReview = async (req, res) => {
 exports.updateReview = async (req, res) => {
   const { reviewID, movieID, comment, rating, isAnonymous } = req.body;
   try {
-    const review = await Review.findById(reviewId);
+    const review = await Review.findById(reviewID);
 
     if (!review) {
       return res.status(404).render("error", { message: "Review not found." });
@@ -120,9 +120,9 @@ exports.updateReview = async (req, res) => {
 };
 
 exports.deleteReview = async (req, res) => {
-  const { reviewId } = req.body;
+  const { reviewID } = req.body;
   try {
-    const review = await Review.findById(reviewId);
+    const review = await Review.findById(reviewID);
 
     if (!review) {
       return res.status(404).render("error", { message: "Review not found." });
@@ -135,7 +135,7 @@ exports.deleteReview = async (req, res) => {
     }
 
     const movieID = review.movieID;
-    await Review.findByIdAndDelete(reviewId);
+    await Review.findByIdAndDelete(reviewID);
 
     res.redirect(`/reviews?movieID=${movieID}`);
   } catch (err) {

@@ -29,7 +29,7 @@ const reviewSchema = new mongoose.Schema(
       min: [1, "Rating must be 1 or more"],
       max: [5, "Rating cannot be more than 5"],
       validate: {
-        validatpr: Number.isInteger,
+        validator: Number.isInteger,
         message: "Rating must be whole number",
       },
     },
@@ -45,4 +45,4 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-module.exports = mongoose.model("Review", reviewSchema);
+module.exports = mongoose.models.Review || mongoose.model('Review', reviewSchema);
