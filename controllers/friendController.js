@@ -5,14 +5,17 @@
 // - manage nicknames (only respective user can update theirs)
 // - view user profile (changed from friend-watchlist)
 
+const mongoose = require('mongoose');
 const User = require('../models/user');
 const Friend = require('../models/Friend');
 
 // Resolve user identity from request data (query/body/session fallback)
 // For early development where auth is absent, fall back to first user in DB.
+// FIX: Guard req.body access — it is undefined if body-parser middleware is missing.
 async function resolveCurrentUser(req) {
-  if (req.query.userId) return req.query.userId;
-  if (req.body.userId) return req.body.userId;
+  if (req.session && req.session.user && req.session.user.id) return req.session.user.id;
+  if (req.query && req.query.userId) return req.query.userId;
+  if (req.body && req.body.userId) return req.body.userId;
   if (req.user && req.user._id) return req.user._id;
 
   const firstUser = await User.findOne().sort({ createdAt: 1 });
@@ -20,32 +23,39 @@ async function resolveCurrentUser(req) {
   return firstUser._id;
 }
 
+// Cast a value to a Mongoose ObjectId safely.
+// Prevents string IDs (from req.query/body) failing $nin/$eq comparisons in queries.
+function toObjectId(id) {
+  return new mongoose.Types.ObjectId(id);
+}
+
 // GET /friends
 // Renders the friends page with three sections: Friends, Requests, Recommended
 exports.getFriendsPage = async (req, res) => {
   try {
     const userId = await resolveCurrentUser(req);
+    const userObjectId = toObjectId(userId);
 
     // Get all accepted friendships (both directions)
     const friends = await Friend.find({
       $or: [
-        { requestor: userId, status: 'accepted' },
-        { requestee: userId, status: 'accepted' }
+        { requestor: userObjectId, status: 'accepted' },
+        { requestee: userObjectId, status: 'accepted' }
       ]
     }).populate('requestor requestee', 'username _id');
 
     // Get all pending requests where userId is the requestee
     const requests = await Friend.find({
-      requestee: userId,
+      requestee: userObjectId,
       status: 'pending'
     }).populate('requestor', 'username _id');
 
     // Get recommended users (not in any friend relationship)
-    const suggestions = await Friend.findSuggestedUsers(userId, 5);
+    const suggestions = await Friend.findSuggestedUsers(userObjectId, 5);
 
     // Render view with model data
     res.render('friends', {
-      currentUserId: userId,
+      currentUserId: userObjectId,
       friends,
       requests,
       suggestions,
@@ -59,11 +69,10 @@ exports.getFriendsPage = async (req, res) => {
 // Send a friend request from current user to target user
 exports.sendRequest = async (req, res) => {
   try {
-    const requestor = await resolveCurrentUser(req);
-    const requestee = req.params.friendId;
+    const requestor = toObjectId(await resolveCurrentUser(req));
+    const requestee = toObjectId(req.params.friendId);
 
-    if (!requestor || !requestee) return res.status(400).send('User IDs required');
-    if (requestor === requestee) return res.status(400).send('Cannot friend yourself');
+    if (requestor.equals(requestee)) return res.status(400).send('Cannot friend yourself');
 
     // Check for existing blocked relationship (in either direction)
     const blocked = await Friend.findOne({
@@ -74,9 +83,7 @@ exports.sendRequest = async (req, res) => {
     });
     if (blocked) return res.status(403).send('Cannot send request: blocked or relationship blocked');
 
-    // Create or update pending request
     await Friend.sendRequest(requestor, requestee);
-
     res.redirect('/friends');
   } catch (error) {
     res.status(500).send(error.message);
@@ -87,22 +94,14 @@ exports.sendRequest = async (req, res) => {
 // Accept a friend request (current user is requestee)
 exports.acceptRequest = async (req, res) => {
   try {
-    const requestee = await resolveCurrentUser(req);
-    const requestor = req.params.requestorId;
-
-    if (!requestor || !requestee) return res.status(400).send('User IDs required');
+    const requestee = toObjectId(await resolveCurrentUser(req));
+    const requestor = toObjectId(req.params.requestorId);
 
     // Verify request exists and is pending
-    const friendship = await Friend.findOne({
-      requestor,
-      requestee,
-      status: 'pending'
-    });
+    const friendship = await Friend.findOne({ requestor, requestee, status: 'pending' });
     if (!friendship) return res.status(404).send('Request not found');
 
-    // Accept the request
     await Friend.acceptRequest(requestor, requestee);
-
     res.redirect('/friends');
   } catch (error) {
     res.status(500).send(error.message);
@@ -113,14 +112,10 @@ exports.acceptRequest = async (req, res) => {
 // Decline a friend request (current user is requestee)
 exports.declineRequest = async (req, res) => {
   try {
-    const requestee = await resolveCurrentUser(req);
-    const requestor = req.params.requestorId;
+    const requestee = toObjectId(await resolveCurrentUser(req));
+    const requestor = toObjectId(req.params.requestorId);
 
-    if (!requestor || !requestee) return res.status(400).send('User IDs required');
-
-    // Decline the request
     await Friend.declineRequest(requestor, requestee);
-
     res.redirect('/friends');
   } catch (error) {
     res.status(500).send(error.message);
@@ -131,15 +126,12 @@ exports.declineRequest = async (req, res) => {
 // Block a user (prevents further requests)
 exports.blockUser = async (req, res) => {
   try {
-    const userId = await resolveCurrentUser(req);
-    const targetId = req.params.friendId;
+    const userId = toObjectId(await resolveCurrentUser(req));
+    const targetId = toObjectId(req.params.friendId);
 
-    if (!userId || !targetId) return res.status(400).send('User IDs required');
-    if (userId === targetId) return res.status(400).send('Cannot block yourself');
+    if (userId.equals(targetId)) return res.status(400).send('Cannot block yourself');
 
-    // Block the user
     await Friend.blockUser(userId, targetId);
-
     res.redirect('/friends');
   } catch (error) {
     res.status(500).send(error.message);
@@ -150,14 +142,10 @@ exports.blockUser = async (req, res) => {
 // Remove friend (delete the accepted friendship)
 exports.removeFriend = async (req, res) => {
   try {
-    const userId = await resolveCurrentUser(req);
-    const friendId = req.params.friendId;
+    const userId = toObjectId(await resolveCurrentUser(req));
+    const friendId = toObjectId(req.params.friendId);
 
-    if (!userId || !friendId) return res.status(400).send('User IDs required');
-
-    // Remove the friendship
     await Friend.removeFriend(userId, friendId);
-
     res.redirect('/friends');
   } catch (error) {
     res.status(500).send(error.message);
@@ -170,11 +158,9 @@ exports.removeFriend = async (req, res) => {
 // If current user is requestee, they update nickname1 (for requestor)
 exports.updateNickname = async (req, res) => {
   try {
-    const userId = await resolveCurrentUser(req);
-    const friendId = req.params.friendId;
-    const newNickname = (req.body.nickname || '').trim();
-
-    if (!userId || !friendId) return res.status(400).send('User IDs required');
+    const userId = toObjectId(await resolveCurrentUser(req));
+    const friendId = toObjectId(req.params.friendId);
+    const newNickname = (req.body && req.body.nickname ? req.body.nickname : '').trim();
 
     // Find the friendship to determine which nickname field to update
     const friendship = await Friend.findOne({
@@ -187,7 +173,7 @@ exports.updateNickname = async (req, res) => {
     if (!friendship) return res.status(404).send('Friendship not found');
 
     // Determine which nickname this user can update
-    const isNickname1 = friendship.requestee.toString() === userId.toString();
+    const isNickname1 = friendship.requestee.equals(userId);
     await Friend.updateNickname(userId, friendId, newNickname, isNickname1);
 
     res.redirect('/friends');
@@ -200,15 +186,13 @@ exports.updateNickname = async (req, res) => {
 // View a user's profile page (own or another user's)
 exports.viewUserProfile = async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const currentUserId = await resolveCurrentUser(req);
+    const userId = toObjectId(req.params.userId);
+    const currentUserId = toObjectId(await resolveCurrentUser(req));
 
-    // Load the target user
     const user = await User.findById(userId);
     if (!user) return res.status(404).send('User not found');
 
-    // Flag to differentiate if viewing own profile
-    const isOwnProfile = user._id.toString() === currentUserId.toString();
+    const isOwnProfile = user._id.equals(currentUserId);
 
     res.render('user-profile', {
       user,

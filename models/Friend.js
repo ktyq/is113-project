@@ -63,25 +63,27 @@ friendSchema.statics.getPendingRequestsForUser = function(userId) {
 };
 
 // Suggest random users not in any friend relationship with userId
+// FIX: Replaced broken chained .then() logic with Promise.all, and cast userId to ObjectId
+// to ensure $nin exclusions work correctly in the aggregation pipeline.
 friendSchema.statics.findSuggestedUsers = async function(userId, limit = 5) {
   const User = this.model('User');
-  
-  // Find all users connected to this user (any status)
-  const connectedUserIds = await this.find({
-    $or: [
-      { requestor: userId },
-      { requestee: userId }
-    ]
-  }).distinct('requestor').then(requestors => {
-    return this.find({
-      $or: [
-        { requestor: userId },
-        { requestee: userId }
-      ]
-    }).distinct('requestee').then(requestees => [...requestors, ...requestees]);
-  });
 
-  const exclusions = [userId, ...connectedUserIds];
+  // Cast to ObjectId so string IDs (from req.query/body) don't slip through $nin unmatched
+  const userObjectId = new mongoose.Types.ObjectId(userId);
+
+  // Fetch all users connected to this user (any status, either direction) in parallel
+  const [requestors, requestees] = await Promise.all([
+    this.find({
+      $or: [{ requestor: userObjectId }, { requestee: userObjectId }]
+    }).distinct('requestor'),
+    this.find({
+      $or: [{ requestor: userObjectId }, { requestee: userObjectId }]
+    }).distinct('requestee'),
+  ]);
+
+  // Deduplicate the exclusion list
+  const exclusions = [...new Set([userObjectId, ...requestors, ...requestees])];
+
   return User.aggregate([
     { $match: { _id: { $nin: exclusions } } },
     { $sample: { size: limit } },
@@ -135,7 +137,7 @@ friendSchema.statics.removeFriend = function(userId1, userId2) {
 // Update nickname (only the respective user can update their assigned nickname)
 friendSchema.statics.updateNickname = function(userId, friendId, nicknameValue, isNickname1) {
   const updateField = isNickname1 ? 'nickname1' : 'nickname2';
-  
+
   if (isNickname1) {
     // Only requestee can update nickname1 (for requestor)
     return this.updateOne(
@@ -153,4 +155,3 @@ friendSchema.statics.updateNickname = function(userId, friendId, nicknameValue, 
 
 // Export model for use in controllers/routes
 module.exports = mongoose.model('Friend', friendSchema);
-
