@@ -106,7 +106,7 @@
         <img src="<%= movie.imageRef %>" alt="<%= movie.title %>">
     </div>
 
-    <form action="/admin/edit/<%= movie._id %>" method="POST">
+    <form action="/admin/edit?id=<%= movie._id %>" method="POST">
 
         <label>Title</label>
         <input type="text" name="title" value="<%= movie.title %>" required>

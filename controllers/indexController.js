@@ -19,7 +19,7 @@ exports.getAllMovies = async (req, res) => {
 // --- DISPLAY SINGLE MOVIE ---
 exports.getMovieById = async (req, res) => {
     try {
-        const movie = await Movie.findById(req.params.id);
+        const movie = await Movie.findById(req.query.id);
 
         if (!movie) {
             return res.status(404).send("Movie not found");

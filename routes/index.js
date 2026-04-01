@@ -7,6 +7,6 @@ const authMiddleware = require('../middleware/authentication');
 router.get('/', indexController.getAllMovies);
 
 // --- DISPLAY SINGLE MOVIE ---
-router.get('/:id', indexController.getMovieById);
+router.get('/view', indexController.getMovieById);
 
 module.exports = router;

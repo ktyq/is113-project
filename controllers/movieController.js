@@ -19,7 +19,7 @@ exports.createMovie = async (req, res) => {
             overview,
             director: director.split(',').map(d => d.trim()),
             cast: cast.split(',').map(c => c.trim()),
-            addedBy: new mongoose.Types.ObjectId()
+            addedBy: req.session.user.id
         });
 
         res.redirect('/admin');
@@ -43,7 +43,7 @@ exports.getAllMoviesAdmin = async (req, res) => {
 // --- DELETE MOVIE ---
 exports.deleteMovie = async (req, res) => {
     try {
-        await Movie.findByIdAndDelete(req.params.id);
+        await Movie.findByIdAndDelete(req.query.id);
         res.redirect('/admin');
     } catch (err) {
         console.error(err);
@@ -54,7 +54,7 @@ exports.deleteMovie = async (req, res) => {
 // --- SHOW EDIT FORM ---
 exports.getEditMovie = async (req, res) => {
     try {
-        const movie = await Movie.findById(req.params.id);
+        const movie = await Movie.findById(req.query.id);
         if (!movie) return res.send("Movie not found");
 
         res.render('editMovie', { movie });
@@ -73,7 +73,7 @@ exports.updateMovie = async (req, res) => {
             return res.send("All fields are required!");
         }
 
-        await Movie.findByIdAndUpdate(req.params.id, {
+        await Movie.findByIdAndUpdate(req.query.id, {
             title,
             imageRef,
             movieLength: Number(movieLength),
