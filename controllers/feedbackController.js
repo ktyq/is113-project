@@ -2,7 +2,7 @@
 const Feedback = require("../models/Feedback");
 
 // import User model (needed for populate to get username)
-const User = require("../models/User");
+const User = require("../models/user");
 
 // CREATE feedback (user submit form)
 exports.createFeedback = async (req, res) => {
@@ -25,7 +25,7 @@ exports.createFeedback = async (req, res) => {
     }
 };
 
-// READ all feedback (admin view)
+// READ all feedback (admin view) if normal user then only read your own feedback, if admin then read all feedback (different page)
 exports.readFeedback = async (req, res) => {
     try {
         // get all feedback, populate userID to get username, sort by newest first
@@ -57,7 +57,7 @@ exports.updateFeedback = async (req, res) => {
     }
 };
 
-// DELETE feedback (admin delete spam or irrelevant feedback)
+// DELETE feedback (admin delete spam or irrelevant feedback) only for user, not admin
 exports.deleteFeedback = async (req, res) => {
     try {
         // delete feedback using id
