@@ -3,7 +3,7 @@ const router = express.Router();
 const Movie = require('../models/movie');
 const authMiddleware = require('../middleware/authentication');
 
-// --- DISPLAY ALL MOVIES ---
+// --- DISPLAY ALL MOVIES --- this one is for index page
 router.get('/', async (req, res) => {
     try {
         const movies = await Movie.find().sort({ createdAt: -1 });
@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// --- DISPLAY SINGLE MOVIE ---
+// --- DISPLAY SINGLE MOVIE --- this one is for movie page
 router.get('/:id', async (req, res) => {
     try {
         const movie = await Movie.findById(req.params.id);
