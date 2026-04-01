@@ -72,11 +72,6 @@
                     <div>Genre: <%= movie.genre.join(', ') %></div>
                     <p>Rating: <%= movie.averageRating || 0 %> / 5</p>
                     <p class="movie-overview"><%= movie.overview %></p>
-
-                    <div class="button-row">
-                        <a href="/watchlist/add/<%= movie._id %>"><button>Add to Watchlist</button></a>
-                        <a href="/watched/add/<%= movie._id %>"><button>Mark as Watched</button></a>
-                    </div>
                 </div>
             </section>
         <% }) %>
