@@ -4,7 +4,7 @@
 // requestee = user who received the friend request
 // nickname1 = nickname given to requestor by requestee (only requestee can update)
 // nickname2 = nickname given to requestee by requestor (only requestor can update)
-// status = pending (awaiting requestee response), accepted (are friends), declined, blocked
+// status = pending (awaiting requestee response) | accepted (are friends)
 // friendsSince = timestamp when status changed to 'accepted'
 
 const mongoose = require('mongoose');
@@ -31,9 +31,9 @@ const friendSchema = new mongoose.Schema({
         default: ''
     },
     status: {
-        // Status of the friend relationship
+        // 'declined' removed — decline and remove both delete the entry entirely
         type: String,
-        enum: ['pending', 'accepted', 'declined', 'blocked'],
+        enum: ['pending', 'accepted'],
         required: true,
         default: 'pending'
     },
@@ -62,26 +62,30 @@ friendSchema.statics.getPendingRequestsForUser = function(userId) {
   return this.find({ requestee: userId, status: 'pending' }).populate('requestor', 'username');
 };
 
-// Suggest random users not in any friend relationship with userId
-// FIX: Replaced broken chained .then() logic with Promise.all, and cast userId to ObjectId
-// to ensure $nin exclusions work correctly in the aggregation pipeline.
+// Fetch all pending requests where userId is the requestor (sent, awaiting response)
+friendSchema.statics.getSentRequestsForUser = function(userId) {
+  return this.find({ requestor: userId, status: 'pending' }).populate('requestee', 'username _id');
+};
+
+// Suggest random users not in any active friend relationship with userId.
+// Users who have declined or been removed are eligible to appear again
+// since those entries are deleted — only exclude accepted/pending pairs.
 friendSchema.statics.findSuggestedUsers = async function(userId, limit = 5) {
   const User = this.model('User');
 
-  // Cast to ObjectId so string IDs (from req.query/body) don't slip through $nin unmatched
   const userObjectId = new mongoose.Types.ObjectId(userId);
 
-  // Fetch all users connected to this user (any status, either direction) in parallel
   const [requestors, requestees] = await Promise.all([
     this.find({
-      $or: [{ requestor: userObjectId }, { requestee: userObjectId }]
+      $or: [{ requestor: userObjectId }, { requestee: userObjectId }],
+      status: { $in: ['accepted', 'pending'] }
     }).distinct('requestor'),
     this.find({
-      $or: [{ requestor: userObjectId }, { requestee: userObjectId }]
+      $or: [{ requestor: userObjectId }, { requestee: userObjectId }],
+      status: { $in: ['accepted', 'pending'] }
     }).distinct('requestee'),
   ]);
 
-  // Deduplicate the exclusion list
   const exclusions = [...new Set([userObjectId, ...requestors, ...requestees])];
 
   return User.aggregate([
@@ -100,6 +104,11 @@ friendSchema.statics.sendRequest = function(requestorId, requesteeId) {
   );
 };
 
+// Cancel a sent pending request (delete the entry completely)
+friendSchema.statics.cancelRequest = function(requestorId, requesteeId) {
+  return this.deleteOne({ requestor: requestorId, requestee: requesteeId, status: 'pending' });
+};
+
 // Accept a pending friend request
 friendSchema.statics.acceptRequest = function(requestorId, requesteeId) {
   return this.updateOne(
@@ -108,23 +117,14 @@ friendSchema.statics.acceptRequest = function(requestorId, requesteeId) {
   );
 };
 
-// Decline a friend request
+// Decline a friend request — deletes the entry completely so both users
+// can appear in each other's suggestions pool again
 friendSchema.statics.declineRequest = function(requestorId, requesteeId) {
-  return this.updateOne(
-    { requestor: requestorId, requestee: requesteeId },
-    { status: 'declined' }
-  );
+  return this.deleteOne({ requestor: requestorId, requestee: requesteeId });
 };
 
-// Block a user (sets status to blocked)
-friendSchema.statics.blockUser = function(requestorId, requesteeId) {
-  return this.updateOne(
-    { requestor: requestorId, requestee: requesteeId },
-    { status: 'blocked' }
-  );
-};
-
-// Remove friend (delete the relationship)
+// Remove friend — deletes the accepted relationship entry completely so both
+// users can appear in each other's suggestions pool again
 friendSchema.statics.removeFriend = function(userId1, userId2) {
   return this.deleteOne({
     $or: [
@@ -153,5 +153,4 @@ friendSchema.statics.updateNickname = function(userId, friendId, nicknameValue, 
   }
 };
 
-// Export model for use in controllers/routes
 module.exports = mongoose.model('Friend', friendSchema);

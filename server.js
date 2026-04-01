@@ -1,3 +1,7 @@
+//disable this section after testing
+const dns = require('node:dns');
+dns.setServers(['8.8.8.8', '8.8.4.4']); // Use Google DNS
+
 const express = require("express");
 const session = require("express-session");
 const dotenv = require("dotenv");
