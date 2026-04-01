@@ -13,9 +13,9 @@ router.get('/', (req, res) => {
     if (req.session.user) {
         return req.session.user.role === 'admin'
         ? res.redirect('/admin-profile')
-        : res.redirect('/home');
+        : res.redirect('/index');
     }
-    res.redirect('/login');
+    res.redirect('/index');
 })
 
 router.get('/register', userController.registerGet);

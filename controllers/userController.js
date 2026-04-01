@@ -80,7 +80,7 @@ exports.loginPost = async(req, res) => {
         if(user.role === "admin") {
             return res.redirect('/admin-profile');
         }
-        res.redirect('/user-profile');
+        res.redirect('/index');
 
     } catch(err) {
         console.error(err.message);
