@@ -106,13 +106,13 @@
         <img src="<%= movie.imageRef %>" alt="<%= movie.title %>">
     </div>
 
-    <form action="/admin/edit?id=<%= movie._id %>" method="POST">
+    <form action="/admin/edit?id=<%= movie._id %>" method="POST" enctype="multipart/form-data">
 
         <label>Title</label>
         <input type="text" name="title" value="<%= movie.title %>" required>
 
         <label>Image URL</label>
-        <input type="text" name="imageRef" value="<%= movie.imageRef %>" required>
+        <input type="file" name="image" accept="image/*">
 
         <label>Genre</label>
         <input type="text" name="genre" value="<%= movie.genre.join(', ') %>" required>
