@@ -23,15 +23,7 @@ exports.registerPost = async(req, res) => {
         if (existingUser) {
             return res.render('register', {error: 'Username or email already exists'});
         }
-
-        //Only 1 admin account allowed
-        if (role === 'admin') {
-            const existingAdmin = await User.findOne({role: 'admin'});
-            if (existingAdmin) {
-                return res.render('register', {error: 'Admin account already exists'});
-            }
-        }
-
+        
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 

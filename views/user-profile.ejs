@@ -18,12 +18,18 @@
     
     <br>
     
-    <a href="/edit-profile">Edit Profile</a>
     
-    <br><br>
-    <form action="/delete-profile" method="POST" id="deleteForm">
+      <!-- Show edit/delete only for own profile -->
+      <a href="/edit-profile">Edit Profile</a>
+      
+      <br><br>
+      <form action="/delete-profile" method="POST" id="deleteForm">
         <button type="submit" onclick="confirmDelete()">Delete Account</button>
-    </form>
+      </form>
+    
+      <!-- Show back to friends for other profiles -->
+      <a href="/friends"><button>Back to Friends</button></a>
+   
 
     <script>
         function confirmDelete() {
