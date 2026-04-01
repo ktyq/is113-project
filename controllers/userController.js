@@ -118,7 +118,7 @@ exports.editProfileGet = async (req, res) => {
 
 exports.editProfilePost = async(req, res) => {
     try {
-        const {username, email, currentPassword, newPassword, confirmNewPassword} = req.body;
+        const {username, email, currentPassword, newPassword, confirmNewPassword, watchlistPrivacy} = req.body; // Added watchlistPrivacy
         const user = await User.findById(req.session.user.id);
 
         if (!user) return res.redirect('/login');
@@ -141,6 +141,7 @@ exports.editProfilePost = async(req, res) => {
 
         user.username = username || user.username;
         user.email = email || user.email;
+        user.watchlistPrivacy = watchlistPrivacy || user.watchlistPrivacy; // Update privacy setting
 
         //Only update password if user typed a new one
         if (newPassword) {

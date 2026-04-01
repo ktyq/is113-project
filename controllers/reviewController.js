@@ -1,5 +1,5 @@
 const Review = require("../models/review");
-const Movie = require("../models/movie");
+const Movie = require("../models/Movie");
 
 exports.getMoviePage = async (req, res) => {
   try {

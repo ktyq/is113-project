@@ -31,7 +31,8 @@ server.use('/admin', require('./routes/movies'));
 server.use('/movie', require('./routes/index'));
 server.use('/index', require('./routes/index'));
 
-// server.get('/watchlist/:friendId', friendController.viewFriendWatchlist);
+// Direct profile view route (for viewing other users' profiles via friends)
+server.get('/friends/profile/:userId', require('./controllers/friendController').viewUserProfile);
 
 async function connectDB() {
   try {
