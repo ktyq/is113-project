@@ -7,13 +7,17 @@ const User = require("../models/user");
 // CREATE feedback (user submit form)
 exports.createFeedback = async (req, res) => {
     try {
-    // get userID and message from request body    
-    const {userID, problemMessage} = req.body
+    // get userID and message from request body
+    const user = req.session.user
+    const {type, url, notes} = req.body
     
     // create new feedback in database
     await Feedback.create({
-        UserID: userID,         // store reference to user
-        problemMessage: problemMessage
+        sentBy: user.id,
+        type : type,
+        status: "pending",
+        url: url,
+        notes: notes
     }); // try-catch to handle any errors safely during creation
 
     // redirect back to feedback page 
@@ -25,17 +29,35 @@ exports.createFeedback = async (req, res) => {
     }
 };
 
-// READ all feedback (admin view) if normal user then only read your own feedback, if admin then read all feedback (different page)
+// READ all feedback by user
 exports.readFeedback = async (req, res) => {
     try {
+        const user = req.session.user
+
+        // if admin, redirect to admin feedback page
+
         // get all feedback, populate userID to get username, sort by newest first
-        const feedbacks = await Feedback.find()
-        .populate("userID", "username")
-        .sort({ createdAt: -1 });
+       const feedbacks = await Feedback.find({ sentBy: user.id }).sort({ createdAt: -1 });
 
         // render feedback page and pass feedbacks to view. C,U,D redirects to the 
         // feedback page which calls it to reload with updated data
-        res.render("feedback", { feedbacks });
+        return res.render("feedback", { feedbacks, user });
+
+    } catch (err) {
+        console.error("readFeedback error:", err);
+        res.status(500).render("error", { message: "Could not retrieve feedback." });
+    }
+};
+
+// READ all feedback by admin
+exports.readFeedbackAdmin = async (req, res) => {
+    try {
+        // get all feedback, populate userID to get username, sort by newest first
+        const feedbacks = await Feedback.find().populate("sentBy", "username").sort({ createdAt: -1 });
+
+        // render feedback page and pass feedbacks to view. C,U,D redirects to the 
+        // feedback page which calls it to reload with updated data
+        return res.render("admin-feedback", { feedbacks, user: req.session.user});
 
     } catch (err) {
         console.error("readFeedback error:", err);
@@ -47,9 +69,9 @@ exports.readFeedback = async (req, res) => {
 exports.updateFeedback = async (req, res) => {
     try {
         // find feedback by id and set status to true (resolved)
-        await Feedback.findByIdAndUpdate(req.params.id, {status: true}); // can only update from unresolved (f) to resolved (t)
+        await Feedback.findByIdAndUpdate(req.params.id, {status: "resolved"}); // can only update from unresolved to resolved 
         
-        res.redirect("/feedback");
+        res.redirect("/feedback/admin");
 
     } catch (err) {
         console.error("updateFeedback error:", err);

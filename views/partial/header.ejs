@@ -10,8 +10,12 @@
         
         <% if (user) { %>
             <% if (user.role === 'admin') { %>
+                <a href="/feedback/admin">Feedback</a>
+        &nbsp;|&nbsp;
                 <a href="/admin-profile">Admin</a>
             <% } else { %>
+                <a href="/feedback">Feedback</a>
+        &nbsp;|&nbsp;
                 <a href="/user-profile">Account</a>
             <% } %>
                 

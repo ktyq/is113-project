@@ -1,11 +1,8 @@
 // formSchema
 // _id: ObjectId
 // sentBy: ObjectId
-// movieID: ObjectId (optional, report movie bug)
-// userID: ObjectId (optional, report user)
-// reviewID: ObjectId (optional, report review)
 // type: String ['feedback', 'bug', 'report']
-// status: String ['pending', 'working', 'resolved'] (pending review, working on it)
+// status: String ['pending', 'resolved'] 
 // notes: String [max: 256]
 // createdAt: Date
 // updatedAt: Date

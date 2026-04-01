@@ -30,6 +30,7 @@ server.use("/friends", require("./routes/friends"));
 server.use('/admin', require('./routes/movies'));
 server.use('/movie', require('./routes/index'));
 server.use('/index', require('./routes/index'));
+server.use('/feedback', require("./routes/feedback"));
 // Direct profile view route (for viewing other users' profiles via friends)
 server.get('/friends/profile/:userId', require('./controllers/friendController').viewUserProfile);
 
