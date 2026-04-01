@@ -19,7 +19,7 @@ exports.createMovie = async (req, res) => {
             overview,
             director: director.split(',').map(d => d.trim()),
             cast: cast.split(',').map(c => c.trim()),
-            addedBy: req.session.user.id
+            addedBy: new mongoose.Types.ObjectId()
         });
 
         res.redirect('/admin');

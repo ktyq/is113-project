@@ -6,19 +6,19 @@ const authMiddleware = require('../middleware/authentication');
 // Protect all admin routes
 router.use(authMiddleware.isAdmin);
 
-// CREATE
-router.post('/add', movieController.createMovie);
-
-// READ (Admin view)
+// --- ADMIN DASHBOARD: LIST ALL MOVIES ---
 router.get('/', movieController.getAllMoviesAdmin);
 
-// DELETE
-router.get('/delete/:id', movieController.deleteMovie);
+// --- ADD MOVIE ---
+router.post('/add', movieController.createMovie);
 
-// EDIT FORM
+// --- EDIT MOVIE FORM ---
 router.get('/edit/:id', movieController.getEditMovie);
 
-// UPDATE
+// --- UPDATE MOVIE ---
 router.post('/edit/:id', movieController.updateMovie);
+
+// --- DELETE MOVIE ---
+router.get('/delete/:id', movieController.deleteMovie);
 
 module.exports = router;
