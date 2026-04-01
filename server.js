@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 // const fs = require('fs');
 
-const friendController = require("./controllers/friendController");
+// const friendController = require("./controllers/friendController");
 const server = express();
 server.set("view engine", "ejs");
 server.set('views', path.join(__dirname, 'views')); 
@@ -20,9 +20,9 @@ server.use(session({
     resave: false, 
     saveUninitialized: false  
 }));
-server.get("/", (req, res) => res.status(200).send(`success!`));
+// server.get("/", (req, res) => res.status(200).send(`success!`));
 
-// routes
+//routes
 server.use("/", require("./routes/profile"));
 server.use("/list", require("./routes/watchlist"));
 server.use("/reviews", require("./routes/reviews"));
@@ -30,7 +30,6 @@ server.use("/friends", require("./routes/friends"));
 server.use('/admin', require('./routes/movies'));
 server.use('/movie', require('./routes/index'));
 server.use('/index', require('./routes/index'));
-
 // Direct profile view route (for viewing other users' profiles via friends)
 server.get('/friends/profile/:userId', require('./controllers/friendController').viewUserProfile);
 
