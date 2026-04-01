@@ -45,7 +45,11 @@ exports.getAllMoviesAdmin = async (req, res) => {
 
         const movies = await Movie.find(query).sort({ createdAt: -1 });
 
-        res.render('admin', { movies, search });
+        res.render('admin', { 
+            movies, 
+            search,
+            user: req.session.user
+        });
 
     } catch (err) {
         console.error(err);
@@ -70,7 +74,9 @@ exports.getEditMovie = async (req, res) => {
         const movie = await Movie.findById(req.query.id);
         if (!movie) return res.send("Movie not found");
 
-        res.render('editMovie', { movie });
+        res.render('editMovie', { movie,
+            user: req.session.user
+         });
     } catch (err) {
         console.error(err);
         res.send("Error loading edit page");

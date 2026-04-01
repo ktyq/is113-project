@@ -52,7 +52,7 @@
             min-height: 60px;
         }
 
-        form button {
+        section form button {
             margin-top: 20px;
             padding: 12px 20px;
             border: none;
@@ -64,7 +64,7 @@
             transition: background-color 0.3s ease;
         }
 
-        form button:hover {
+        section form button:hover {
             background-color: #2980b9;
         }
 
@@ -108,7 +108,7 @@
                 font-size: 16px;
             }
 
-            form button {
+            section form button {
                 width: 100%;
             }
         }
@@ -116,6 +116,8 @@
 </head>
 
 <body>
+    <%- include('partial/header', { user: user }) %>
+
     <section>
     <h2>Search Movies</h2>
 
