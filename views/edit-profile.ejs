@@ -17,14 +17,17 @@
     <% if (error) { %>
         <h3><%= error %></h3>
     <% } %>
+    <% if (success) { %>
+        <h3><%= success %></h3>
+    <% } %>
 
     <form action="/edit-profile" method="POST">
         <label>New Username:</label>
-        <input type="text" name="username" placeholder="Enter new username">
+        <input type="text" name="username" placeholder="<%= user.username %>">
         <br><br>
 
         <label>New Email Address:</label>
-        <input type="email" name="email" placeholder="Enter new email">
+        <input type="email" name="email" placeholder="<%= user.email %>">
         <br><br>
 
         <!-- Watchlist privacy setting -->
@@ -37,11 +40,15 @@
         <br><br>
 
         <h3>Change password</h3>
-        <p>Leave the password fields empty if you don't want to change your password.</p>
+        <p>Verify your current password to change it.</p>
 
         <label>Current Password:</label>
         <input type="password" name="currentPassword" placeholder="Enter current password">
 
+        <% if (passwordError) { %>
+            <p><%= passwordError %></p>
+        <% } %>
+        
         <br>
         <label>New Password:</label>
         <input type="password" name="newPassword" placeholder="Enter new password">

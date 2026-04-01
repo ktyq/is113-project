@@ -77,7 +77,7 @@ exports.loginPost = async(req, res) => {
         console.log("User logged in:", user.username, user.role);
 
         // Redirect based on role
-        if(user.role === "admin") {
+        if(user.role === "admin" || user.role === 'superadmin') {
             return res.redirect('/admin-profile');
         }
         res.redirect('/index');
@@ -101,7 +101,13 @@ exports.adminProfile = (req, res) => {
 exports.editProfileGet = async (req, res) => {
     try {
         const user = await User.findById(req.session.user.id);
-        res.render('edit-profile', {user: user, error: null});
+        res.render('edit-profile', {
+            user: user, 
+            error: null, 
+            success: null, 
+            passwordError: null, 
+            passwordVerified: null
+        });
     } catch(err) {
         console.error(err);
         res.redirect('/user-profile');
@@ -115,52 +121,92 @@ exports.editProfilePost = async(req, res) => {
 
         if (!user) return res.redirect('/login');
 
-        //Check new username not taken by others
-        if (username !== user.username) {
-            const taken = await User.findOne({username: username});
-            if(taken) {
-                return res.render('edit-profile', {user: user, error: 'Username already taken'});
+        //Function rerender
+        const rerender = (error, success, passwordError, passwordVerified = false) => {
+            return res.render('edit-profile', {user, error, success, passwordError, passwordVerified });
+        };
+
+        let changesMade = false; // Track if any changes were made
+
+        //--Username validation---------------------------------------------------------------------------------------------------------------
+        if (username && username.trim() !== '') {
+            if (username === user.username) {        
+            return rerender('New username cannot be the same as the current one.', null, null);
             }
+            //Check new username not taken by others
+             const taken = await User.findOne({username: username});                 
+            if(taken) {
+                return rerender('Username is already in use', null, null);
+            }
+            user.username = username.trim();
+            changesMade = true;
         }
         
-        //Check new email not taken by others
-        if (email !== user.email) {
-            const taken = await User.findOne({email: email});
-            if(taken) {
-                return res.render('edit-profile', {user: user, error: 'Email already taken'});
-            }            
-        }
+        //--Email validation----------------------------------------------------------------------------------------------------------------
+        if (email && email.trim() !== '') {
+            if (email === user.email) {
+                return rerender('New email cannot be the same as the current one.', null, null);
+            }
+            //Check new email not taken by others
+            if (email !== user.email) {
+                const taken = await User.findOne({email: email});
+                if(taken) {
+                    return rerender('Email is already in use', null, null);
+                }
+            }
+            user.email = email.trim();
+            changesMade = true;
+        }         
+        
 
         user.username = username || user.username;
         user.email = email || user.email;
         user.watchlistPrivacy = watchlistPrivacy || user.watchlistPrivacy; // Update privacy setting
 
-        //Only update password if user typed a new one
-        if (newPassword) {
-            //Verify old password
-            if (!currentPassword) {
-                return res.render('edit-profile', {user, error: 'Please enter your current password to set a new one'});
-            }
+        //--Password validation----------------------------------------------------------------------------------------------------------------
+        if (currentPassword) {
             const oldMatch = await bcrypt.compare(currentPassword, user.password);
             if (!oldMatch) {
-                return res.render('edit-profile', {user, error: 'Current password is incorrect'});
+                //Save username/email changes made before returning error
+                if (changesMade) await user.save();
+                return rerender(null, null, 'Current password is incorrect', false);
+            }
+
+            //Current password verified - now check new password
+            if (!newPassword || newPassword.trim() === '') { 
+                //Password verified but no new password typed yet - show new fields
+                if (changesMade) await user.save();
+                return rerender(null, changesMade ? 'Profile updated successfully' : null, null, true);    
+            }
+
+            //Block setting same password
+            const newMatch = await bcrypt.compare(newPassword, user.password);
+            if (newMatch) {
+                return rerender(null, null, 'New password cannot be the same as the current one.', true);
             }
 
             if (newPassword !== confirmNewPassword) {
-                return res.render('edit-profile', {user: user, error: 'New passwords do not match'});
+                return rerender(null, null, 'New passwords do not match', true);
             }
+
             user.password = await bcrypt.hash(newPassword, 10);
+            changesMade = true;
+        }
+
+        //--If nothing was changed----------------------------------------------------------------------------------------------------------------
+        if (!changesMade) {
+            return rerender('No changes were made. Please fill in at least one field to update.', null, null);
         }
 
         await user.save();
-
+        
         // Update session info
         req.session.user.username = user.username;
         req.session.user.email = user.email;
         console.log("Profile updated:", user.username);
 
-        res.render('edit-profile', {user: user, error: 'Profile updated successfully'});
-        
+        return rerender(null, 'Profile updated successfully', null, false);
+
     } catch(err) {
         console.error(err);
         res.redirect('/user-profile');
@@ -188,4 +234,45 @@ exports.logout = (req, res) => {
     req.session.destroy(() => {
         res.redirect('/login');
     });
+}
+
+// =============================================================
+// Admin: Manage Account
+// =============================================================
+
+// GET admin & user profiles
+exports.manageAccountsGet = async (req, res) => {
+    try {
+        const users = await User.find({role: 'user'}).sort({createdAt: -1});
+        const admins = await User.find({role: 'admin'}).sort({createdAt: -1});
+        res.render('manage-accounts', {user: req.session.user, users, admins, error: null, success: null});
+    } catch(err) {
+        console.error(err);
+        res.redirect('/admin-profile'); 
+    }
+}
+
+// UPDATE user role (admin <-> user)
+exports.promoteToAdmin = async(req, res) => {
+    try {
+        const {userId} = req.body;
+        await User.findByIdAndUpdate(userId, {role: 'admin'});
+        console.log("User promoted to Admin:", userId);
+        res.redirect('/manage-accounts');
+    } catch(err) {
+        console.error(err);
+        res.redirect('/manage-accounts');
+    }
+}
+
+exports.demoteToUser = async(req, res) => {
+    try {
+        const {userId} = req.body;
+        await User.findByIdAndUpdate(userId, {role:'user'});
+        console.log("Admin demoted to User:", userId);
+        res.redirect('/manage-accounts'); 
+    } catch(err) {
+        console.error(err);
+        res.redirect('/manage-accounts');
+    }
 }

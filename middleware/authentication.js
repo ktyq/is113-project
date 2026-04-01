@@ -11,8 +11,8 @@ exports.isAdmin = (req, res, next) => {
         console.log("User not logged in");
         return res.redirect('/login');
     }
-    if (req.session.user.role !== 'admin') {
-        console.log("User is not an admin");
+    if (req.session.user.role !== 'admin' && req.session.user.role !== 'superadmin') {
+        console.log("Access denied: User is not admin");
         return res.redirect('/user-profile');
     }
     next();
