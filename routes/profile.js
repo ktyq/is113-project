@@ -11,7 +11,7 @@ const authMiddleware = require('../middleware/authentication');
 //--Root redirect--//
 router.get('/', (req, res) => {
     if (req.session.user) {
-        return req.session.user.role === 'admin'
+        return req.session.user.role === 'admin' || req.session.user.role === 'superadmin'
         ? res.redirect('/admin-profile')
         : res.redirect('/index');
     }
@@ -24,10 +24,6 @@ router.post('/register', userController.registerPost);
 router.get('/login', userController.loginGet);
 router.post('/login', userController.loginPost);
 
-//--Home page--//
-router.get('/home', authMiddleware.isLoggedIn, (req, res) => {
-    res.render('index', {movies: [], user: req.session.user})
-})
 //--User profile--//
 router.get('/user-profile', authMiddleware.isLoggedIn, userController.profile);
 
@@ -43,5 +39,10 @@ router.post('/delete-profile', authMiddleware.isLoggedIn, userController.deleteP
 
 //--Logout--//
 router.post('/logout', userController.logout);
+
+//--Superadmin--//
+router.get('/manage-accounts', authMiddleware.isAdmin, userController.manageAccountsGet);
+router.post('/manage-accounts/promote', authMiddleware.isAdmin, userController.promoteToAdmin);
+router.post('/manage-accounts/demote', authMiddleware.isAdmin, userController.demoteToUser);
 
 module.exports = router;

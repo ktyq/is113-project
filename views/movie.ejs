@@ -11,7 +11,7 @@
 
 <body>
     <%- include('partial/header', { user: user }) %>
-    
+
     <section>
         <div class="movie-detail">
             <!-- Movie Poster -->
@@ -50,11 +50,39 @@
 
                 <% } else { %>
                     <% if (status === 'planning') { %>
-                        <p>You marked this movie as planning to watch.</p>
+                        <p style="color: orange;">
+                            You marked this movie as planning to watch.
+                        </p>
+                    <% } else if (status === 'watched') { %>
+                        <p style="color: green;">
+                            You marked this movie as watched.
+                        </p>
+                    <% } %>
+
+
+                    <!-- BUTTONS -->
+                    <% if (!status) { %>
+
+                        <!-- NULL -->
+                        <form action="/list/add" method="POST">
+                            <input type="hidden" name="movieId" value="<%= movie._id %>">
+                            <button type="submit">Add to Watchlist</button>
+                        </form>
+
+                        <form action="/list/edit" method="POST">
+                            <input type="hidden" name="movieId" value="<%= movie._id %>">
+                            <input type="hidden" name="status" value="watched">
+                            <button type="submit">Mark as Watched</button>
+                        </form>
+
+                    <% } else if (status === 'planning') { %>
+
+                        <!-- PLANNING -->
                         <form action="/list/remove" method="POST">
                             <input type="hidden" name="movieId" value="<%= movie._id %>">
                             <button type="submit">Remove from Watchlist</button>
                         </form>
+
                         <form action="/list/edit" method="POST">
                             <input type="hidden" name="movieId" value="<%= movie._id %>">
                             <input type="hidden" name="status" value="watched">
@@ -62,28 +90,19 @@
                         </form>
 
                     <% } else if (status === 'watched') { %>
-                        <p>You marked this movie as watched.</p>
+
+                        <!-- WATCHED -->
                         <form action="/list/remove" method="POST">
                             <input type="hidden" name="movieId" value="<%= movie._id %>">
                             <button type="submit">Remove from Watchlist</button>
                         </form>
+
                         <form action="/list/edit" method="POST">
                             <input type="hidden" name="movieId" value="<%= movie._id %>">
                             <input type="hidden" name="status" value="planning">
                             <button type="submit">Change to Planning</button>
                         </form>
 
-                    <% } else { %>
-                        <p>This movie is not in your watchlist yet.</p>
-                        <form action="/list/add" method="POST">
-                            <input type="hidden" name="movieId" value="<%= movie._id %>">
-                            <button type="submit">Add to Watchlist</button>
-                        </form>
-                        <form action="/list/edit" method="POST">
-                            <input type="hidden" name="movieId" value="<%= movie._id %>">
-                            <input type="hidden" name="status" value="watched">
-                            <button type="submit">Mark as Watched</button>
-                        </form>
                     <% } %>
                 <% } %>
 
