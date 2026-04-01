@@ -2,7 +2,7 @@
 const Feedback = require("../models/Feedback");
 
 // import User model (needed for populate to get username)
-const User = require("../models/User");
+const User = require("../models/user");
 
 // CREATE feedback (user submit form)
 exports.createFeedback = async (req, res) => {
