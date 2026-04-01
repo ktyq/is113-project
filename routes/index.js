@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Movie = require('../models/movie');
+const Movie = require('../models/Movie');
 const authMiddleware = require('../middleware/authentication');
 
 // --- DISPLAY ALL MOVIES --- this one is for index page
