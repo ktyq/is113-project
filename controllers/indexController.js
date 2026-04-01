@@ -29,32 +29,27 @@ exports.getAllMovies = async (req, res) => {
 
 // --- DISPLAY SINGLE MOVIE ---
 exports.getMovieById = async (req, res) => {
-  try {
-    const movieId = req.query.id;
-    const movie = await Movie.findById(movieId).lean();
+    try {
+        const movie = await Movie.findById(req.query.id).lean();
+        if (!movie) return res.status(404).send("Movie not found");
 
-    let status = null;
+        let status = null;
 
-    if (req.session.user) {
-      // Use listController.getMovieStatus logic directly
-      const watchItem = await List.findOne({
-        userID: req.session.user._id,
-        movieID: movieId
-      }).lean();
+        if (req.session && req.session.user) {
+            const userId = req.session.user.id || req.session.user._id;
 
-      if (watchItem) {
-        status = watchItem.status; // 'planning' or 'watched'
-      }
+            // ✅ THIS IS YOUR getMovieStatus
+            status = await List.getMovieStatus(userId, movie._id);
+        }
+
+        res.render('movie', {
+            movie,
+            user: req.session.user || null,
+            status   // ✅ PASS TO EJS
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server error");
     }
-
-    res.render('movie', {
-      movie,
-      user: req.session.user || null,
-      status // null if not in watchlist
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server Error');
-  }
 };
