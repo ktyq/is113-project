@@ -1,12 +1,13 @@
 const Movie = require('../models/Movie');
 const mongoose = require('mongoose');
+const listController = require('./listController');
 
 // --- CREATE MOVIE ---
 exports.createMovie = async (req, res) => {
     try {
         const { title, movieLength, release_year, genre, overview, director, cast } = req.body;
 
-        // ✅ FIX: check req.file instead of imageRef
+        // check req.file instead of imageRef
         if (!title || !movieLength || !release_year || !genre || !overview || !director || !cast || !req.file) {
             return res.send("All fields are required!");
         }
@@ -34,8 +35,18 @@ exports.createMovie = async (req, res) => {
 // --- READ MOVIES ---
 exports.getAllMoviesAdmin = async (req, res) => {
     try {
-        const movies = await Movie.find().sort({ createdAt: -1 });
-        res.render('admin', { movies });
+        const search = req.query.search || "";
+
+        let query = {};
+
+        if (search.trim() !== "") {
+            query.title = { $regex: search, $options: "i" };
+        }
+
+        const movies = await Movie.find(query).sort({ createdAt: -1 });
+
+        res.render('admin', { movies, search });
+
     } catch (err) {
         console.error(err);
         res.send("Error fetching movies");

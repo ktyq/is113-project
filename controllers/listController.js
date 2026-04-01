@@ -43,7 +43,7 @@ exports.viewUserList = async (req, res) => {
     try {
         if (!editMovieId && !removeMovieId) {
             let watchlist = await List.getListsByUser(user, page, total, status, settings, search);
-            return res.render("watchlist", { watchlist, page, total, status, sort, search, editMovieId, removeMovieId });
+            return res.render("watchlist", { watchlist, page, total, status, sort, search, editMovieId, removeMovieId});
         }
 
         const movieId = editMovieId || removeMovieId;

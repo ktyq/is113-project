@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const movieController = require('../controllers/movieController');
+const listController = require('../controllers/listController');
+const indexController = require('../controllers/indexController');
 const authMiddleware = require('../middleware/authentication');
 const multer = require('multer');
 const path = require('path');
+
 
 //configure storage
 const storage = multer.diskStorage({
@@ -35,5 +38,16 @@ router.post('/edit', upload.single('image'), movieController.updateMovie);
 
 // --- DELETE MOVIE ---
 router.get('/delete', movieController.deleteMovie);
+
+
+// Add movie to watchlist
+router.post('/movie/add', listController.addToUserList);
+
+// Update movie status / notes
+router.post('/list/edit', listController.editUserListItem);
+
+// Remove movie from watchlist
+router.post('/list/remove', listController.deleteFromUserList);
+
 
 module.exports = router;

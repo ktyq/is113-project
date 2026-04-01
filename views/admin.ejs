@@ -116,7 +116,19 @@
 </head>
 
 <body>
+    <section>
+    <h2>Search Movies</h2>
 
+    <form method="GET" action="/admin">
+        <input 
+            type="text" 
+            name="search" 
+            placeholder="Search by title..." 
+            value="<%= search || '' %>"
+        >
+        <button type="submit">Search</button>
+    </form>
+    </section>
     <section>
         <h2>Add New Movie</h2>
 
