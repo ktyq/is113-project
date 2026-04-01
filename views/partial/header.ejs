@@ -1,27 +1,28 @@
 <header>
     <h1>Movie App</h1>
     <nav>
-        <a href="/home">Home</a>
+        <a href="/index">Home</a>
         &nbsp;|&nbsp;
-        <a href="/watchlist">Watchlist</a>
+        <a href="/list">Watchlist</a>
         &nbsp;|&nbsp;
         <a href="/friends">Friends</a>
         &nbsp;|&nbsp;
         
-        <% if (user.role === 'admin') { %>
-            <a href="/admin-profile">Admin</a>
-        <% } else { %>
-            <a href="/user-profile">Account</a>
-        <% } %>
-        &nbsp;|&nbsp;  
-        
         <% if (user) { %>
+            <% if (user.role === 'admin') { %>
+                <a href="/admin-profile">Admin</a>
+            <% } else { %>
+                <a href="/user-profile">Account</a>
+            <% } %>
+                
             <form action="/logout" method="POST" style="display:inline;">
                 <button type="submit">Logout</button>
             </form>
-        <% } else { %>
-            <a href="/login">Login</a>
-        <% } %>
+        <% } else { %> 
+            <a href="/login"><button type="submit">Login</button></a>
+        <% } %>         
+       
+       
     </nav>
     <hr>
 </header>

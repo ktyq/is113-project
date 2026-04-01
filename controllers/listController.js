@@ -1,32 +1,30 @@
 const fs = require('fs/promises');
 
 const List = require('../models/Watchlist');
-const User = require('../models/user'); // Added for privacy checks
-const Friend = require('../models/Friend'); // Added for friendship verification
+const User = require('../models/user');
+const Friend = require('../models/Friend');
 const TEST_USER = '69c39ce645385a80651325ed';
 
 // Helper function to resolve current user ID from various sources
+// FIX: Guard req.body, and extract .id from session.user object instead of returning the whole object
 async function resolveCurrentUser(req) {
     if (req.session && req.session.user) {
-        return req.session.user;
+        const sid = req.session.user.id || req.session.user._id;
+        if (sid) return typeof sid === 'object' ? sid.toString() : sid;
     }
-    if (req.query.userId) {
-        return req.query.userId;
-    }
-    if (req.body.userId) {
-        return req.body.userId;
-    }
-    // Fallback: get first user from DB
+    if (req.query && req.query.userId) return req.query.userId;
+    if (req.body && req.body.userId) return req.body.userId;
+
     const firstUser = await User.findOne({});
     return firstUser ? firstUser._id.toString() : TEST_USER;
 }
 
-// viewUserList // userid, list type (planned, watched), order
+// viewUserList
 exports.viewUserList = async (req, res) => {
-    const user = (req.session && req.session.user) || TEST_USER;
+    const user = (req.session && req.session.user && (req.session.user.id || req.session.user._id)) || TEST_USER;
     let page = parseInt(req.query.page) || 1;
     let total = parseInt(req.query.limit) || 10;
-    let status = req.query.status || 'planning'; // only planning or watched
+    let status = req.query.status || 'planning';
     let sort = req.query.sort || 'priority_asc';
     const search = (req.query.search || '').toString().trim();
 
@@ -34,26 +32,18 @@ exports.viewUserList = async (req, res) => {
     switch (sort) {
         case 'priority_asc': settings.priority = 1; break;
         case 'priority_desc': settings.priority = -1; break;
-        // case 'title_asc': settings.title = 1; break;
-        // case 'title_desc': settings.title = -1; break;
         case 'date_asc': settings.createdAt = 1; break;
         case 'date_desc': settings.createdAt = -1; break;
         default: settings.priority = 1;
     }
-    // settings = {
-    //     priority: 1, // ascending
-    //     createdAt: 0, // unset
-    //     title: 0 // unset
-    // };
 
-    // action
     const editMovieId = req.query.edit || null;
     const removeMovieId = req.query.remove || null;
 
     try {
         if (!editMovieId && !removeMovieId) {
             let watchlist = await List.getListsByUser(user, page, total, status, settings, search);
-            return res.render("watchlist", { watchlist, page, total, status, sort, search, editMovieId, removeMovieId });
+            return res.render("watchlist", { watchlist, page, total, status, sort, search, editMovieId, removeMovieId});
         }
 
         const movieId = editMovieId || removeMovieId;
@@ -68,7 +58,7 @@ exports.viewUserList = async (req, res) => {
     }
 };
 
-// viewOtherUserList // view another user's watchlist with privacy check
+// viewOtherUserList - view another user's watchlist with privacy check
 exports.viewOtherUserList = async (req, res) => {
     const targetUserId = req.params.userId;
     const currentUserId = await resolveCurrentUser(req);
@@ -88,7 +78,6 @@ exports.viewOtherUserList = async (req, res) => {
         }
 
         if (targetUser.watchlistPrivacy === 'friends') {
-            // Check if current user is friends with target user
             const friendship = await Friend.findOne({
                 $or: [
                     { requestor: currentUserId, requestee: targetUserId },
@@ -101,7 +90,6 @@ exports.viewOtherUserList = async (req, res) => {
             }
         }
 
-        // Privacy allows viewing (public or friends and is friend)
         let page = parseInt(req.query.page) || 1;
         let total = parseInt(req.query.limit) || 10;
         let status = req.query.status || 'planning';
@@ -117,33 +105,16 @@ exports.viewOtherUserList = async (req, res) => {
             default: settings.priority = 1;
         }
 
-        const editMovieId = null; // viewing only, no edit for other users
-        const removeMovieId = null;
-
-        if (!editMovieId && !removeMovieId) {
-            let watchlist = await List.getListsByUser(targetUserId, page, total, status, settings, search);
-            return res.render("watchlist", { 
-                watchlist, 
-                page, 
-                total, 
-                status, 
-                sort, 
-                search, 
-                editMovieId, 
-                removeMovieId,
-                viewingUser: targetUser // pass target user for display
-            });
-        }
-
-        const movieId = editMovieId || removeMovieId;
-        const movie = await List.getWatchlistItem(targetUserId, movieId);
-
-        if (!movie) return res.status(404).send("Movie not found in watchlist");
-
-        return res.render("watchlist", { 
-            editMovieId, 
-            removeMovieId, 
-            movie,
+        let watchlist = await List.getListsByUser(targetUserId, page, total, status, settings, search);
+        return res.render("watchlist", {
+            watchlist,
+            page,
+            total,
+            status,
+            sort,
+            search,
+            editMovieId: null,
+            removeMovieId: null,
             viewingUser: targetUser
         });
 
@@ -152,11 +123,10 @@ exports.viewOtherUserList = async (req, res) => {
     }
 };
 
-// todo getMovieStatus
+// getMovieStatus
 exports.getMovieStatus = async (req, res) => {
-    // const { userId, movieId } = req.params;
-    const user = (req.session && req.session.user) || TEST_USER;
-    movie = '69c39ce645385a80651325f7';
+    const user = (req.session && req.session.user && (req.session.user.id || req.session.user._id)) || TEST_USER;
+    const movie = '69c39ce645385a80651325f7';
 
     try {
         const status = await List.getMovieStatus(user, movie);
@@ -166,9 +136,9 @@ exports.getMovieStatus = async (req, res) => {
     }
 };
 
-// editUserListItem // userid, movieid, listtype, edit info
+// editUserListItem
 exports.editUserListItem = async (req, res) => {
-    const user = (req.session && req.session.user) || TEST_USER;
+    const user = (req.session && req.session.user && (req.session.user.id || req.session.user._id)) || TEST_USER;
     const movie = req.body.movieId;
     const update = {
         status: req.body.status || null,
@@ -179,36 +149,34 @@ exports.editUserListItem = async (req, res) => {
     try {
         const status = await List.updateWatchlistMovie(user, movie, update);
         console.log(status);
-        // res.status(200).json(status);
         return res.redirect('/list');
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-// addToUserList // userid, movieid, listtype, info
+// addToUserList
 exports.addToUserList = async (req, res) => {
-    const user = (req.session && req.session.user) || TEST_USER;
-    movie = '69c39ce645385a80651325f7';
-    list = 'planning';
-    notes = null;
+    const user = (req.session && req.session.user && (req.session.user.id || req.session.user._id)) || TEST_USER;
+    const movie = '69c39ce645385a80651325f7';
+    const list = 'planning';
+    const notes = null;
+
     try {
         let newItem = await List.createUserList(user, movie, list, notes);
         res.status(200).json({ newItem });
-        // res.redirect('/');
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
-// deleteFromUserL ist // userid, movieid
+// deleteFromUserList
 exports.deleteFromUserList = async (req, res) => {
-    const user = (req.session && req.session.user) || TEST_USER;
+    const user = (req.session && req.session.user && (req.session.user.id || req.session.user._id)) || TEST_USER;
     const movie = req.body.movieId;
 
     try {
         await List.deleteFromUserList(user, movie);
-        // res.status(200).json('success');
         return res.redirect('/list');
     } catch (error) {
         res.status(500).json({ error: error.message });

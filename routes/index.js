@@ -1,29 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const Movie = require('models/movie');
+const indexController = require('../controllers/indexController');
+const authMiddleware = require('../middleware/authentication');
 
 // --- DISPLAY ALL MOVIES ---
-router.get('/', async (req, res) => {
-    try {
-        const movies = await Movie.find().sort({ createdAt: -1 });
-        res.render('index', { movies }); // pass movies to index.ejs
-    } catch (err) {
-        console.error(err);
-        res.send("Error fetching movies");
-    }
-});
+router.get('/', indexController.getAllMovies);
 
 // --- DISPLAY SINGLE MOVIE ---
-router.get('/:id', async (req, res) => {
-    try {
-        const movie = await Movie.findById(req.params.id);
-        if (!movie) return res.status(404).send("Movie not found");
-
-        res.render('movie', { movie });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Server error");
-    }
-});
+router.get('/view', indexController.getMovieById);
 
 module.exports = router;

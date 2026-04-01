@@ -5,20 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="../public/default.css">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/default.css">
 </head>
 
 <body>
     <%- include('partial/header', {user: user}) %>
-    <h1><%= isOwnProfile ? 'My Profile' : user.username + '\'s Profile' %></h1>
+    <h1>My Profile</h1>
 
     <p><strong>Username:</strong> <%= user.username %></p>
     <p><strong>Email:</strong> <%= user.email %></p>
     
     <br>
     
-    <% if (isOwnProfile) { %>
+    
       <!-- Show edit/delete only for own profile -->
       <a href="/edit-profile">Edit Profile</a>
       
@@ -26,10 +26,10 @@
       <form action="/delete-profile" method="POST" id="deleteForm">
         <button type="submit" onclick="confirmDelete()">Delete Account</button>
       </form>
-    <% } else { %>
+    
       <!-- Show back to friends for other profiles -->
       <a href="/friends"><button>Back to Friends</button></a>
-    <% } %>
+   
 
     <script>
         function confirmDelete() {
@@ -39,3 +39,4 @@
         }
     </script>
 </body>
+</html>

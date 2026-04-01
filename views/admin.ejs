@@ -52,7 +52,7 @@
             min-height: 60px;
         }
 
-        form button {
+        section form button {
             margin-top: 20px;
             padding: 12px 20px;
             border: none;
@@ -64,7 +64,7 @@
             transition: background-color 0.3s ease;
         }
 
-        form button:hover {
+        section form button:hover {
             background-color: #2980b9;
         }
 
@@ -108,7 +108,7 @@
                 font-size: 16px;
             }
 
-            form button {
+            section form button {
                 width: 100%;
             }
         }
@@ -116,16 +116,30 @@
 </head>
 
 <body>
+    <%- include('partial/header', { user: user }) %>
 
+    <section>
+    <h2>Search Movies</h2>
+
+    <form method="GET" action="/admin">
+        <input 
+            type="text" 
+            name="search" 
+            placeholder="Search by title..." 
+            value="<%= search || '' %>"
+        >
+        <button type="submit">Search</button>
+    </form>
+    </section>
     <section>
         <h2>Add New Movie</h2>
 
-        <form action="/admin/add" method="POST">
+        <form action="/admin/add" method="POST" enctype="multipart/form-data">
             <label>Title</label>
             <input type="text" name="title" required>
 
             <label>Image URL</label>
-            <input type="text" name="imageRef" required>
+            <input type="file" name="image" accept="image/*" required>
 
             <label>Genre</label>
             <input type="text" name="genre" placeholder="Action, Drama" required>
@@ -158,8 +172,8 @@
                     <li>
                         <span><%= movie.title %> (<%= movie.release_year %>)</span>
                         <span>
-                            <a href="/admin/edit/<%= movie._id %>">Edit</a>
-                            <a href="/admin/delete/<%= movie._id %>">Delete</a>
+                            <a href="/admin/edit?id=<%= movie._id %>">Edit</a>
+                            <a href="/admin/delete?id=<%= movie._id %>">Delete</a>
                         </span>
                     </li>
                 <% }) %>

@@ -62,21 +62,26 @@
     <%- include('partial/header', {user: user}) %>
 
     <h1>All Movies</h1>
+    
+    <form method="GET" action="/index">
+    <input 
+        type="text" 
+        name="search" 
+        placeholder="Search movies..." 
+        value="<%= search || '' %>"
+    >
+    <button type="submit">Search</button>
+    </form>
 
     <% if (movies && movies.length > 0) { %>
         <% movies.forEach(movie => { %>
             <section class="movie-card">
                 <img src="<%= movie.imageRef %>" alt="<%= movie.title %>">
                 <div class="movie-info">
-                    <h2><a href="/movie/<%= movie._id %>"><%= movie.title %></a> (<%= movie.release_year %>)</h2>
+                    <h2><a href="/movie/view?id=<%= movie._id %>"><%= movie.title %></a> (<%= movie.release_year %>)</h2>
                     <div>Genre: <%= movie.genre.join(', ') %></div>
                     <p>Rating: <%= movie.averageRating || 0 %> / 5</p>
                     <p class="movie-overview"><%= movie.overview %></p>
-
-                    <div class="button-row">
-                        <a href="/watchlist/add/<%= movie._id %>"><button>Add to Watchlist</button></a>
-                        <a href="/watched/add/<%= movie._id %>"><button>Mark as Watched</button></a>
-                    </div>
                 </div>
             </section>
         <% }) %>

@@ -1,98 +1,53 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
-const Movie = require('../models/movie');
+const movieController = require('../controllers/movieController');
+const listController = require('../controllers/listController');
+const indexController = require('../controllers/indexController');
+const authMiddleware = require('../middleware/authentication');
+const multer = require('multer');
+const path = require('path');
 
-// --- CREATE MOVIE ---
-router.post('/add', async (req, res) => {
-    try {
-        const { title, imageRef, movieLength, release_year, genre, overview, director, cast } = req.body;
 
-        // Basic validation
-        if (!title || !imageRef || !movieLength || !release_year || !genre || !overview || !director || !cast) {
-            return res.send("All fields are required!");
-        }
-
-        const newMovie = await Movie.create({
-            title,
-            imageRef,
-            movieLength: Number(movieLength),
-            release_year: Number(release_year),
-            genre: genre.split(',').map(g => g.trim()),
-            overview,
-            director: director.split(',').map(d => d.trim()),
-            cast: cast.split(',').map(c => c.trim()),
-            addedBy: new mongoose.Types.ObjectId() // TEMP
-        });
-
-        console.log("Movie created:", newMovie);
-        res.redirect('/admin');
-    } catch (err) {
-        console.error("CREATE MOVIE ERROR:", err);
-        res.send("Error creating movie — check console!");
+//configure storage
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads/');
+    },
+    filename: function (req, file, cb) {
+        const uniqueName = Date.now() + path.extname(file.originalname);
+        cb(null, uniqueName);
     }
 });
 
-// --- READ MOVIES ---
-router.get('/', async (req, res) => {
-    try {
-        const movies = await Movie.find().sort({ createdAt: -1 });
-        res.render('admin', { movies });
-    } catch (err) {
-        console.error(err);
-        res.send("Error fetching movies");
-    }
-});
+const upload = multer({ storage: storage });
 
-// --- DELETE MOVIE ---
-router.get('/delete/:id', async (req, res) => {
-    try {
-        await Movie.findByIdAndDelete(req.params.id);
-        res.redirect('/admin');
-    } catch (err) {
-        console.error(err);
-        res.send("Error deleting movie");
-    }
-});
+// Protect all admin routes
+router.use(authMiddleware.isAdmin);
 
-// --- SHOW EDIT FORM ---
-router.get('/edit/:id', async (req, res) => {
-    try {
-        const movie = await Movie.findById(req.params.id);
-        if (!movie) return res.send("Movie not found");
-        res.render('editMovie', { movie });
-    } catch (err) {
-        console.error(err);
-        res.send("Error loading edit page");
-    }
-});
+// --- ADMIN DASHBOARD ---
+router.get('/', movieController.getAllMoviesAdmin);
+
+// --- ADD MOVIE ---
+router.post('/add', upload.single('image'), movieController.createMovie);
+
+// --- EDIT MOVIE FORM ---
+router.get('/edit', movieController.getEditMovie);
 
 // --- UPDATE MOVIE ---
-router.post('/edit/:id', async (req, res) => {
-    try {
-        const { title, imageRef, movieLength, release_year, genre, overview, director, cast } = req.body;
+router.post('/edit', upload.single('image'), movieController.updateMovie);
 
-        if (!title || !imageRef || !movieLength || !release_year || !genre || !overview || !director || !cast) {
-            return res.send("All fields are required!");
-        }
+// --- DELETE MOVIE ---
+router.get('/delete', movieController.deleteMovie);
 
-        await Movie.findByIdAndUpdate(req.params.id, {
-            title,
-            imageRef,
-            movieLength: Number(movieLength),
-            release_year: Number(release_year),
-            genre: genre.split(',').map(g => g.trim()),
-            overview,
-            director: director.split(',').map(d => d.trim()),
-            cast: cast.split(',').map(c => c.trim()),
-            updatedAt: new Date()
-        });
 
-        res.redirect('/admin');
-    } catch (err) {
-        console.error(err);
-        res.send("Error updating movie");
-    }
-});
+// Add movie to watchlist
+router.post('/movie/add', listController.addToUserList);
+
+// Update movie status / notes
+router.post('/list/edit', listController.editUserListItem);
+
+// Remove movie from watchlist
+router.post('/list/remove', listController.deleteFromUserList);
+
 
 module.exports = router;
