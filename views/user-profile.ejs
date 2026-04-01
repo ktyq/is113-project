@@ -11,25 +11,27 @@
 
 <body>
     <%- include('partial/header', {user: user}) %>
-    <h1><%= isOwnProfile ? 'My Profile' : user.username + '\'s Profile' %></h1>
-
+    
+    <h1>My Profile</h1>
     <p><strong>Username:</strong> <%= user.username %></p>
     <p><strong>Email:</strong> <%= user.email %></p>
     
     <br>
     
-    <% if (isOwnProfile) { %>
+    
       <!-- Show edit/delete only for own profile -->
       <a href="/edit-profile">Edit Profile</a>
+      &nbsp;|&nbsp;
+      <a href="/friends">Go to Friends</a>
       
       <br><br>
       <form action="/delete-profile" method="POST" id="deleteForm">
         <button type="submit" onclick="confirmDelete()">Delete Account</button>
       </form>
-    <% } else { %>
-      <!-- Show back to friends for other profiles -->
-      <a href="/friends"><button>Back to Friends</button></a>
-    <% } %>
+      <br>
+    
+      
+    
 
     <script>
         function confirmDelete() {
