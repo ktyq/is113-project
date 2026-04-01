@@ -1,9 +1,10 @@
 // friendController.js
 // Controller for bidirectional friend request system:
-// - render friends page with 3 sections (Friends, Requests, Recommended)
-// - send/accept/decline/block friend requests
+// - render friends page with 4 sections (Friends, Sent Requests, Received Requests, Recommended)
+// - send/accept/decline/cancel friend requests
 // - manage nicknames (only respective user can update theirs)
-// - view user profile (changed from friend-watchlist)
+// - view user profile
+// - browse all users with search, sort, and pagination
 
 const mongoose = require('mongoose');
 const User = require('../models/user');
@@ -27,19 +28,17 @@ async function resolveCurrentUser(req) {
 }
 
 // Cast a value to a Mongoose ObjectId safely.
-// Prevents string IDs (from req.query/body) failing $nin/$eq comparisons in queries.
 function toObjectId(id) {
   return new mongoose.Types.ObjectId(id);
 }
 
 // GET /friends
-// Renders the friends page with three sections: Friends, Requests, Recommended
+// Renders the friends page with four sections: Friends, Sent Requests, Received Requests, Recommended
 exports.getFriendsPage = async (req, res) => {
   try {
     const userId = await resolveCurrentUser(req);
     const userObjectId = toObjectId(userId);
 
-    // Fetch the current user object for the header partial
     const user = await User.findById(userObjectId);
     if (!user) return res.status(404).send('User not found');
 
@@ -55,6 +54,11 @@ exports.getFriendsPage = async (req, res) => {
       status: 'pending'
     }).populate('requestor', 'username _id');
 
+    const sentRequests = await Friend.find({
+      requestor: userObjectId,
+      status: 'pending'
+    }).populate('requestee', 'username _id');
+
     const suggestions = await Friend.findSuggestedUsers(userObjectId, 5);
 
     res.render('friends', {
@@ -62,7 +66,99 @@ exports.getFriendsPage = async (req, res) => {
       currentUserId: userObjectId,
       friends,
       requests,
+      sentRequests,
       suggestions,
+    });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
+// GET /friends/browse
+// Browse all users with search, sort, and pagination.
+// Passes relationship state arrays so the template can show the correct action per user.
+exports.browseUsers = async (req, res) => {
+  try {
+    const userId = await resolveCurrentUser(req);
+    const userObjectId = toObjectId(userId);
+
+    const user = await User.findById(userObjectId);
+    if (!user) return res.status(404).send('User not found');
+
+    // Query params with defaults
+    const search = (req.query.search || '').trim();
+    const sort = req.query.sort || 'az';
+    const limit = Math.min(parseInt(req.query.limit) || 10, 100);
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+
+    // Build search filter
+    const filter = search
+      ? { username: { $regex: search, $options: 'i' } }
+      : {};
+
+    // Sort mapping
+    const sortMap = {
+      az:     { username:  1 },
+      za:     { username: -1 },
+      newest: { createdAt: -1 },
+      oldest: { createdAt:  1 },
+    };
+    const sortQuery = sortMap[sort] || sortMap.az;
+
+    const totalUsers = await User.countDocuments(filter);
+    const totalPages = Math.max(Math.ceil(totalUsers / limit), 1);
+    const safePage = Math.min(page, totalPages);
+    const skip = (safePage - 1) * limit;
+
+    const users = await User.find(filter)
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(limit)
+      .select('username createdAt _id');
+
+    // Fetch all relationship entries involving the current user for status checks
+    const allRelationships = await Friend.find({
+      $or: [
+        { requestor: userObjectId },
+        { requestee: userObjectId }
+      ]
+    });
+
+    // Build ID sets for template lookups
+    const friendIds = allRelationships
+      .filter(r => r.status === 'accepted')
+      .map(r => r.requestor.equals(userObjectId) ? r.requestee : r.requestor);
+
+    const sentRequestIds = allRelationships
+      .filter(r => r.status === 'pending' && r.requestor.equals(userObjectId))
+      .map(r => r.requestee);
+
+    const pendingRequestIds = allRelationships
+      .filter(r => r.status === 'pending' && r.requestee.equals(userObjectId))
+      .map(r => r.requestor);
+
+    // Rebuild query string for redirect-back links (e.g. cancel/send from this page)
+    const queryString = new URLSearchParams({
+      ...(search && { search }),
+      sort,
+      limit,
+      page: safePage,
+    }).toString();
+
+    res.render('browse-users', {
+      user,
+      currentUserId: userObjectId,
+      users,
+      search,
+      sort,
+      limit,
+      page: safePage,
+      totalPages,
+      totalUsers,
+      friendIds,
+      sentRequestIds,
+      pendingRequestIds,
+      queryString: queryString ? `&${queryString}` : '',
     });
   } catch (error) {
     res.status(500).send(error.message);
@@ -77,16 +173,30 @@ exports.sendRequest = async (req, res) => {
 
     if (requestor.equals(requestee)) return res.status(400).send('Cannot friend yourself');
 
-    const blocked = await Friend.findOne({
-      $or: [
-        { requestor, requestee, status: 'blocked' },
-        { requestor: requestee, requestee: requestor, status: 'blocked' }
-      ]
+    const reverseRequest = await Friend.findOne({
+      requestor: requestee,
+      requestee: requestor,
+      status: 'pending'
     });
-    if (blocked) return res.status(403).send('Cannot send request: blocked or relationship blocked');
+    if (reverseRequest) {
+      return res.redirect(req.query.redirect || '/friends');
+    }
 
     await Friend.sendRequest(requestor, requestee);
-    res.redirect('/friends');
+    res.redirect(req.query.redirect || '/friends');
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
+// POST /friends/cancel/:requesteeId
+exports.cancelRequest = async (req, res) => {
+  try {
+    const requestor = toObjectId(await resolveCurrentUser(req));
+    const requestee = toObjectId(req.params.requesteeId);
+
+    await Friend.cancelRequest(requestor, requestee);
+    res.redirect(req.query.redirect || '/friends');
   } catch (error) {
     res.status(500).send(error.message);
   }
@@ -115,21 +225,6 @@ exports.declineRequest = async (req, res) => {
     const requestor = toObjectId(req.params.requestorId);
 
     await Friend.declineRequest(requestor, requestee);
-    res.redirect('/friends');
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-};
-
-// POST /friends/block/:friendId
-exports.blockUser = async (req, res) => {
-  try {
-    const userId = toObjectId(await resolveCurrentUser(req));
-    const targetId = toObjectId(req.params.friendId);
-
-    if (userId.equals(targetId)) return res.status(400).send('Cannot block yourself');
-
-    await Friend.blockUser(userId, targetId);
     res.redirect('/friends');
   } catch (error) {
     res.status(500).send(error.message);
@@ -174,7 +269,7 @@ exports.updateNickname = async (req, res) => {
   }
 };
 
-// GET /profile/:userId
+// GET /friends/profile/:userId
 exports.viewUserProfile = async (req, res) => {
   try {
     const userId = toObjectId(req.params.userId);
