@@ -1,8 +1,9 @@
 // seed.js
+
 const dotenv = require("dotenv");
 dotenv.config({ path: "./config.env" });
-
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const User = require('../models/User');
 const Movie = require('../models/Movie');
@@ -27,9 +28,19 @@ async function seedDatabase() {
         ]);
         console.log('✅ All collections cleared\n');
 
-        // CREATE USERS
+        // CREATE USERS (with hashed passwords)
         console.log('👥 Creating users...');
-        const createdUsers = await User.insertMany(users);
+        const usersWithHashedPasswords = [];
+
+        for (const u of users) {
+            const hashedPassword = await bcrypt.hash(u.password, 10);
+            usersWithHashedPasswords.push({
+                ...u,
+                password: hashedPassword
+            });
+        }
+
+        const createdUsers = await User.insertMany(usersWithHashedPasswords);
 
         const userMap = {};
         createdUsers.forEach(u => {
