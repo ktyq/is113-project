@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Movie</title>
+    <link rel="stylesheet" href="/default.css">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #fff;
+            padding: 25px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .button-group {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .save-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .cancel-btn {
+            background-color: #bdc3c7;
+            color: black;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .cancel-btn:hover {
+            background-color: #95a5a6;
+        }
+
+        .preview {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .preview img {
+            max-width: 150px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Edit Movie</h2>
+
+    <!-- OPTIONAL: Movie Image Preview -->
+    <div class="preview">
+        <img src="<%= movie.imageRef %>" alt="<%= movie.title %>">
+    </div>
+
+    <form action="/admin/edit/<%= movie._id %>" method="POST">
+
+        <label>Title</label>
+        <input type="text" name="title" value="<%= movie.title %>" required>
+
+        <label>Image URL</label>
+        <input type="text" name="imageRef" value="<%= movie.imageRef %>" required>
+
+        <label>Genre</label>
+        <input type="text" name="genre" value="<%= movie.genre.join(', ') %>" required>
+
+        <label>Release Year</label>
+        <input type="number" name="release_year" value="<%= movie.release_year %>" required>
+
+        <label>Duration (minutes)</label>
+        <input type="number" name="movieLength" value="<%= movie.movieLength %>" required>
+
+        <label>Director</label>
+        <input type="text" name="director" value="<%= movie.director.join(', ') %>" required>
+
+        <label>Cast</label>
+        <input type="text" name="cast" value="<%= movie.cast.join(', ') %>" required>
+
+        <label>Overview</label>
+        <textarea name="overview" required><%= movie.overview %></textarea>
+
+        <div class="button-group">
+            <button type="submit" class="save-btn">Update Movie</button>
+            <a href="/admin" class="cancel-btn">Cancel</a>
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

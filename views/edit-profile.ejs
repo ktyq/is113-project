@@ -27,6 +27,15 @@
         <input type="email" name="email" placeholder="Enter new email">
         <br><br>
 
+        <!-- Watchlist privacy setting -->
+        <label>Watchlist Privacy:</label>
+        <select name="watchlistPrivacy">
+            <option value="public" <%= user.watchlistPrivacy === 'public' ? 'selected' : '' %>>Public (All can view)</option>
+            <option value="friends" <%= user.watchlistPrivacy === 'friends' ? 'selected' : '' %>>Friends only</option>
+            <option value="private" <%= user.watchlistPrivacy === 'private' ? 'selected' : '' %>>Private (No one)</option>
+        </select>
+        <br><br>
+
         <h3>Change password</h3>
         <p>Leave the password fields empty if you don't want to change your password.</p>
 

@@ -10,7 +10,7 @@
 
 <body>
     <header>
-        <h1>User Watchlist</h1>
+        <h1><%= viewingUser ? viewingUser.username + '\'s' : 'My' %> Watchlist</h1> <!-- Dynamic title for own vs others' watchlist -->
     </header>
 
     <main>
@@ -19,7 +19,7 @@
             <!-- filter -->
             <section>
                 <hr>
-                <form action="/list" method="get">
+                <form action="<%= viewingUser ? '/list/' + viewingUser._id : '/list' %>" method="get"> <!-- Dynamic form action for filtering -->
 
                     <div class="row">
                         <input type="text" name="search" value="<%= search %>" placeholder="Search by title">

@@ -6,6 +6,7 @@ const router = express.Router();
 
 // view planned , watched
 router.get("/", listController.viewUserList); // user, list type (planned, watched), order
+router.get("/:userId", listController.viewOtherUserList); // view another user's watchlist with privacy
 router.get("/status", listController.getMovieStatus); // user, list type (planned, watched), order
 
 // update movie in watchlist | reorder, update notes, update status
