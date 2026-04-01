@@ -62,6 +62,16 @@
     <%- include('partial/header', {user: user}) %>
 
     <h1>All Movies</h1>
+    
+    <form method="GET" action="/index">
+    <input 
+        type="text" 
+        name="search" 
+        placeholder="Search movies..." 
+        value="<%= search || '' %>"
+    >
+    <button type="submit">Search</button>
+    </form>
 
     <% if (movies && movies.length > 0) { %>
         <% movies.forEach(movie => { %>

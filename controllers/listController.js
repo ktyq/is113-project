@@ -43,7 +43,7 @@ exports.viewUserList = async (req, res) => {
     try {
         if (!editMovieId && !removeMovieId) {
             let watchlist = await List.getListsByUser(user, page, total, status, settings, search);
-            return res.render("watchlist", { watchlist, page, total, status, sort, search, editMovieId, removeMovieId });
+            return res.render("watchlist", { watchlist, page, total, status, sort, search, editMovieId, removeMovieId, viewingUser: null, user: req.session.user || null });
         }
 
         const movieId = editMovieId || removeMovieId;
@@ -51,7 +51,7 @@ exports.viewUserList = async (req, res) => {
 
         if (!movie) return res.status(404).send("Movie not found in watchlist");
 
-        return res.render("watchlist", { editMovieId, removeMovieId, movie });
+        return res.render("watchlist", { editMovieId, removeMovieId, movie, viewingUser: null, user: req.session.user || null });
 
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -126,7 +126,7 @@ exports.viewOtherUserList = async (req, res) => {
 // getMovieStatus
 exports.getMovieStatus = async (req, res) => {
     const user = (req.session && req.session.user && (req.session.user.id || req.session.user._id)) || TEST_USER;
-    const movie = '69c39ce645385a80651325f7';
+    const movie = req.body.movieId;
 
     try {
         const status = await List.getMovieStatus(user, movie);
@@ -147,8 +147,14 @@ exports.editUserListItem = async (req, res) => {
     };
 
     try {
-        const status = await List.updateWatchlistMovie(user, movie, update);
-        console.log(status);
+        // check if movie already exists in watchlist
+        const existing = await List.getWatchlistItem(user, movie);
+
+        if (existing) {
+            await List.updateWatchlistMovie(user, movie, update);
+        } else {
+            await List.createUserList(user, movie, update.status || 'planning');
+        }
         return res.redirect('/list');
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -158,13 +164,13 @@ exports.editUserListItem = async (req, res) => {
 // addToUserList
 exports.addToUserList = async (req, res) => {
     const user = (req.session && req.session.user && (req.session.user.id || req.session.user._id)) || TEST_USER;
-    const movie = '69c39ce645385a80651325f7';
+    const movie = req.body.movieId;
     const list = 'planning';
     const notes = null;
 
     try {
         let newItem = await List.createUserList(user, movie, list, notes);
-        res.status(200).json({ newItem });
+        res.redirect('/list');
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -177,7 +183,7 @@ exports.deleteFromUserList = async (req, res) => {
 
     try {
         await List.deleteFromUserList(user, movie);
-        return res.redirect('/list');
+        return res.redirect('/movie');
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
