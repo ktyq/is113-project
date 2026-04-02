@@ -74,10 +74,11 @@
 
       <% if (watchlist.length===0) { %>
       <% if (!viewingUser) { %>
-      <p>Looks like this user has no movies in this watchlist!</p>  
-        <% } else { %>
-      <p>No movies found. <a href="/">Add one now</a>.</p>
-      } %>
+      <p>No movies found. <a href="/">Add one now!</a></p>
+      <% } else { %>
+      <p>Looks like this user has no movies in this watchlist!</p>
+      <% } %>
+
       <% } else { %>
       <table border="1">
         <thead>
