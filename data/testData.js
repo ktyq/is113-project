@@ -5,7 +5,7 @@ const users = [
     {
         username: 'john_doe',
         email: 'john@example.com',
-        password: 'password123',
+        password: '123',
         role: 'user',
         accountStatus: 'active',
         watchlistPrivacy: 'friends'
@@ -13,7 +13,7 @@ const users = [
     {
         username: 'jane_smith',
         email: 'jane@example.com',
-        password: 'password123',
+        password: '123',
         role: 'user',
         accountStatus: 'active',
         watchlistPrivacy: 'friends'
@@ -21,7 +21,7 @@ const users = [
     {
         username: 'admin_user',
         email: 'admin@example.com',
-        password: 'admin123',
+        password: '123',
         role: 'admin',
         accountStatus: 'active',
         watchlistPrivacy: 'private'

@@ -10,16 +10,15 @@
 
 <body>
   <%- include('partial/header', {user: user}) %>
+  <h1>My Friends</h1>
   <main>
-    <h1>Friends</h1>
-
     <!-- ===== FRIENDS SECTION ===== -->
     <section>
       <h2>Friends</h2>
       <% if (!friends || friends.length === 0) { %>
       <p>No friends :(</p>
       <% } else { %>
-      <table>
+      <table border="1">
         <thead>
           <tr>
             <th>Friend</th>
@@ -37,7 +36,7 @@
             %>
           <tr>
             <td>
-              <a href="/list/<%= otherUser._id %>"><%= otherUser.username %></a>
+              <a href="/list?userId=<%= otherUser._id %>"><%= otherUser.username %></a>
               <% if (myNickname) { %>
               (<%= myNickname %>)
               <% } %>
@@ -71,7 +70,7 @@
       <% if (!sentRequests || sentRequests.length === 0) { %>
       <p>No pending sent requests.</p>
       <% } else { %>
-      <table>
+      <table border="1">
         <thead>
           <tr>
             <th>To</th>
@@ -82,7 +81,7 @@
           <% sentRequests.forEach(function(r) { %>
           <tr>
             <td>
-              <a href="/list/<%= r.requestee._id %>"><%= r.requestee.username %></a>
+              <a href="/list?userId=<%= r.requestee._id %>"><%= r.requestee.username %></a>
             </td>
             <td>
               <form method="POST" action="/friends/cancel">
@@ -103,7 +102,7 @@
       <% if (!requests || requests.length === 0) { %>
       <p>No pending friend requests.</p>
       <% } else { %>
-      <table>
+      <table border="1">
         <thead>
           <tr>
             <th>From</th>
@@ -114,7 +113,7 @@
           <% requests.forEach(function(req) { %>
           <tr>
             <td>
-              <a href="/list/<%= req.requestor._id %>"><%= req.requestor.username %></a>
+              <a href="/list?userId=<%= req.requestor._id %>"><%= req.requestor.username %></a>
             </td>
             <td>
               <form method="POST" action="/friends/accept" style="display:inline;">
@@ -136,12 +135,13 @@
     <!-- ===== RECOMMENDED SECTION ===== -->
     <section style="margin-top: 2rem;">
       <h2>Want to find some friends?</h2>
+      <a href="/friends/browse"><button type="button">Browse All Users</button></a>
       <a href="/friends"><button type="button">Refresh Recommendations</button></a>
       <div id="suggestions-area">
         <% if (!suggestions || suggestions.length === 0) { %>
         <p>No recommendations available.</p>
         <% } else { %>
-        <table>
+        <table border="1">
           <thead>
             <tr>
               <th>Username</th>
@@ -152,7 +152,7 @@
             <% suggestions.forEach(function(suggestedUser) { %>
             <tr>
               <td>
-                <a href="/list/<%= suggestedUser._id %>"><%= suggestedUser.username %></a>
+                <a href="/list?userId=<%= suggestedUser._id %>"><%= suggestedUser.username %></a>
               </td>
               <td>
                 <form method="POST" action="/friends/send">
@@ -166,13 +166,6 @@
         </table>
         <% } %>
       </div>
-    </section>
-
-    <!-- ===== BROWSE ALL USERS ===== -->
-    <section style="margin-top: 2rem;">
-      <h2>Want more results?</h2>
-      <p>Search through all users on the platform.</p>
-      <a href="/friends/browse"><button type="button">Browse All Users</button></a>
     </section>
   </main>
 </body>

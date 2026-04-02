@@ -19,7 +19,7 @@
             <h2>Submit Feedback</h2>
             <form action="/feedback" method="POST">
                 <div class="row">
-                    <label>Type</label>
+                    <label>Type*</label>
                     <select name="type" required>
                         <option value="" disabled selected>Select type</option>
                         <option value="feedback">Feedback</option>
@@ -28,12 +28,12 @@
                 </div>
 
                 <div class="row">
-                    <label>Related URL</label>
-                    <input type="text" name="url" placeholder="e.g. /movie/view?id=...">
+                    <label>Related URL (optional)</label>
+                    <input type="text" name="url" placeholder="e.g. http://localhost:8000/index/view?movieId=69ce41694eaa99a98b417ed8">
                 </div>
 
                 <div class="row">
-                    <label>Notes</label><br>
+                    <label>Comments*</label><br>
                     <textarea name="notes" maxlength="256" placeholder="Describe your feedback..." required style="width: 100%; min-height: 80px;"></textarea>
                 </div>
 
@@ -90,9 +90,6 @@
             <% } %>
         </section>
     </main>
-
-    <br>
-    <a href="/index">Back to Dashboard</a>
 </body>
 
 </html>

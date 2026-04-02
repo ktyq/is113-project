@@ -238,9 +238,9 @@ exports.deleteProfile = async (req, res) => {
 
 // Log out
 exports.logout = (req, res) => {
-    const { user } = req.session;
+    // const { user } = req.session;
     req.session.destroy(() => {
-        console.log("User logged out:", user.username, user.role);
+        // console.log("User logged out:", user.username, user.role);
         res.redirect('/login');
     });
 };
