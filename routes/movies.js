@@ -10,13 +10,14 @@ const path = require('path');
 
 //configure storage
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/uploads/');
-    },
-    filename: function (req, file, cb) {
-        const uniqueName = Date.now() + path.extname(file.originalname);
-        cb(null, uniqueName);
-    }
+  destination: function (req, file, cb) {
+    cb(null, 'public/uploads/');
+  },
+  filename: function (req, file, cb) {
+    const cleanName = file.originalname.replace(/\s+/g, '-'); // remove spaces
+    const uniqueName = Date.now() + "-" + cleanName;
+    cb(null, uniqueName);
+  }
 });
 
 const upload = multer({ storage: storage });

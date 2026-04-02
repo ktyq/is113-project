@@ -47,7 +47,6 @@ server.use('/feedback', require("./routes/feedback"));
 //   res.redirect("/");
 //   // res.status(404).render('error', { message: 'Page not found' });
 // });
-
 async function connectDB() {
   try {
     // connecting to Database with our config.env file and DB is constant in config.env
