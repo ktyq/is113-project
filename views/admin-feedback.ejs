@@ -41,7 +41,9 @@
                                 <td><%= fb.notes %></td>
                                 <td>
                                     <% if (fb.url) { %>
-                                        <a href="<%= fb.url %>" target="_blank">Link</a>
+                                        <a href="<%= fb.url %>" target="_blank" rel="noopener noreferrer">
+                                            <%= fb.url %>
+                                        </a>
                                     <% } else { %>
                                         -
                                     <% } %>
@@ -68,7 +70,7 @@
                     </tbody>
                 </table>
             <% } else { %>
-                <p>No feedback found. 
+                <p>No feedback found.</p>
             <% } %>
         </section>
     </main>

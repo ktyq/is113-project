@@ -28,8 +28,8 @@
                 </div>
 
                 <div class="row">
-                    <label>Related URL (optional)</label>
-                    <input type="text" name="url" placeholder="e.g. http://localhost:8000/index/view?movieId=69ce41694eaa99a98b417ed8">
+                    <label>Related URL</label>
+                    <input type="text" name="url" placeholder="e.g. http://localhost:8000/index/view?movieId=...">
                 </div>
 
                 <div class="row">
@@ -65,7 +65,9 @@
                                 <td><%= fb.notes %></td>
                                 <td>
                                     <% if (fb.url) { %>
-                                        <a href="<%= fb.url %>">Link</a>
+                                        <a href="<%= fb.url %>" target="_blank" rel="noopener noreferrer">
+                                            <%= fb.url %>
+                                        </a>
                                     <% } else { %>
                                         -
                                     <% } %>
