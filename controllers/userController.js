@@ -267,7 +267,7 @@ exports.deleteProfile = async (req, res) => {
 exports.logout = (req, res) => {
     const user = req.session.user;
     req.session.destroy(() => {
-        // console.log("User logged out:", user.username, user.role);
+        console.log("User logged out:", user.username, user.role);
         res.redirect('/login');
     });
 };
