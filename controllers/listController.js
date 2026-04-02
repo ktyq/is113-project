@@ -112,7 +112,8 @@ exports.viewOtherUserList = async (req, res) => {
             search,
             editMovieId: null,
             removeMovieId: null,
-            viewingUser: targetUser
+            viewingUser: targetUser,
+            user: req.session.user || null  // FIX: pass user to template for header partial
         });
 
     } catch (error) {

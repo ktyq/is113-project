@@ -49,7 +49,7 @@ exports.readFeedback = async (req, res) => {
 // READ all feedback by admin
 exports.readFeedbackAdmin = async (req, res) => {
     try {
-        // get all feedback, populate userID to get username, sort by newest first
+        // get all feedback, populate userID to get username, sort by newest first, populate is joining feedback with user
         const feedbacks = await Feedback.find().populate("sentBy", "username").sort({ createdAt: -1 });
 
         // render feedback page and pass feedbacks to view. C,U,D redirects to the 
@@ -62,12 +62,16 @@ exports.readFeedbackAdmin = async (req, res) => {
     }
 };
 
-// UPDATE feedback (admin mark as resolved)
+// UPDATE feedback (admin status change)
 exports.updateFeedback = async (req, res) => {
     try {
-        // find feedback by id and set status to true (resolved)
-        await Feedback.findByIdAndUpdate(req.params.id, {status: "resolved"}); // can only update from unresolved to resolved 
+        // 1. Get the status value from the <select name="status"> in your EJS
+        const { status } = req.body;
+
+        // 2. Update the database with the new status (pending or resolved)
+        await Feedback.findByIdAndUpdate(req.params.id, { status: status }); 
         
+        // 3. Redirect back to the admin page to see the change
         res.redirect("/feedback/admin");
 
     } catch (err) {

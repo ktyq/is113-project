@@ -10,24 +10,21 @@ router.get('/', friendController.getFriendsPage);
 router.get('/browse', friendController.browseUsers);
 
 // Send friend request
-router.post('/send/:friendId', friendController.sendRequest);
+router.post('/send', friendController.sendRequest);
 
-// Cancel a sent pending request (deletes the entry)
-router.post('/cancel/:requesteeId', friendController.cancelRequest);
+// Cancel a sent pending request
+router.post('/cancel', friendController.cancelRequest);
 
-// Accept friend request (current user is requestee)
-router.post('/accept/:requestorId', friendController.acceptRequest);
+// Accept friend request
+router.post('/accept', friendController.acceptRequest);
 
-// Decline friend request (deletes the entry, current user is requestee)
-router.post('/decline/:requestorId', friendController.declineRequest);
+// Decline friend request
+router.post('/decline', friendController.declineRequest);
 
-// Remove friend (delete accepted friendship)
-router.post('/remove/:friendId', friendController.removeFriend);
+// Remove friend —
+router.post('/remove', friendController.removeFriend);
 
-// Update nickname (only respective user can update theirs)
-router.post('/nickname/:friendId', friendController.updateNickname);
-
-// View user profile
-router.get('/profile/:userId', friendController.viewUserProfile);
+// Update nickname
+router.post('/nickname', friendController.updateNickname);
 
 module.exports = router;

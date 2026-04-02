@@ -1,9 +1,3 @@
-// Feedback page (kaylene) 
-// C: submit feedback -> post
-// R: read reports by admin -> get
-// U: admin mark resolved -> post / put
-// D: admin delete reports if spam -> post / delete
-
 // import express and create router
 const express = require("express");
 const router = express.Router();
@@ -19,7 +13,6 @@ router.post('/', isLoggedIn, feedbackController.createFeedback);
 router.get('/', isLoggedIn, feedbackController.readFeedback);
 router.get('/admin', isAdmin ,feedbackController.readFeedbackAdmin);
 
-// Update feedback (mark as resolved)
 // Update feedback (admin mark as resolved)
 router.post('/resolve/:id', isAdmin, feedbackController.updateFeedback);
 
