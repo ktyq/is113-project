@@ -261,24 +261,3 @@ exports.updateNickname = async (req, res) => {
   }
 };
 
-// GET /friends/profile
-// userId read from req.query
-exports.viewUserProfile = async (req, res) => {
-  try {
-    const userId = toObjectId(req.query.userId);
-    const currentUserId = toObjectId(await resolveCurrentUser(req));
-
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).send('User not found');
-
-    const isOwnProfile = user._id.equals(currentUserId);
-
-    res.render('user-profile', {
-      user,
-      currentUserId,
-      isOwnProfile,
-    });
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-};

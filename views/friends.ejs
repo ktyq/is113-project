@@ -37,7 +37,7 @@
             %>
           <tr>
             <td>
-              <a href="/friends/profile?userId=<%= otherUser._id %>"><%= otherUser.username %></a>
+              <a href="/list/<%= otherUser._id %>"><%= otherUser.username %></a>
               <% if (myNickname) { %>
               (<%= myNickname %>)
               <% } %>
@@ -82,7 +82,7 @@
           <% sentRequests.forEach(function(r) { %>
           <tr>
             <td>
-              <a href="/friends/profile?userId=<%= r.requestee._id %>"><%= r.requestee.username %></a>
+              <a href="/list/<%= r.requestee._id %>"><%= r.requestee.username %></a>
             </td>
             <td>
               <form method="POST" action="/friends/cancel">
@@ -114,7 +114,7 @@
           <% requests.forEach(function(req) { %>
           <tr>
             <td>
-              <a href="/friends/profile?userId=<%= req.requestor._id %>"><%= req.requestor.username %></a>
+              <a href="/list/<%= req.requestor._id %>"><%= req.requestor.username %></a>
             </td>
             <td>
               <form method="POST" action="/friends/accept" style="display:inline;">
@@ -152,7 +152,7 @@
             <% suggestions.forEach(function(suggestedUser) { %>
             <tr>
               <td>
-                <a href="/friends/profile?userId=<%= suggestedUser._id %>"><%= suggestedUser.username %></a>
+                <a href="/list/<%= suggestedUser._id %>"><%= suggestedUser.username %></a>
               </td>
               <td>
                 <form method="POST" action="/friends/send">

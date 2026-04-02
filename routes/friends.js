@@ -27,7 +27,4 @@ router.post('/remove', friendController.removeFriend);
 // Update nickname
 router.post('/nickname', friendController.updateNickname);
 
-// View user profile 
-router.get('/profile', friendController.viewUserProfile);
-
 module.exports = router;
