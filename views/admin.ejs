@@ -25,6 +25,7 @@
     section {
       background-color: #fff;
       padding: 20px;
+      padding-left: 50px;
       margin-bottom: 30px;
       border-radius: 10px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -52,53 +53,29 @@
       min-height: 60px;
     }
 
-    section form button {
-      margin-top: 20px;
-      padding: 12px 20px;
-      border: none;
-      background-color: #3498db;
-      color: white;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+    table {
+        width: 50%;
     }
 
-    section form button:hover {
-      background-color: #2980b9;
+    form[action="/admin"] {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
     }
 
-    ul {
-      list-style: none;
-      padding: 0;
+    form[action="/admin"] input[type="text"] {
+    padding: 6px 10px;
+    font-size: 14px;
+    width: 40%;
     }
 
-    li {
-      background-color: #ecf0f1;
-      margin-bottom: 10px;
-      padding: 12px 15px;
-      border-radius: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: background-color 0.2s ease;
+    form[action="/admin"] button {
+    padding: 6px 12px;
+    cursor: pointer;
     }
 
-    li:hover {
-      background-color: #dcdde1;
-    }
 
-    li a {
-      margin-left: 10px;
-      text-decoration: none;
-      color: #2980b9;
-      font-weight: bold;
-      transition: color 0.2s ease;
-    }
-
-    li a:hover {
-      color: #e74c3c;
-    }
 
     /* Responsive */
     @media (max-width: 600px) {
@@ -114,19 +91,37 @@
       }
     }
   </style>
+  <script>
+    document.querySelector("form[action='/admin/add']").addEventListener("submit", function(e) {
+        const title = document.querySelector("input[name='title']").value.trim();
+        const year = parseInt(document.querySelector("input[name='release_year']").value);
+        const duration = parseInt(document.querySelector("input[name='movieLength']").value);
+        const genre = document.querySelector("input[name='genre']").value.trim();
+
+        if (!title || !genre) {
+        alert("Title and Genre cannot be empty!");
+        e.preventDefault();
+        return;
+        }
+
+        if (year < 1888 || year > 2100) {
+        alert("Release year must be between 1888 and 2100");
+        e.preventDefault();
+        return;
+        }
+
+        if (duration <= 0 || duration > 500) {
+        alert("Duration must be between 1 and 500 minutes");
+        e.preventDefault();
+        return;
+        }
+    });
+  </script>
 </head>
 
 <body>
   <%- include('partial/header', { user: user }) %>
 
-  <section>
-    <h2>Search Movies</h2>
-
-    <form method="GET" action="/admin">
-      <input type="text" name="search" placeholder="Search by title..." value="<%= search || '' %>">
-      <button type="submit">Search</button>
-    </form>
-  </section>
   <section>
     <h2>Add New Movie</h2>
 
@@ -141,10 +136,10 @@
       <input type="text" name="genre" placeholder="Action, Drama" required>
 
       <label>Release Year</label>
-      <input type="number" name="release_year" required>
+      <input type="number" name="release_year" required min="1888" max="2100">
 
       <label>Duration (minutes)</label>
-      <input type="number" name="movieLength" required>
+      <input type="number" name="movieLength" required min="1" max="500">
 
       <label>Director</label>
       <input type="text" name="director" placeholder="Comma separated" required>
@@ -158,23 +153,59 @@
       <button type="submit">Add Movie</button>
     </form>
 
-  </section>
+    <h2>Search Movies</h2>
 
-  <section>
+    <form method="GET" action="/admin">
+      <input type="text" name="search" placeholder="Search by title..." value="<%= search || '' %>">
+      <button type="submit">Search</button>
+    </form>
+
     <h2>Movie List</h2>
-    <ul>
-      <% if (movies) { %>
-      <% movies.forEach(movie => { %>
-      <li>
-        <span><%= movie.title %> (<%= movie.release_year %>)</span>
-        <span>
-          <a href="/admin/edit?id=<%= movie._id %>">Edit</a>
-          <a href="/admin/delete?id=<%= movie._id %>">Delete</a>
-        </span>
-      </li>
-      <% }) %>
-      <% } %>
-    </ul>
+    <% if (!movies || movies.length === 0) { %>
+    <p>No movies found.</p>
+    <% } else { %>
+
+    <table border="1">
+    <thead>
+        <tr>
+        <th>Poster</th>
+        <th>Title</th>
+        <th>Year</th>
+        <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <% movies.forEach(movie => { %>
+        <tr>
+        <!-- IMAGE -->
+        <td>
+            <img src="/uploads/<%= movie.imageRef %>" 
+                style="width:60px; height:90px; object-fit:cover;">
+        </td>
+
+        <!-- TITLE -->
+        <td>
+            <%= movie.title %>
+        </td>
+
+        <!-- YEAR -->
+        <td>
+            <%= movie.release_year %>
+        </td>
+
+        <!-- ACTIONS -->
+        <td>
+            <a href="/admin/edit?id=<%= movie._id %>">Edit</a>
+            |
+            <a href="/admin/delete?id=<%= movie._id %>">Delete</a>
+        </td>
+        </tr>
+        <% }) %>
+    </tbody>
+    </table>
+
+    <% } %>
   </section>
 
 </body>

@@ -1,5 +1,6 @@
 const Movie = require('../models/Movie');
 const List = require('../models/Watchlist');
+const Review = require('../models/Review');
 
 // Display all movies
 exports.getAllMovies = async (req, res) => {
@@ -11,7 +12,20 @@ exports.getAllMovies = async (req, res) => {
             query.title = { $regex: search, $options: "i" }; // case-insensitive
         }
 
-        const movies = await Movie.find(query).sort({ createdAt: -1 });
+        const movies = await Movie.find(query).sort({ createdAt: -1 }).lean();
+
+        const Review = require('../models/Review');
+
+        for (let movie of movies) {
+            const reviews = await Review.find({ movieID: movie._id });
+
+            if (reviews.length === 0) {
+                movie.averageRating = null;
+            } else {
+                const total = reviews.reduce((sum, r) => sum + r.rating, 0);
+                movie.averageRating = (total / reviews.length).toFixed(1);
+            }
+        }
 
         res.render('index', {
             movies,
@@ -38,10 +52,13 @@ exports.getMovieById = async (req, res) => {
             status = await List.getMovieStatus(userId, movie._id);
         }
 
+        const reviewCount = await Review.countDocuments({ movieID: movie._id });
+
         res.render('movie', {
             movie,
             user: req.session.user || null,
-            status
+            status,
+            reviewCount   // pass to EJS
         });
 
     } catch (err) {

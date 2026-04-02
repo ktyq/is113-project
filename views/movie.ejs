@@ -6,6 +6,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= movie.title %></title>
   <link rel="stylesheet" href="/default.css">
+  <style>
+    .review-header {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* spacing between text and link */
+    }
+
+    .review-header a {
+    color: #3498db;
+    font-weight: bold;
+    text-decoration: none;
+    margin-right: 85%;
+    }
+
+    .review-header a:hover {
+    text-decoration: underline;
+    }
+  </style>
 </head>
 
 <body>
@@ -14,7 +32,7 @@
   <section>
     <div class="movie-detail">
       <!-- Movie Poster -->
-      <img src="../uploads/<%= movie.imageRef %>" alt="<%= movie.title %>" style="max-width:200px;">
+      <img src="/uploads/<%= movie.imageRef %>" alt="<%= movie.title %>" style="max-width:200px;">
       <div>
         <!-- Title -->
         <h2><%= movie.title %></h2>
@@ -115,7 +133,11 @@
   <!-- Reviews Section -->
   <section>
     <div class="review-header">
-      <a href="/reviews?movieId=<%= movie._id %>"><%= movie.reviews ? movie.reviews.length : 0 %> Reviews</a>
+      <span><%= reviewCount %> Reviews</span>
+
+      <a href="/reviews?movieId=<%= movie._id %>">
+        Leave a review
+      </a>
     </div>
   </section>
 </body>

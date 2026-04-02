@@ -60,6 +60,16 @@
       width: 150px;
       object-fit: cover;
     }
+    .movie-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    }
+
+    .movie-link:hover {
+    transform: scale(1.02);
+    transition: 0.2s;
+    }
   </style>
 </head>
 
@@ -73,15 +83,25 @@
   <% if (movies && movies.length > 0) { %>
   <div class="movie-grid">
     <% movies.forEach(movie => { %>
+    <a href="/index/view?movieId=<%= movie._id %>" class="movie-link">
     <section class="movie-card">
-      <img src="uploads/<%= movie.imageRef %>" alt="<%= movie.title %>">
-      <div class="movie-info">
-        <h2><a href="index/view?movieId=<%= movie._id %>"><%= movie.title %></a> (<%= movie.release_year %>)</h2>
+        <img src="/uploads/<%= movie.imageRef %>" alt="<%= movie.title %>">
+
+        <div class="movie-info">
+        <h2><%= movie.title %> (<%= movie.release_year %>)</h2>
         <div>Genre: <%= movie.genre.join(', ') %></div>
-        <p>Rating: <%= movie.averageRating || 0 %> / 5</p>
+        <p>
+            Rating:
+            <% if (movie.averageRating) { %>
+                <%= movie.averageRating %> / 5
+            <% } else { %>
+                No ratings yet
+            <% } %>
+        </p>
         <p class="movie-overview"><%= movie.overview %></p>
-      </div>
+        </div>
     </section>
+    </a>
     <% }) %>
   </div>
   <% } else { %>
