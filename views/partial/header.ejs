@@ -13,7 +13,7 @@
     <% if (user.role === 'admin') { %>
     <a href="/feedback/admin">Feedback</a>
     &nbsp;|&nbsp;
-    <a href="/admin-profile">Manage Movies</a>
+    <a href="/admin-profile">Admin</a>
     <% } else { %>
     <a href="/feedback">Feedback</a>
     &nbsp;|&nbsp;
@@ -25,9 +25,8 @@
     </form>
     <% } else { %>
     <a href="/login"><button type="submit">Login</button></a>
+    <a href="/register"><button type="submit">Register</button></a>
     <% } %>
-
-
   </nav>
   <hr>
 </header>

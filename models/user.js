@@ -5,6 +5,7 @@
 // password: String
 // isAdmin: Boolean
 // accountStatus: String ['active', 'suspended', 'disabled']
+// watchlistPrivacy: String ['public', 'friends', 'private']
 // createdAt: Date
 // updatedAt: Date
 
@@ -38,13 +39,12 @@ const userSchema = new mongoose.Schema({
         // disabled: user closed account [30 day deletion period]
         default: 'active'
     },
-    // Watchlist privacy setting: controls who can view the user's watchlist
-    watchlistPrivacy: {
+    watchlistPrivacy: { // Watchlist privacy setting: controls who can view the user's watchlist
         type: String,
         enum: ['public', 'friends', 'private'],
         default: 'friends'
     }
 }, { timestamps: true });
 
-// models/User.js
+// export the schema as a model
 module.exports = mongoose.models.User || mongoose.model('User', userSchema);

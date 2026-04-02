@@ -75,7 +75,7 @@
     <section class="movie-card">
       <img src="uploads/<%= movie.imageRef %>" alt="<%= movie.title %>">
       <div class="movie-info">
-        <h2><a href="/movie/view?id=<%= movie._id %>"><%= movie.title %></a> (<%= movie.release_year %>)</h2>
+        <h2><a href="index/view?movieId=<%= movie._id %>"><%= movie.title %></a> (<%= movie.release_year %>)</h2>
         <div>Genre: <%= movie.genre.join(', ') %></div>
         <p>Rating: <%= movie.averageRating || 0 %> / 5</p>
         <p class="movie-overview"><%= movie.overview %></p>

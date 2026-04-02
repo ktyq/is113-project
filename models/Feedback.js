@@ -11,28 +11,23 @@ const mongoose = require('mongoose');
 
 // Define the schema for feedback, bug/general reports
 const formSchema = new mongoose.Schema({
-    //who submitted the feedback (required)
-    sentBy: {
+    sentBy: { // who submitted the feedback (required)
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',            // references the User collection
         required: [true, 'User is required']
     },
-    // type of form (feedback, bug report, user report)
-    type: {
+    type: { // type of form 
         type: String,
         enum: ['feedback', 'bug', 'report']
     },
-
-    // status of the form (pending review, working on it, resolved)
-    status: {
+    status: { // status of the form
         type: String,
-        enum: ['pending', 'resolved']
+        enum: ['pending', 'resolved'] //  (pending review, resolved)
     },
     url: {
         type: String
     },
-    // additional notes by admin when working on the form
-    notes: {
+    notes: { // feedback comments
         type: String,
         maxLength: 256
     },

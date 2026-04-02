@@ -25,11 +25,13 @@ input[type="text"],
 input[type="email"],
 input[type="password"],
 textarea {
-  padding: 6px 6px;   /* bigger than default */
-  border-radius: 8px;   /* rounded corners */
-  border: 1px solid #ccc;
-  font-size: 14px;
-  box-sizing: border-box;
+    padding: 6px 6px;
+    /* bigger than default */
+    border-radius: 8px;
+    /* rounded corners */
+    border: 1px solid #ccc;
+    font-size: 14px;
+    box-sizing: border-box;
 }
 
 img {
@@ -53,6 +55,16 @@ img {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+
+table {
+    min-width: 50vw;
+    width: auto;
+    border-collapse: collapse;
+}
+
+form {
+    display: inline-block;
 }
 
 .movie-overview {

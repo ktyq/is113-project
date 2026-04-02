@@ -56,4 +56,5 @@ const movieSchema = new mongoose.Schema({
     { timestamps: true }
 );
 
+// export the schema as a model
 module.exports = mongoose.model('Movie', movieSchema);

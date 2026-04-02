@@ -3,104 +3,110 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>watchlist</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watchlist</title>
+  <link rel="stylesheet" href="default.css">
 </head>
 
 <body>
-    <header>
-        <h1><%= viewingUser ? viewingUser.username + '\'s' : 'My' %> Watchlist</h1> <!-- Dynamic title for own vs others' watchlist -->
-    </header>
+  <%- include('partial/header', {user: user}) %>
+  <h1><%= viewingUser ? viewingUser.username + '\'s' : 'My' %> Watchlist</h1> <!-- Dynamic title for own vs others' watchlist -->
+  <main>
+    <% if (!editMovieId && !removeMovieId) { %>
 
-    <main>
-        <% if (!editMovieId && !removeMovieId) { %>
+    <!-- filter -->
+    <section>
+      <form action="<%= viewingUser ? '/list/' + viewingUser._id : '/list' %>" method="get">
+        <!-- Dynamic form action for filtering -->
 
-            <!-- filter -->
-            <section>
-                <hr>
-                <form action="<%= viewingUser ? '/list/' + viewingUser._id : '/list' %>" method="get"> <!-- Dynamic form action for filtering -->
+        <div class="row">
+          <input type="text" name="search" value="<%= search %>" placeholder="Search by title">
+        </div>
 
-                    <div class="row">
-                        <input type="text" name="search" value="<%= search %>" placeholder="Search by title">
-                    </div>
+        <div class="row">
 
-                    <div class="row">
+          <label>Status</label>
+          <select name="status" id="statusDropdown">
+            <option value="planning" <%=status==='planning' ? 'selected' : '' %>>Planning to Watch
+            </option>
+            <option value="watched" <%=status==='watched' ? 'selected' : '' %>>Watched</option>
+          </select>
 
-                        <label>Status</label>
-                        <select name="status">
-                            <option value="planning" <%=status==='planning' ? 'selected' : '' %>>Planning to Watch
-                            </option>
-                            <option value="watched" <%=status==='watched' ? 'selected' : '' %>>Watched</option>
-                        </select>
+          <label>Sort By</label>
+          <select name="sort">
+            <option value="priority_asc" <%=sort==='priority_asc' ? 'selected' : '' %>>Priority (Lowest
+              first)</option>
+            <option value="priority_desc" <%=sort==='priority_desc' ? 'selected' : '' %>>Priority
+              (Highest
+              first)</option>
+            <option value="date_desc" <%=sort==='date_desc' ? 'selected' : '' %>>Date Added (Newest
+              first)
+            </option>
+            <option value="date_asc" <%=sort==='date_asc' ? 'selected' : '' %>>Date Added (Oldest first)
+            </option>
+          </select>
 
-                        <label>Sort By</label>
-                        <select name="sort">
-                            <option value="priority_asc" <%=sort==='priority_asc' ? 'selected' : '' %>>Priority (Lowest
-                                first)</option>
-                            <option value="priority_desc" <%=sort==='priority_desc' ? 'selected' : '' %>>Priority
-                                (Highest
-                                first)</option>
-                            <option value="date_desc" <%=sort==='date_desc' ? 'selected' : '' %>>Date Added (Newest
-                                first)
-                            </option>
-                            <option value="date_asc" <%=sort==='date_asc' ? 'selected' : '' %>>Date Added (Oldest first)
-                            </option>
-                        </select>
+          <label>Show</label>
+          <select name="limit">
+            <option value="5" <%=total==5 ? 'selected' : '' %>>5</option>
+            <option value="10" <%=total==10 ? 'selected' : '' %>>10</option>
+            <option value="20" <%=total==20 ? 'selected' : '' %>>20</option>
+            <option value="50" <%=total==50 ? 'selected' : '' %>>50</option>
+            <option value="100" <%=total==100 ? 'selected' : '' %>>100</option>
+          </select>
 
-                        <label>Show</label>
-                        <select name="limit">
-                            <option value="5" <%=total==5 ? 'selected' : '' %>>5</option>
-                            <option value="10" <%=total==10 ? 'selected' : '' %>>10</option>
-                            <option value="20" <%=total==20 ? 'selected' : '' %>>20</option>
-                            <option value="50" <%=total==50 ? 'selected' : '' %>>50</option>
-                            <option value="100" <%=total==100 ? 'selected' : '' %>>100</option>
-                        </select>
+          <label>Page</label>
+          <input type="number" name="page" value="<%= page %>" style="width:60px;" min="1">
 
-                        <label>Page</label>
-                        <input type="number" name="page" value="<%= page %>" style="width:60px;" min="1">
+          <a href="/list" style="text-decoration: none;">
+            <button type="button">Reset</button>
+          </a>
+          <button type="submit">Apply</button>
+        </div>
+      </form>
+    </section>
 
-                        <a href="/list" style="text-decoration: none;">
-                            <button type="button">Reset</button>
-                        </a>
-                        <button type="submit">Apply</button>
-                    </div>
-                </form>
-            </section>
+    <!-- movie list -->
+    <section>
+      <h2>
+        <%= status==='planning' ? 'Planning to Watch' : 'Watched' %>
+      </h2>
 
-            <!-- movie list -->
-            <section>
-                <h2>
-                    <%= status==='planning' ? 'Planning to Watch' : 'Watched' %>
-                </h2>
+      <% if (watchlist.length===0) { %>
+      <p>No movies found. <a href="/">Add one now</a>.</p>
+      <% } else { %>
+      <table border="1">
+        <thead>
+          <tr>
+            <th colspan="2">Movie</th>
+            <th>Notes</th>
+            <th>Priority</th>
+            <th>Action</th>
+          </tr>
+        </thead>
 
-                <% if (watchlist.length===0) { %>
-                    <p>No movies found. <a href="/">Add one now</a>.</p>
-                    <% } else { %>
-                        <table border="1">
-                            <thead>
-                                <tr>
-                                    <th colspan="2">Movie</th>
-                                    <th>Notes</th>
-                                    <th>Priority</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <% watchlist.forEach(function(item){ %>
-                                    <%- include("partial/watchlist-row", { item: item, editMovieId: editMovieId,
+        <tbody>
+          <% watchlist.forEach(function(movie){ %>
+          <%- include("partial/watchlist-row", { movie, editMovieId: editMovieId,
                                         removeMovieId: removeMovieId }) %>
-                                        <% }) %>
-                            </tbody>
-                        </table>
-                        <% } %>
-            </section>
+          <% }) %>
+        </tbody>
+      </table>
+      <% } %>
+    </section>
 
-        <% } else { %>
-            <%- include("partial/watchlist-edit", { editMovieId, removeMovieId, movie } )%>
-        <% } %>
-    </main>
+    <% } else { %>
+    <%- include("partial/watchlist-edit", { editMovieId, removeMovieId, movie } )%>
+    <% } %>
+  </main>
 </body>
+
+<script>
+  const statusDropdown = document.getElementById('statusDropdown');
+  statusDropdown.addEventListener('change', () => {
+    statusDropdown.form.submit();
+  });
+</script>
 
 </html>

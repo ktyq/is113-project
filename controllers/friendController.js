@@ -76,7 +76,8 @@ exports.getFriendsPage = async (req, res) => {
 
 // GET /friends/browse
 // Browse all users with search, sort, and pagination.
-// Passes relationship state arrays so the template can show the correct action per user.
+// Users who are already friends or have any pending request (either direction) are excluded
+// at the DB level — so the displayed count always matches the requested limit exactly.
 exports.browseUsers = async (req, res) => {
   try {
     const userId = await resolveCurrentUser(req);
@@ -91,10 +92,29 @@ exports.browseUsers = async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit) || 10, 100);
     const page = Math.max(parseInt(req.query.page) || 1, 1);
 
-    // Build search filter
-    const filter = search
-      ? { username: { $regex: search, $options: 'i' } }
-      : {};
+    // Fetch all relationship entries involving the current user (any status)
+    const allRelationships = await Friend.find({
+      $or: [
+        { requestor: userObjectId },
+        { requestee: userObjectId }
+      ]
+    });
+
+    // Build exclusion set: self + anyone in any existing relationship
+    const excludedIds = new Set([userObjectId.toString()]);
+    for (const r of allRelationships) {
+      const otherId = r.requestor.equals(userObjectId)
+        ? r.requestee.toString()
+        : r.requestor.toString();
+      excludedIds.add(otherId);
+    }
+    const excludedObjectIds = [...excludedIds].map(id => toObjectId(id));
+
+    // Build filter: exclude related users + optional username search
+    const filter = {
+      _id: { $nin: excludedObjectIds },
+      ...(search && { username: { $regex: search, $options: 'i' } }),
+    };
 
     // Sort mapping
     const sortMap = {
@@ -116,28 +136,7 @@ exports.browseUsers = async (req, res) => {
       .limit(limit)
       .select('username createdAt _id');
 
-    // Fetch all relationship entries involving the current user for status checks
-    const allRelationships = await Friend.find({
-      $or: [
-        { requestor: userObjectId },
-        { requestee: userObjectId }
-      ]
-    });
-
-    // Build ID sets for template lookups
-    const friendIds = allRelationships
-      .filter(r => r.status === 'accepted')
-      .map(r => r.requestor.equals(userObjectId) ? r.requestee : r.requestor);
-
-    const sentRequestIds = allRelationships
-      .filter(r => r.status === 'pending' && r.requestor.equals(userObjectId))
-      .map(r => r.requestee);
-
-    const pendingRequestIds = allRelationships
-      .filter(r => r.status === 'pending' && r.requestee.equals(userObjectId))
-      .map(r => r.requestor);
-
-    // Rebuild query string for redirect-back links (e.g. cancel/send from this page)
+    // Rebuild query string for redirect-back links after send/cancel
     const queryString = new URLSearchParams({
       ...(search && { search }),
       sort,
@@ -155,9 +154,6 @@ exports.browseUsers = async (req, res) => {
       page: safePage,
       totalPages,
       totalUsers,
-      friendIds,
-      sentRequestIds,
-      pendingRequestIds,
       queryString: queryString ? `&${queryString}` : '',
     });
   } catch (error) {
