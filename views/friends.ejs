@@ -10,6 +10,7 @@
 
 <body>
   <%- include('partial/header', {user: user}) %>
+  <h1>My Friends</h1>
   <main>
     <!-- ===== FRIENDS SECTION ===== -->
     <section>
@@ -134,6 +135,7 @@
     <!-- ===== RECOMMENDED SECTION ===== -->
     <section style="margin-top: 2rem;">
       <h2>Want to find some friends?</h2>
+      <a href="/friends/browse"><button type="button">Browse All Users</button></a>
       <a href="/friends"><button type="button">Refresh Recommendations</button></a>
       <div id="suggestions-area">
         <% if (!suggestions || suggestions.length === 0) { %>
@@ -164,13 +166,6 @@
         </table>
         <% } %>
       </div>
-    </section>
-
-    <!-- ===== BROWSE ALL USERS ===== -->
-    <section style="margin-top: 2rem;">
-      <h2>Want more results?</h2>
-      <p>Search through all users on the platform.</p>
-      <a href="/friends/browse"><button type="button">Browse All Users</button></a>
     </section>
   </main>
 </body>
