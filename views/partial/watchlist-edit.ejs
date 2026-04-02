@@ -1,52 +1,52 @@
-<!-- views/watchlist-edit.ejs -->
+<!-- views/partial/watchlist-edit.ejs -->
 <section>
-    <h2><%= editMovieId ? 'Edit Movie' : 'Remove Movie' %></h2>
+  <h2><%= editMovieId ? 'Edit Movie' : 'Remove Movie' %></h2>
 
-    <form action="<%= editMovieId ? '/list/edit' : '/list/remove' %>" method="post">
-        <input type="hidden" name="movieId" value="<%= movie.movieID._id %>">
+  <form action="<%= editMovieId ? '/list/edit' : '/list/remove' %>" method="post">
+    <input type="hidden" name="movieId" value="<%= movie.movieID._id %>">
 
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Movie</th>
-                    <th>Status</th>
-                    <th>Notes</th>
-                    <th>Priority</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        <a href="/movie/<%= movie.movieID._id %>">
-                            <%= movie.movieID.title %>
-                        </a>
-                    </td>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Movie</th>
+          <th>Status</th>
+          <th>Notes</th>
+          <th>Priority</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <a href="/movie/<%= movie.movieID._id %>">
+              <%= movie.movieID.title %>
+            </a>
+          </td>
 
-                    <% if (editMovieId) { %>
-                        <td>
-                            <select name="status">
-                                <option value="planning" <%= movie.status==='planning' ? 'selected' : '' %>>Planning</option>
-                                <option value="watched" <%= movie.status==='watched' ? 'selected' : '' %>>Watched</option>
-                            </select>
-                        </td>
-                        <td><textarea name="notes" style="width:200px;height:60px;"><%= movie.notes %></textarea></td>
-                        <td><input type="number" name="priority" value="<%= movie.priority %>" style="width:60px;"></td>
-                        <td>
-                            <button type="submit">Update</button>
-                            <a href="/list"><button type="button">Cancel</button></a>
-                        </td>
-                    <% } else { %>
-                        <td><%= movie.status %></td>
-                        <td><%= movie.notes %></td>
-                        <td><%= movie.priority %></td>
-                        <td>
-                            <button type="submit">Confirm Remove</button>
-                            <a href="/list"><button type="button">Cancel</button></a>
-                        </td>
-                    <% } %>
-                </tr>
-            </tbody>
-        </table>
-    </form>
+          <% if (editMovieId) { %>
+          <td>
+            <select name="status">
+              <option value="planning" <%= movie.status==='planning' ? 'selected' : '' %>>Planning</option>
+              <option value="watched" <%= movie.status==='watched' ? 'selected' : '' %>>Watched</option>
+            </select>
+          </td>
+          <td><textarea name="notes" style="width:200px;height:60px;"><%= movie.notes %></textarea></td>
+          <td><input type="number" name="priority" value="<%= movie.priority %>" style="width:60px;"></td>
+          <td>
+            <button type="submit">Update</button>
+            <a href="/list"><button type="button">Cancel</button></a>
+          </td>
+          <% } else { %>
+          <td><%= movie.status %></td>
+          <td><%= movie.notes %></td>
+          <td><%= movie.priority %></td>
+          <td>
+            <button type="submit">Confirm Remove</button>
+            <a href="/list"><button type="button">Cancel</button></a>
+          </td>
+          <% } %>
+        </tr>
+      </tbody>
+    </table>
+  </form>
 </section>

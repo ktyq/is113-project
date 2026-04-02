@@ -1,3 +1,7 @@
+const mongoose = require('mongoose');
+const User = require('../models/User');
+const Friend = require('../models/Friend');
+
 // friendController.js
 // Controller for bidirectional friend request system:
 // - render friends page with 4 sections (Friends, Sent Requests, Received Requests, Recommended)
@@ -5,10 +9,6 @@
 // - manage nicknames (only respective user can update theirs)
 // - view user profile
 // - browse all users with search, sort, and pagination
-
-const mongoose = require('mongoose');
-const User = require('../models/user');
-const Friend = require('../models/Friend');
 
 // Resolve user identity from request data (query/body/session fallback)
 // For early development where auth is absent, fall back to first user in DB.

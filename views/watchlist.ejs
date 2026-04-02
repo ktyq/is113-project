@@ -15,11 +15,9 @@
   <main>
     <% if (!editMovieId && !removeMovieId) { %>
 
-    <!-- filter -->
+    <!-- Filter results  -->
     <section>
       <form action="<%= viewingUser ? '/list/' + viewingUser._id : '/list' %>" method="get">
-        <!-- Dynamic form action for filtering -->
-
         <div class="row">
           <input type="text" name="search" value="<%= search %>" placeholder="Search by title">
         </div>
@@ -67,7 +65,7 @@
       </form>
     </section>
 
-    <!-- movie list -->
+    <!-- Movie list -->
     <section>
       <h2>
         <%= status==='planning' ? 'Planning to Watch' : 'Watched' %>
@@ -96,6 +94,7 @@
       <% } %>
     </section>
 
+    <!-- Show edit partial when action clicked  -->
     <% } else { %>
     <%- include("partial/watchlist-edit", { editMovieId, removeMovieId, movie } )%>
     <% } %>

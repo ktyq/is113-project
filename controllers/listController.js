@@ -1,9 +1,6 @@
-const fs = require('fs/promises');
-
 const List = require('../models/Watchlist');
 const User = require('../models/User');
 const Friend = require('../models/Friend');
-const TEST_USER = null;
 
 // Helper function to resolve current user ID from various sources
 // FIX: Guard req.body, and extract .id from session.user object instead of returning the whole object
