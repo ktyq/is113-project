@@ -8,7 +8,7 @@ const authMiddleware = require('../middleware/authentication');
 router.get('/', (req, res) => {
     if (req.session.user) {
         return req.session.user.role === 'admin' || req.session.user.role === 'superadmin'
-        ? res.redirect('/admin-profile')
+        ? res.redirect('/profile')
         : res.redirect('/index');
     }
     res.redirect('/index');
@@ -21,10 +21,7 @@ router.get('/login', userController.loginGet);
 router.post('/login', userController.loginPost);
 
 //--User profile--//
-router.get('/user-profile', authMiddleware.isLoggedIn, userController.profile);
-
-//--Admin profile--//
-router.get('/admin-profile', authMiddleware.isAdmin, userController.adminProfile);
+router.get('/profile', authMiddleware.isLoggedIn, userController.profile);
 
 //--Edit profile--//
 router.get('/edit-profile', authMiddleware.isLoggedIn, userController.editProfileGet);

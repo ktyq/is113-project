@@ -1,0 +1,19 @@
+<% if (typeof errors !== 'undefined' && errors && errors.length> 0) { %>
+    <div style="color: red; border: 1px solid red; padding: 8px 12px; margin-bottom: 12px; border-radius: 4px;">
+        <% if (errors.length === 1) { %>
+            <p style="margin: 0;"><%= errors[0] %></p>
+        <% } else { %>
+            <ul style="margin: 0; padding-left: 20px;">
+                <% errors.forEach(e => { %>
+                    <li><%= e %></li>
+                <% }) %>
+            </ul>
+        <% } %>
+    </div>
+<% } %>
+
+<% if (typeof success !== 'undefined' && success) { %>
+    <div style="color: green; border: 1px solid green; padding: 8px 12px; margin-bottom: 12px; border-radius: 4px;">
+        <p style="margin: 0;"><%= success %></p>
+    </div>
+<% } %>
