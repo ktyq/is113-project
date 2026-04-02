@@ -23,18 +23,29 @@ server.use(session({
     saveUninitialized: false  
 }));
 
-//routes
-server.use("/", require("./routes/profile"));
+server.get('/index.html', (req, res) => {
+  res.redirect('/index');
+});
 
+//routes
+server.use('/index', require('./routes/index'));
+server.use("/", require("./routes/profile"));
 server.use("/list", require("./routes/watchlist"));
+
 server.use("/reviews", require("./routes/reviews"));
 server.use("/friends", require("./routes/friends"));
 server.use('/admin', require('./routes/movies'));
-server.use('/movie', require('./routes/index'));
-server.use('/index', require('./routes/index'));
 server.use('/feedback', require("./routes/feedback"));
 // Direct profile view route (for viewing other users' profiles via friends)
 server.get('/friends/profile/:userId', require('./controllers/friendController').viewUserProfile);
+
+// IF NO ROUTES FOUND
+server.use((req, res) => {
+  res.redirect("/")
+  // res.status(404).render('error', {
+  //   message: 'Page not found'
+  // });
+});
 
 async function connectDB() {
   try {

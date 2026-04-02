@@ -2,120 +2,122 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= movie.title %></title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="stylesheet" href="/default.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= movie.title %></title>
+  <link rel="stylesheet" href="/default.css">
 </head>
 
 <body>
-    <%- include('partial/header', { user: user }) %>
+  <%- include('partial/header', { user: user }) %>
 
-    <section>
-        <div class="movie-detail">
-            <!-- Movie Poster -->
-            <img src="<%= movie.imageRef %>" alt="<%= movie.title %>" style="max-width:200px;">
-            <div>
-                <!-- Title -->
-                <h2><%= movie.title %></h2>
+  <section>
+    <div class="movie-detail">
+      <!-- Movie Poster -->
+      <img src="../uploads/<%= movie.imageRef %>" alt="<%= movie.title %>" style="max-width:200px;">
+      <div>
+        <!-- Title -->
+        <h2><%= movie.title %></h2>
 
-                <!-- Year and Duration -->
-                <p><%= movie.release_year %> - <%= movie.movieLength %> mins</p>
+        <!-- Year and Duration -->
+        <p><%= movie.release_year %> - <%= movie.movieLength %> mins</p>
 
-                <!-- Meta Info -->
-                <div class="movie-meta">
-                    <div>Genre: <%= movie.genre.join(', ') %></div>
-                    <div>Average Rating: <%= movie.averageRating || 0 %> / 5</div>
-                </div>
-
-                <!-- Overview -->
-                <p><%= movie.overview %></p>
-
-                <!-- Director(s) -->
-                <p><strong>Directed By:</strong> <%= movie.director.join(', ') %></p>
-
-                <!-- Cast -->
-                <p><strong>Cast:</strong> <%= movie.cast.join(', ') %></p>
-
-                <!-- Watchlist Status -->
-                <% if (!user) { %>
-                    <p>Please login to manage your watchlist.</p>
-                    <form action="/login" method="get">
-                        <button type="submit">Add to Watchlist</button>
-                    </form>
-                    <form action="/login" method="get">
-                        <button type="submit">Mark as Watched</button>
-                    </form>
-
-                <% } else { %>
-                    <% if (status === 'planning') { %>
-                        <p style="color: orange;">
-                            You marked this movie as planning to watch.
-                        </p>
-                    <% } else if (status === 'watched') { %>
-                        <p style="color: green;">
-                            You marked this movie as watched.
-                        </p>
-                    <% } %>
-
-
-                    <!-- BUTTONS -->
-                    <% if (!status) { %>
-
-                        <!-- NULL -->
-                        <form action="/list/add" method="POST">
-                            <input type="hidden" name="movieId" value="<%= movie._id %>">
-                            <button type="submit">Add to Watchlist</button>
-                        </form>
-
-                        <form action="/list/edit" method="POST">
-                            <input type="hidden" name="movieId" value="<%= movie._id %>">
-                            <input type="hidden" name="status" value="watched">
-                            <button type="submit">Mark as Watched</button>
-                        </form>
-
-                    <% } else if (status === 'planning') { %>
-
-                        <!-- PLANNING -->
-                        <form action="/list/remove" method="POST">
-                            <input type="hidden" name="movieId" value="<%= movie._id %>">
-                            <button type="submit">Remove from Watchlist</button>
-                        </form>
-
-                        <form action="/list/edit" method="POST">
-                            <input type="hidden" name="movieId" value="<%= movie._id %>">
-                            <input type="hidden" name="status" value="watched">
-                            <button type="submit">Mark as Watched</button>
-                        </form>
-
-                    <% } else if (status === 'watched') { %>
-
-                        <!-- WATCHED -->
-                        <form action="/list/remove" method="POST">
-                            <input type="hidden" name="movieId" value="<%= movie._id %>">
-                            <button type="submit">Remove from Watchlist</button>
-                        </form>
-
-                        <form action="/list/edit" method="POST">
-                            <input type="hidden" name="movieId" value="<%= movie._id %>">
-                            <input type="hidden" name="status" value="planning">
-                            <button type="submit">Change to Planning</button>
-                        </form>
-
-                    <% } %>
-                <% } %>
-
-            </div>
-    </section>
-
-    <!-- Reviews Section -->
-    <section>
-        <div class="review-header">
-            <a href="/reviews?id=<%= movie._id %>"><%= movie.reviews ? movie.reviews.length : 0 %> Reviews</a>
-            <a href="/reviews?id=<%= movie._id %>"><button>Add Review</button></a>
+        <!-- Meta Info -->
+        <div class="movie-meta">
+          <div>Genre: <%= movie.genre.join(', ') %></div>
+          <div> Average Rating:
+            <% if (movie.averageRating !== undefined && movie.averageRating !== null) { %>
+            <%= movie.averageRating %> / 5
+            <% } else { %>
+            No ratings yet
+            <% } %></div>
         </div>
-    </section>
+
+        <!-- Overview -->
+        <p><%= movie.overview %></p>
+
+        <!-- Director(s) -->
+        <p><strong>Directed By:</strong> <%= movie.director.join(', ') %></p>
+
+        <!-- Cast -->
+        <p><strong>Cast:</strong> <%= movie.cast.join(', ') %></p>
+
+        <!-- Watchlist Status -->
+        <% if (!user) { %>
+        <p>Please login to manage your watchlist.</p>
+        <form action="/login" method="get">
+          <button type="submit">Add to Watchlist</button>
+        </form>
+        <form action="/login" method="get">
+          <button type="submit">Mark as Watched</button>
+        </form>
+
+        <% } else { %>
+        <% if (status === 'planning') { %>
+        <p style="color: orange;">
+          You marked this movie as planning to watch.
+        </p>
+        <% } else if (status === 'watched') { %>
+        <p style="color: green;">
+          You marked this movie as watched.
+        </p>
+        <% } %>
+
+
+        <!-- BUTTONS -->
+        <% if (!status) { %>
+
+        <!-- NULL -->
+        <form action="/list/add" method="POST">
+          <input type="hidden" name="movieId" value="<%= movie._id %>">
+          <button type="submit">Add to Watchlist</button>
+        </form>
+
+        <form action="/list/edit" method="POST">
+          <input type="hidden" name="movieId" value="<%= movie._id %>">
+          <input type="hidden" name="status" value="watched">
+          <button type="submit">Mark as Watched</button>
+        </form>
+
+        <% } else if (status === 'planning') { %>
+
+        <!-- PLANNING -->
+        <form action="/list/remove" method="POST">
+          <input type="hidden" name="movieId" value="<%= movie._id %>">
+          <button type="submit">Remove from Watchlist</button>
+        </form>
+
+        <form action="/list/edit" method="POST">
+          <input type="hidden" name="movieId" value="<%= movie._id %>">
+          <input type="hidden" name="status" value="watched">
+          <button type="submit">Mark as Watched</button>
+        </form>
+
+        <% } else if (status === 'watched') { %>
+
+        <!-- WATCHED -->
+        <form action="/list/remove" method="POST">
+          <input type="hidden" name="movieId" value="<%= movie._id %>">
+          <button type="submit">Remove from Watchlist</button>
+        </form>
+
+        <form action="/list/edit" method="POST">
+          <input type="hidden" name="movieId" value="<%= movie._id %>">
+          <input type="hidden" name="status" value="planning">
+          <button type="submit">Change to Planning</button>
+        </form>
+
+        <% } %>
+        <% } %>
+      </div>
+  </section>
+
+  <!-- Reviews Section -->
+  <section>
+    <div class="review-header">
+      <a href="/reviews?movieId=<%= movie._id %>"><%= movie.reviews ? movie.reviews.length : 0 %> Reviews</a>
+    </div>
+  </section>
 </body>
 
 </html>

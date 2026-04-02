@@ -81,11 +81,12 @@ watchlistSchema.statics.getListsByUser = async function (user, page = 1, number 
         .sort(sortObj)
         .populate({
             path: 'movieID',
-            select: 'title director',
+            select: 'title director imageRef',
             match: search && search.trim() !== '' ? { title: { $regex: search.trim(), $options: 'i' } } : {}
         })
         .lean();
 
+        console.log(result)
     result = result.filter(item => item.movieID); // remove non matching titles
     // console.log('Titles:', result.map(item => item.movieID?.title));
     return result;

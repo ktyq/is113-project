@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="../public/default.css">
+     <link rel="stylesheet" href="default.css">
 </head>
 
 <body>
@@ -24,11 +24,11 @@
     <form action="/edit-profile" method="POST">
         <label>New Username:</label>
         <input type="text" name="username" placeholder="<%= user.username %>">
-        <br><br>
+        <br>
 
         <label>New Email Address:</label>
         <input type="email" name="email" placeholder="<%= user.email %>">
-        <br><br>
+        <br>
 
         <!-- Watchlist privacy setting -->
         <label>Watchlist Privacy:</label>
