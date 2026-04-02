@@ -26,8 +26,8 @@
       <label>
         Sort By
         <select name="sort">
-          <option value="az" <%= sort === 'az'     ? 'selected' : '' %>>A → Z</option>
-          <option value="za" <%= sort === 'za'     ? 'selected' : '' %>>Z → A</option>
+          <option value="az"     <%= sort === 'az'     ? 'selected' : '' %>>A → Z</option>
+          <option value="za"     <%= sort === 'za'     ? 'selected' : '' %>>Z → A</option>
           <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest accounts</option>
           <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>>Oldest accounts</option>
         </select>
@@ -38,10 +38,10 @@
       <label>
         Show
         <select name="limit">
-          <option value="5" <%= limit == 5   ? 'selected' : '' %>>5</option>
-          <option value="10" <%= limit == 10  ? 'selected' : '' %>>10</option>
-          <option value="20" <%= limit == 20  ? 'selected' : '' %>>20</option>
-          <option value="50" <%= limit == 50  ? 'selected' : '' %>>50</option>
+          <option value="5"   <%= limit == 5   ? 'selected' : '' %>>5</option>
+          <option value="10"  <%= limit == 10  ? 'selected' : '' %>>10</option>
+          <option value="20"  <%= limit == 20  ? 'selected' : '' %>>20</option>
+          <option value="50"  <%= limit == 50  ? 'selected' : '' %>>50</option>
           <option value="100" <%= limit == 100 ? 'selected' : '' %>>100</option>
         </select>
       </label>
@@ -80,13 +80,14 @@
         <% users.forEach(function(u) { %>
         <tr>
           <td>
-            <a href="/list/<%= u._id %>"><%= u.username %></a>
+            <a href="/friends/profile?userId=<%= u._id %>"><%= u.username %></a>
           </td>
           <td>
             <%= u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB') : '' %>
           </td>
           <td>
-            <form method="POST" action="/friends/send/<%= u._id %>?redirect=/friends/browse<%= queryString %>">
+            <form method="POST" action="/friends/send?redirect=/friends/browse<%= queryString %>">
+              <input type="hidden" name="friendId" value="<%= u._id %>" />
               <button type="submit">Send Friend Request</button>
             </form>
           </td>

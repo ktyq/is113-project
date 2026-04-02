@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Friends</title>
-  <link rel="stylesheet" href="../public/default.css">
+  <link rel="stylesheet" href="/default.css">
 </head>
 
 <body>
@@ -37,7 +37,7 @@
             %>
           <tr>
             <td>
-              <a href="/list/<%= otherUser._id %>"><%= otherUser.username %></a>
+              <a href="/friends/profile?userId=<%= otherUser._id %>"><%= otherUser.username %></a>
               <% if (myNickname) { %>
               (<%= myNickname %>)
               <% } %>
@@ -46,13 +46,15 @@
               <% } %>
             </td>
             <td>
-              <form method="POST" action="/friends/nickname/<%= otherUser._id %>">
+              <form method="POST" action="/friends/nickname">
+                <input type="hidden" name="friendId" value="<%= otherUser._id %>" />
                 <input type="text" name="nickname" value="<%= myNickname || '' %>" placeholder="Set nickname" />
                 <button type="submit">Update</button>
               </form>
             </td>
             <td>
-              <form method="POST" action="/friends/remove/<%= otherUser._id %>">
+              <form method="POST" action="/friends/remove">
+                <input type="hidden" name="friendId" value="<%= otherUser._id %>" />
                 <button type="submit">Remove Friend</button>
               </form>
             </td>
@@ -80,10 +82,11 @@
           <% sentRequests.forEach(function(r) { %>
           <tr>
             <td>
-              <a href="/list/<%= r.requestee._id %>"><%= r.requestee.username %></a>
+              <a href="/friends/profile?userId=<%= r.requestee._id %>"><%= r.requestee.username %></a>
             </td>
             <td>
-              <form method="POST" action="/friends/cancel/<%= r.requestee._id %>">
+              <form method="POST" action="/friends/cancel">
+                <input type="hidden" name="requesteeId" value="<%= r.requestee._id %>" />
                 <button type="submit">Cancel Request</button>
               </form>
             </td>
@@ -111,13 +114,15 @@
           <% requests.forEach(function(req) { %>
           <tr>
             <td>
-              <a href="/list/<%= req.requestor._id %>"><%= req.requestor.username %></a>
+              <a href="/friends/profile?userId=<%= req.requestor._id %>"><%= req.requestor.username %></a>
             </td>
             <td>
-              <form method="POST" action="/friends/accept/<%= req.requestor._id %>" style="display:inline;">
+              <form method="POST" action="/friends/accept" style="display:inline;">
+                <input type="hidden" name="requestorId" value="<%= req.requestor._id %>" />
                 <button type="submit">Accept</button>
               </form>
-              <form method="POST" action="/friends/decline/<%= req.requestor._id %>" style="display:inline;">
+              <form method="POST" action="/friends/decline" style="display:inline;">
+                <input type="hidden" name="requestorId" value="<%= req.requestor._id %>" />
                 <button type="submit">Decline</button>
               </form>
             </td>
@@ -147,10 +152,11 @@
             <% suggestions.forEach(function(suggestedUser) { %>
             <tr>
               <td>
-                <a href="/list/<%= suggestedUser._id %>"><%= suggestedUser.username %></a>
+                <a href="/friends/profile?userId=<%= suggestedUser._id %>"><%= suggestedUser.username %></a>
               </td>
               <td>
-                <form method="POST" action="/friends/send/<%= suggestedUser._id %>">
+                <form method="POST" action="/friends/send">
+                  <input type="hidden" name="friendId" value="<%= suggestedUser._id %>" />
                   <button type="submit">Send Friend Request</button>
                 </form>
               </td>
