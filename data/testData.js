@@ -51,7 +51,7 @@ const movies = [
     },
     {
         title: 'The Dark Knight',
-        imageRef: 'dark_knight.jpg',
+        imageRef: 'the_dark_knight.jpg',
         movieLength: 152,
         release_year: 2008,
         genre: ['Action', 'Crime'],
@@ -71,7 +71,7 @@ const movies = [
     },
     {
         title: 'Fight Club',
-        imageRef: 'fight_club.jpg',
+        imageRef: 'fight_club.webp',
         movieLength: 139,
         release_year: 1999,
         genre: ['Drama'],
@@ -91,7 +91,7 @@ const movies = [
     },
     {
         title: 'The Matrix',
-        imageRef: 'matrix.jpg',
+        imageRef: 'the_matrix.jpg',
         movieLength: 136,
         release_year: 1999,
         genre: ['Sci-Fi'],
@@ -101,7 +101,7 @@ const movies = [
     },
     {
         title: 'Gladiator',
-        imageRef: 'gladiator.jpg',
+        imageRef: 'gladiator.png',
         movieLength: 155,
         release_year: 2000,
         genre: ['Action'],
@@ -141,7 +141,7 @@ const movies = [
     },
     {
         title: 'The Social Network',
-        imageRef: 'social_network.jpg',
+        imageRef: 'the_social_network.jpg',
         movieLength: 120,
         release_year: 2010,
         genre: ['Drama'],

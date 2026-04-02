@@ -8,7 +8,7 @@ const router = express.Router();
 const reviewController = require("../controllers/reviewController");
 const { isLoggedIn } = require("../middleware/authentication");
 
-router.get("/", reviewController.getMoviePage);
+router.get("/", reviewController.showReviews);
 router.post("/add", isLoggedIn, reviewController.createReview);
 router.post("/edit", isLoggedIn, reviewController.updateReview);
 router.post("/del", isLoggedIn, reviewController.deleteReview);
