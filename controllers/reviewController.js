@@ -70,7 +70,6 @@ exports.createReview = async (req, res) => {
       .limit(limit);
 
     return res.render("review", {
-      // Changed to "review"
       movie,
       reviews,
       errors,
@@ -203,7 +202,7 @@ exports.deleteReview = async (req, res) => {
     const movieID = review.movieID;
     await Review.findByIdAndDelete(reviewID);
 
-    res.redirect(`/reviews?movieID=${movieID}`);
+    res.redirect(`/reviews?id=${movieID}`);
   } catch (err) {
     console.error("deleteReview error:", err);
     res.status(500).render("error", { message: "Could not delete review." });
