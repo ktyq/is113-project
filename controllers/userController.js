@@ -16,6 +16,7 @@ function validateUsername(username) {
     const errors = [];
     if (username.length < 3) errors.push('Username must be at least 3 characters long');
     if (username.length > 20) errors.push('Username cannot exceed 20 characters');
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) errors.push('Username can only contain letters, numbers, and underscores');
     return errors;
 }
 
@@ -56,7 +57,8 @@ exports.registerPost = async (req, res) => {
             username: username,
             email: email,
             password: hashedPassword,
-            role: role
+            role: 'user',
+            watchlistPrivacy: 'friends'
         });
 
         await user.save();
@@ -71,45 +73,54 @@ exports.registerPost = async (req, res) => {
 
 //--LOGIN----------------------------------------------------------------- //
 exports.loginGet = (req, res) => {
-    res.render('login', { errors: [], success: null });
+    res.render('login', { errors: [], success: null, accNotFound: false, wrongPass: false, identifier: '' });
 };
 
 exports.loginPost = async (req, res) => {
-    const { email, password } = req.body;
-    const errors = [];
+    const { identifier, password } = req.body;
+    
+    // Helper function rerender
+    const rerender = (extras) => res.render('login', {
+        errors: null,
+        success: null,
+        accNotFound: false,
+        wrongPass: false,
+        identifier : identifier || '', //pre-fill identifier field
+        ...extras
+    })
 
-    if (!email || !password) {
-        errors.push('All fields are required.');
-    } else {
-        if (!validateEmail(email)) errors.push('Please enter a valid email address');
-        if (password.length < 6) errors.push('Password must be at least 6 characters long');
+    // Log validation issues only to console    
+    if (!identifier || !password) {
+        console.log('Login attempt failed: Missing fields');
+        return rerender({ errors: ['Please fill in all fields'] });
     }
-
-    if (errors.length > 0) {
-        return res.render('login', { errors, success: null });
-    }
-
+    if (password.length < 6) console.log('Login attempt failed: Password must be at least 6 characters long');
+    
     try {
-        const user = await User.findOne({ email: email });
+        const isEmail = validateEmail(identifier);
+        const query = isEmail ? { email: identifier } : { username: identifier };
+        const user = await User.findOne(query);
+
         if (!user) {
-            return res.render('login', { errors: ['Invalid email or password'], success: null });
+            console.log('Login attempt failed: Account not found for identifier:', identifier);
+            return rerender({ accNotFound: true});
         }
 
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
-            return res.render('login', { errors: ['Invalid email or password'], success: null });
+            console.log('Login attempt failed: Incorrect password for', identifier);
+            return rerender({ wrongPass: true });
         }
 
-        // Store user info in session
         req.session.user = {
             id: user._id,
             username: user.username,
             email: user.email,
-            role: user.role
+            role: user.role,
+            watchlistPrivacy: user.watchlistPrivacy   
         };
         console.log("User logged in:", user.username, user.role);
 
-        // Redirect based on role
         if (user.role === "admin" || user.role === 'superadmin') {
             return res.redirect('/profile');
         }
@@ -117,7 +128,7 @@ exports.loginPost = async (req, res) => {
 
     } catch (err) {
         console.error(err.message);
-        res.render('login', { errors: ['An error occurred. Please try again.'], success: null });
+        return rerender ({ errors: ['An error occurred. Please try again.'] });
     }
 };
 
@@ -148,11 +159,7 @@ exports.editProfilePost = async (req, res) => {
         const { username, email, currentPassword, newPassword, confirmNewPassword, watchlistPrivacy } = req.body;
         const user = await User.findById(req.session.user.id);
         if (!user) return res.redirect('/login');
-
-        // Function: rerender page
-        // const rerender = (error, success, passwordError, passwordVerified = false) => {
-        //     return res.render('edit-profile', { user, error, success, passwordError, passwordVerified });
-        // };
+        
         const errors = [];
         let changesMade = false; // Track if any changes were made
 

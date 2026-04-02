@@ -10,13 +10,28 @@
 </head>
 
 <body>
+  <a href="/index">Home Page</a>
   <h1>Login</h1>
 
   <%- include('partial/messages', { errors: errors, success: success }) %>
 
+  <% if (typeof accNotFound !== 'undefined' && accNotFound) { %>
+    <p style="color: red;">
+      Could not find account. 
+      Try a different one or <a href="/register">create a new account</a>.
+    </p>
+  <% } %>
+
+  <% if (typeof wrongPass !== 'undefined' && wrongPass) { %>
+    <p style="color: red;">
+      Incorrect password. Please try again.
+      If you forgot your password, please contact admin or <a href="/register">create a new account</a>.
+    </p>
+  <% } %>
+
   <form action="/login" method="POST">
-    <label>Email Address: </label>
-    <input type="email" name="email" placeholder="Enter Email" required>
+    <label>Username or Email: </label>
+    <input type="text" name="identifier" value="<%= typeof identifier !== 'undefined' ? identifier : '' %>" placeholder="Enter Username or Email" required>
     <br>
 
     <label>Password:</label>

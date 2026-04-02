@@ -16,6 +16,7 @@
   <p><strong>Username:</strong> <%= user.username %></p>
   <p><strong>Email:</strong> <%= user.email %></p>
   <p><strong>Role:</strong> <%= user.role %></p>
+  <p><strong>Watchlist Privacy:</strong> <%= user.watchlistPrivacy %></p>
 
   <br>
 
@@ -36,7 +37,7 @@
     </form>
   <% } %>    
 
-  <br>
+  <br><br>
   <form action="/logout" method="POST">
     <button type="submit">Logout</button>
   </form>
