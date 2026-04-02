@@ -19,7 +19,7 @@ const formSchema = new mongoose.Schema({
     },
     type: { // type of form 
         type: String,
-        enum: ['feedback', 'bug', 'report']
+        enum: ['feedback', 'bug']
     },
     status: { // status of the form
         type: String,

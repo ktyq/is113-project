@@ -24,7 +24,6 @@
                         <option value="" disabled selected>Select type</option>
                         <option value="feedback">Feedback</option>
                         <option value="bug">Bug Report</option>
-                        <option value="report">User Report</option>
                     </select>
                 </div>
 
@@ -74,9 +73,13 @@
                                 <td><%= fb.status %></td>
                                 <td><%= fb.createdAt.toLocaleDateString() %></td>
                                 <td>
-                                    <form action="/feedback/delete/<%= fb._id %>" method="POST" onsubmit="return confirm('Delete this feedback?')">
-                                        <button type="submit" style="color: red;">Delete</button>
-                                    </form>
+                                    <% if (fb.status !== 'resolved') { %>
+                                        <form action="/feedback/delete/<%= fb._id %>" method="POST" onsubmit="return confirm('Delete this feedback?')">
+                                            <button type="submit" style="color: red;">Delete</button>
+                                        </form>
+                                    <% } else { %>
+                                        <span style="color: gray; font-size: 0.9em;">Locked (Resolved)</span>
+                                    <% } %>
                                 </td>
                             </tr>
                         <% }) %>

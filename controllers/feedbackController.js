@@ -26,7 +26,7 @@ exports.createFeedback = async (req, res) => {
     }
 };
 
-// READ all feedback by user
+// READ all feedback by user (if on normal user account can only read their own feedback)
 exports.readFeedback = async (req, res) => {
     try {
         const user = req.session.user
@@ -65,13 +65,13 @@ exports.readFeedbackAdmin = async (req, res) => {
 // UPDATE feedback (admin status change)
 exports.updateFeedback = async (req, res) => {
     try {
-        // 1. Get the status value from the <select name="status"> in your EJS
+        // Get the status value from the <select name="status"> in your EJS
         const { status } = req.body;
 
-        // 2. Update the database with the new status (pending or resolved)
+        // Update the database with the new status (pending or resolved)
         await Feedback.findByIdAndUpdate(req.params.id, { status: status }); 
         
-        // 3. Redirect back to the admin page to see the change
+        // Redirect back to the admin page to see the change
         res.redirect("/feedback/admin");
 
     } catch (err) {
@@ -80,13 +80,31 @@ exports.updateFeedback = async (req, res) => {
     }
 };
 
-// DELETE feedback (admin delete spam or irrelevant feedback) only for user, not admin
+// DELETE feedback only for user, not admin (user cannot delete if status is resolved)
 exports.deleteFeedback = async (req, res) => {
     try {
-        // delete feedback using id
-        await Feedback.findByIdAndDelete(req.params.id);
+        const feedbackId = req.params.id;
 
-        res.redirect("/feedback")
+        // Find the feedback to check its status
+        const feedback = await Feedback.findById(feedbackId);
+
+        // Safety check: if feedback doesn't exist
+        if (!feedback) {
+            return res.status(404).render("error", { message: "Feedback not found." });
+        }
+
+        // Logic: If status is 'resolved', block deletion
+        // Ensure 'resolved' matches the exact string you use in your update controller
+        if (feedback.status === 'resolved') {
+            return res.status(403).render("error", { 
+                message: "This feedback has been resolved by an admin and cannot be deleted." 
+            });
+        }
+
+        // Proceed with deletion
+        await Feedback.findByIdAndDelete(feedbackId);
+
+        res.redirect("/feedback");
 
     } catch (err) {
         console.error("deleteFeedback error:", err);
