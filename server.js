@@ -8,9 +8,7 @@ const dotenv = require("dotenv");
 dotenv.config({ path: "./config.env" });
 const mongoose = require("mongoose");
 const path = require("path");
-// const fs = require('fs');
 
-// const friendController = require("./controllers/friendController");
 const server = express();
 server.set("view engine", "ejs");
 server.set('views', path.join(__dirname, 'views')); 
@@ -24,10 +22,10 @@ server.use(session({
     resave: false, 
     saveUninitialized: false  
 }));
-// server.get("/", (req, res) => res.status(200).send(`success!`));
 
 //routes
 server.use("/", require("./routes/profile"));
+
 server.use("/list", require("./routes/watchlist"));
 server.use("/reviews", require("./routes/reviews"));
 server.use("/friends", require("./routes/friends"));
