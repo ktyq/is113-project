@@ -13,13 +13,14 @@
     <% if (user.role === 'admin' || user.role === 'superadmin') { %>
     <a href="/feedback/admin">Feedback</a>
     &nbsp;|&nbsp;
-    <a href="/admin-profile">Admin</a>
+    <a href="/profile">Admin</a>
     <% } else { %>
     <a href="/feedback">Feedback</a>
     &nbsp;|&nbsp;
-    <a href="/user-profile">Account</a>
+    <a href="/profile">Account</a>
     <% } %>
 
+    &nbsp;  
     <form action="/logout" method="POST" style="display:inline;">
       <button type="submit">Logout</button>
     </form>

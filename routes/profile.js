@@ -8,7 +8,7 @@ const authMiddleware = require('../middleware/authentication');
 router.get('/', (req, res) => {
     if (req.session.user) {
         return req.session.user.role === 'admin' || req.session.user.role === 'superadmin'
-        ? res.redirect('/admin-profile')
+        ? res.redirect('/profile')
         : res.redirect('/index');
     }
     res.redirect('/index');

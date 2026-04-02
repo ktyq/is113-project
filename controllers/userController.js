@@ -22,7 +22,7 @@ function validateUsername(username) {
 //--REGISTER----------------------------------------------------------------- //
 
 exports.registerGet = (req, res) => {
-    res.render('register', { errors: [] });
+    res.render('register', { errors: [], success: null });
 };
 
 exports.registerPost = async (req, res) => {
@@ -265,9 +265,10 @@ exports.deleteProfile = async (req, res) => {
 
 //--LOGOUT----------------------------------------------------------------- //
 exports.logout = (req, res) => {
-    const user = req.session.user;
+    const username = req.session.user ? req.session.user.username : 'Unknown';
+    const role = req.session.user ? req.session.user.role : 'Unknown';
     req.session.destroy(() => {
-        console.log("User logged out:", user.username, user.role);
+        console.log("User logged out:", username, role);
         res.redirect('/login');
     });
 };
