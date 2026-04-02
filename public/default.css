@@ -58,7 +58,7 @@ img {
 }
 
 table {
-    min-width: 50vw;
+    min-width: 36vw;
     width: auto;
     border-collapse: collapse;
 }
@@ -69,7 +69,6 @@ form {
 
 .movie-overview {
     display: -webkit-box;
-    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

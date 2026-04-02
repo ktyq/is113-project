@@ -29,8 +29,10 @@
 </td>
 
 <!-- actions -->
+<% if (!viewingUser) { %>
 <td>
   <a href="/list?edit=<%= movie.movieID._id %>">Edit</a>
   <a href="/list?remove=<%= movie.movieID._id %>">Remove</a>
 </td>
+<% } %>
 </tr>

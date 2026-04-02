@@ -14,11 +14,17 @@ Full-stack web application which allows users can add movies to a personal watch
 ## Tech Stack
 - **Backend**: Express.js with MVC architecture
 - **Database**: MongoDB with Mongoose ODM
-- **Frontend**: HTML
+- **Frontend**: HTML with minimal CSS
 - **Templates**: EJS
 - **Environment**: Node.js
 
 ## Project Structure
+
+Models: Define data structures in the models/ directory
+Controllers: Handle business logic in the controllers/ directory
+Routes: Define API endpoints in the routes/ directory
+Views: Create EJS templates in the views/ directory
+Public: Access public files in the public/ directory
 
 ## Installation
 1. Clone the repository
@@ -28,11 +34,20 @@ Full-stack web application which allows users can add movies to a personal watch
 5. Start application
 6. Launch browser
 
-## Usage
-
 ## API Endpoints
 
--
+GET /reviews - Get all reviews
+GET /reviews/create - Get review form to provide review
+POST /reviews/create - Create new review
+
+server.use("/", require("./routes/profile"));
+server.use('/index', require('./routes/index'));
+server.use("/list", require("./routes/watchlist"));
+server.use("/reviews", require("./routes/reviews"));
+
+server.use("/friends", require("./routes/friends"));
+server.use('/admin', require('./routes/movies'));
+server.use('/feedback', require("./routes/feedback"));
 
 
 
