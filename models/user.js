@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema({
     accountStatus: {
         type: String,
         enum: ['active', 'suspended', 'disabled'],
-        // suspended: banned by dmin/muted (not allowed to add reviews)
+        // suspended: banned by admin/muted (not allowed to add reviews)
         // disabled: user closed account [30 day deletion period]
         default: 'active'
     },

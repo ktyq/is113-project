@@ -191,8 +191,9 @@ exports.editProfilePost = async(req, res) => {
 
             user.password = await bcrypt.hash(newPassword, 10);
             changesMade = true;
-        }
-
+        } else if (!currentPassword && (newPassword || confirmNewPassword)) {
+            return rerender(null, null, 'Please verify with your current password to set a new one', false);
+        } 
         //--If nothing was changed----------------------------------------------------------------------------------------------------------------
         if (!changesMade) {
             return rerender('No changes were made. Please fill in at least one field to update.', null, null);
@@ -233,7 +234,7 @@ exports.deleteProfile = async(req, res) => {
 exports.logout = (req, res) => {
     const user = req.session.user;
     req.session.destroy(() => {
-        console.log("User logged out:", user.username, user.role);
+        
         res.redirect('/login');
     });
 }

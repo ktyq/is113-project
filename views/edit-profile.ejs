@@ -42,13 +42,13 @@
         <h3>Change password</h3>
         <p>Verify your current password to change it.</p>
 
+        <% if (passwordError) { %>
+            <h4><%= passwordError %></h4>
+        <% } %>
+
         <label>Current Password:</label>
         <input type="password" name="currentPassword" placeholder="Enter current password">
-
-        <% if (passwordError) { %>
-            <p><%= passwordError %></p>
-        <% } %>
-        
+               
         <br>
         <label>New Password:</label>
         <input type="password" name="newPassword" placeholder="Enter new password">
