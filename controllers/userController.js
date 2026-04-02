@@ -1,28 +1,52 @@
-const User = require('../models/user');
+const User = require('../models/User');
 const bcrypt = require('bcrypt');
 
-// Get register page
-exports.registerGet = (req, res) => {
-    res.render('register', { error: null });
+//--Validation and Error Handling ----------------------------------------- //
+function validateEmail(email) {
+    return /\S+@\S+\.\S+/.test(email);
+}
+
+function validatePassword(password) {
+    const errors = [];
+    if (password.length < 6) errors.push('Password must be at least 6 characters long');
+    return errors;
 };
 
-// Register new user
+function validateUsername(username) {
+    const errors = [];
+    if (username.length < 3) errors.push('Username must be at least 3 characters long');
+    if (username.length > 20) errors.push('Username cannot exceed 20 characters');
+    return errors;
+}
+
+//--REGISTER----------------------------------------------------------------- //
+
+exports.registerGet = (req, res) => {
+    res.render('register', { errors: [] });
+};
+
 exports.registerPost = async (req, res) => {
     const { username, email, password, confirmPassword, role } = req.body;
-
+    const errors = [];
+    
     if (!username || !email || !password || !confirmPassword) {
-        return res.render('register', { error: 'All fields are required' });
+        errors.push('All fields are required');
+    } else {
+        validateUsername(username).forEach(err => errors.push(err));
+        if (!validateEmail(email)) errors.push('Please enter a valid email address');
+        validatePassword(password).forEach(err => errors.push(err));
+        if (password !== confirmPassword) errors.push('Passwords do not match');
     }
 
-    if (password !== confirmPassword) {
-        return res.render('register', { error: 'Passwords do not match' });
+    if (errors.length > 0) {
+        return res.render('register', { errors, success: null });
     }
 
     try {
         // Check if username or email already exists
         const existingUser = await User.findOne({ $or: [{ username: username }, { email: email }] });
         if (existingUser) {
-            return res.render('register', { error: 'Username or email already exists' });
+            return res.render('register', { errors: ['Username or email already exists'], success: null });
         }
 
         // Hash password
@@ -31,7 +55,7 @@ exports.registerPost = async (req, res) => {
         const user = new User({
             username: username,
             email: email,
-            password: password,
+            password: hashedPassword,
             role: role
         });
 
@@ -41,32 +65,39 @@ exports.registerPost = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.render('register', { error: 'An error has occurred. Please try again.', success: null });
+        res.render('register', { errors: ['An error has occurred. Please try again.'], success: null });
     }
 };
 
-// Get login page
+//--LOGIN----------------------------------------------------------------- //
 exports.loginGet = (req, res) => {
-    res.render('login', { error: null });
+    res.render('login', { errors: [], success: null });
 };
 
-// Log in user
 exports.loginPost = async (req, res) => {
     const { email, password } = req.body;
+    const errors = [];
 
     if (!email || !password) {
-        return res.render('login', { error: 'All fields are required' });
+        errors.push('All fields are required.');
+    } else {
+        if (!validateEmail(email)) errors.push('Please enter a valid email address');
+        if (password.length < 6) errors.push('Password must be at least 6 characters long');
+    }
+
+    if (errors.length > 0) {
+        return res.render('login', { errors, success: null });
     }
 
     try {
         const user = await User.findOne({ email: email });
         if (!user) {
-            return res.render('login', { error: 'Invalid email or password' });
+            return res.render('login', { errors: ['Invalid email or password'], success: null });
         }
 
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
-            return res.render('login', { error: 'Invalid email or password' });
+            return res.render('login', { errors: ['Invalid email or password'], success: null });
         }
 
         // Store user info in session
@@ -80,29 +111,22 @@ exports.loginPost = async (req, res) => {
 
         // Redirect based on role
         if (user.role === "admin" || user.role === 'superadmin') {
-            return res.redirect('/admin-profile');
+            return res.redirect('/profile');
         }
         res.redirect('/index');
 
     } catch (err) {
         console.error(err.message);
-        res.render('login', { error: 'An error occurred. Please try again.' });
+        res.render('login', { errors: ['An error occurred. Please try again.'], success: null });
     }
 };
 
-// Display user profile
+//--READ PROFILE----------------------------------------------------------------- // 
 exports.profile = (req, res) => {
-    const { user } = req.session;
-    res.render('user-profile', { user });
+    res.render('profile', { user: req.session.user });
 };
 
-// Display admin profile
-exports.adminProfile = (req, res) => {
-    const { user } = req.session;
-    res.render('admin-profile', { user });
-};
-
-// Display profile details
+//--UPDATE PROFILE----------------------------------------------------------------- //
 exports.editProfileGet = async (req, res) => {
     const { user } = req.session;
 
@@ -110,101 +134,103 @@ exports.editProfileGet = async (req, res) => {
         const userId = await User.findById(user.id);
         res.render('edit-profile', {
             user: userId,
-            error: null,
+            errors: [],
             success: null,
-            passwordError: null,
-            passwordVerified: null
         });
     } catch (err) {
         console.error(err);
-        res.redirect('/user-profile');
+        res.redirect('/profile');
     }
 };
 
-// Edit profile details
 exports.editProfilePost = async (req, res) => {
-    const { username, email, currentPassword, newPassword, confirmNewPassword, watchlistPrivacy } = req.body;
-
     try {
+        const { username, email, currentPassword, newPassword, confirmNewPassword, watchlistPrivacy } = req.body;
         const user = await User.findById(req.session.user.id);
-
         if (!user) return res.redirect('/login');
 
         // Function: rerender page
-        const rerender = (error, success, passwordError, passwordVerified = false) => {
-            return res.render('edit-profile', { user, error, success, passwordError, passwordVerified });
-        };
-
+        // const rerender = (error, success, passwordError, passwordVerified = false) => {
+        //     return res.render('edit-profile', { user, error, success, passwordError, passwordVerified });
+        // };
+        const errors = [];
         let changesMade = false; // Track if any changes were made
 
-        // Validate new username
+        // Validate username
         if (username && username.trim() !== '') {
             if (username === user.username) {
-                return rerender('New username cannot be the same as the current one.', null, null);
-            }
-            // Check new username not taken by others
-            const taken = await User.findOne({ username: username });
-            if (taken) {
-                return rerender('Username is already in use', null, null);
-            }
-            user.username = username.trim();
-            changesMade = true;
-        }
-
-        // Validate new email
-        if (email && email.trim() !== '') {
-            if (email === user.email) {
-                return rerender('New email cannot be the same as the current one.', null, null);
-            }
-            // Check new email not taken by others
-            if (email !== user.email) {
-                const taken = await User.findOne({ email: email });
-                if (taken) {
-                    return rerender('Email is already in use', null, null);
+                errors.push('New username cannot be the same as the current one.');
+            } else {
+                validateUsername(username).forEach(e => errors.push(e));
+                if (errors.length === 0) {
+                    const taken = await User.findOne({ username: username });
+                    if (taken) {
+                        errors.push('Username is already in use');
+                    } else {
+                        user.username = username.trim();
+                        changesMade = true;
+                    }
                 }
             }
-            user.email = email.trim();
+        }          
+
+        // Validate email
+        if (email && email.trim() !== '') {
+            if (email === user.email) {
+                errors.push('New email cannot be the same as the current one.');
+            } else if (!validateEmail(email)) {
+                errors.push('Please enter a valid email address');
+            } else {
+                const taken = await User.findOne({email});
+                if (taken) {errors.push('Email is already in use');}
+                else {
+                    user.email = email.trim();
+                    changesMade = true;
+                }
+            }
+        }
+
+        // Watchlist privacy setting
+        if (watchlistPrivacy && watchlistPrivacy !== user.watchlistPrivacy) {
+            user.watchlistPrivacy = watchlistPrivacy;
             changesMade = true;
         }
 
-        user.username = username || user.username;
-        user.email = email || user.email;
-        user.watchlistPrivacy = watchlistPrivacy || user.watchlistPrivacy; // Update privacy setting
+        // Validate Password
+        if (currentPassword || newPassword || confirmNewPassword) {
+            if (!currentPassword) {
+                errors.push('Please enter your current password to set a new one');
+            } else {
+                const oldMatch = await bcrypt.compare(currentPassword, user.password);
+                if (!oldMatch) {
+                    errors.push('Current password is incorrect');
+                } else if (!newPassword) {
+                    errors.push('Please enter a new password');
+                } else {
+                    validatePassword(newPassword).forEach(e => errors.push(e));
+                    if (newPassword !== confirmNewPassword) {
+                        errors.push('New passwords do not match');
+                    }
+                    const newMatch = await bcrypt.compare(newPassword, user.password);
+                    if (newMatch) {
+                        errors.push('New password cannot be the same as the current one.');
+                    }
+                
+                    if (errors.length === 0) {
+                        user.password = await bcrypt.hash(newPassword, 10);
+                        changesMade = true;
+                    }
+                }
+            }   
+        }
 
-        // Validate new password
-        if (currentPassword) {
-            const oldMatch = await bcrypt.compare(currentPassword, user.password);
-            if (!oldMatch) {
-                // Save username/email changes made before returning error
-                if (changesMade) await user.save();
-                return rerender(null, null, 'Current password is incorrect', false);
-            }
+        if (errors.length > 0) {
+            return res.render('edit-profile', { user, errors, success: null });
+        }
 
-            // Current password verified - now check new password
-            if (!newPassword || newPassword.trim() === '') {
-                //Password verified but no new password typed yet - show new fields
-                if (changesMade) await user.save();
-                return rerender(null, changesMade ? 'Profile updated successfully' : null, null, true);
-            }
-
-            // Block setting same password
-            const newMatch = await bcrypt.compare(newPassword, user.password);
-            if (newMatch) {
-                return rerender(null, null, 'New password cannot be the same as the current one.', true);
-            }
-
-            if (newPassword !== confirmNewPassword) {
-                return rerender(null, null, 'New passwords do not match', true);
-            }
-
-            user.password = await bcrypt.hash(newPassword, 10);
-            changesMade = true;
-        } else if (!currentPassword && (newPassword || confirmNewPassword)) {
-            return rerender(null, null, 'Please verify with your current password to set a new one', false);
-        } 
         //--If nothing was changed----------------------------------------------------------------------------------------------------------------
         if (!changesMade) {
-            return rerender('No changes were made. Please fill in at least one field to update.', null, null);
+            return res.render('edit-profile', { user, errors: ['No changes were made. Please fill in at least one field to update.'], success: null });
         }
 
         await user.save();
@@ -214,33 +240,34 @@ exports.editProfilePost = async (req, res) => {
         req.session.user.email = user.email;
         console.log("Profile updated:", user.username);
 
-        return rerender(null, 'Profile updated successfully', null, false);
+        return res.render('edit-profile', { user, errors: null, success: 'Profile updated successfully' });
     } catch (err) {
         console.error(err);
-        res.redirect('/user-profile');
+        res.redirect('/profile');
     }
 };
 
-// Delete user profile
-exports.deleteProfile = async (req, res) => {
-    const { username, id } = req.session.user;
+//--DELETE PROFILE----------------------------------------------------------------- //
+exports.deleteProfile = async (req, res) => {    
     try {
-        await User.findByIdAndDelete(id);
+        const userId = req.session.user.id;
+        const username = req.session.user.username;
+        await User.findByIdAndDelete(userId);
         req.session.destroy(() => {
             console.log("User deleted:", username);
             res.redirect('/register');
         });
     } catch (err) {
         console.error(err);
-        res.redirect('/user-profile');
+        res.redirect('/profile');
     }
 };
 
-// Log out
+//--LOGOUT----------------------------------------------------------------- //
 exports.logout = (req, res) => {
-    const { user } = req.session;
+    const user = req.session.user;
     req.session.destroy(() => {
-        
+        console.log("User logged out:", user.username, user.role);
         res.redirect('/login');
     });
 };
@@ -251,21 +278,26 @@ exports.logout = (req, res) => {
 
 // GET admin & user profiles
 exports.manageAccountsGet = async (req, res) => {
-    const { user } = req.session;
     try {
         const users = await User.find({ role: 'user' }).sort({ createdAt: -1 });
         const admins = await User.find({ role: 'admin' }).sort({ createdAt: -1 });
-        res.render('manage-accounts', { user, users, admins, error: null, success: null });
+        res.render('manage-accounts', { user: req.session.user, users, admins, errors: [], success: null });
     } catch (err) {
         console.error(err);
-        res.redirect('/admin-profile');
+        res.redirect('/profile');
     }
 };
 
 // UPDATE user role (admin <-> user)
 exports.promoteToAdmin = async (req, res) => {
-    const { userId } = req.body;
     try {
+        const { userId } = req.body;
+
+        // Prevent self-promotion to admin
+        if (userId === req.session.user.id) {
+            return res.redirect('/manage-accounts');
+        }
+
         await User.findByIdAndUpdate(userId, { role: 'admin' });
         console.log("User promoted to Admin:", userId);
         res.redirect('/manage-accounts');
@@ -276,8 +308,14 @@ exports.promoteToAdmin = async (req, res) => {
 };
 
 exports.demoteToUser = async (req, res) => {
-    const { userId } = req.body;
     try {
+        const { userId } = req.body;
+
+        // Prevent self-demotion
+        if (userId === req.session.user.id) {
+            return res.redirect('/manage-accounts');
+        }
+
         await User.findByIdAndUpdate(userId, { role: 'user' });
         console.log("Admin demoted to User:", userId);
         res.redirect('/manage-accounts');

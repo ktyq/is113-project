@@ -8,7 +8,7 @@ dotenv.config({ path: "../config.env" });
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-const User = require('../models/user');
+const User = require('../models/User');
 const Movie = require('../models/Movie');
 const Watchlist = require('../models/Watchlist');
 const Friend = require('../models/Friend');

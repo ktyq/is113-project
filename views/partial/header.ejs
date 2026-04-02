@@ -10,7 +10,7 @@
     <a href="/friends">Friends</a>
     &nbsp;|&nbsp;
 
-    <% if (user.role === 'admin') { %>
+    <% if (user.role === 'admin' || user.role === 'superadmin') { %>
     <a href="/feedback/admin">Feedback</a>
     &nbsp;|&nbsp;
     <a href="/admin-profile">Admin</a>
@@ -24,7 +24,8 @@
       <button type="submit">Logout</button>
     </form>
     <% } else { %>
-    <a href="/login"><button type="submit">Login</button></a>
+    &nbsp;    
+    <a href="/login"><button type="submit">Login</button></a>    
     <a href="/register"><button type="submit">Register</button></a>
     <% } %>
   </nav>

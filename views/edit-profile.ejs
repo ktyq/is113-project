@@ -13,12 +13,7 @@
 
   <h1>Edit Profile</h1>
 
-  <% if (error) { %>
-  <h3><%= error %></h3>
-  <% } %>
-  <% if (success) { %>
-  <h3><%= success %></h3>
-  <% } %>
+  <%- include('partial/messages', { errors: errors, success: success }) %>
 
   <form action="/edit-profile" method="POST">
     <label>New Username:</label>
@@ -38,19 +33,15 @@
     </select>
     <br><br>
 
-        <h3>Change Password</h3>
-        <p>Verify your current password to change it.</p>
+    <h3>Change Password</h3>
+    <p>Verify your current password to change it.</p>
 
-        <% if (passwordError) { %>
-            <h4><%= passwordError %></h4>
-        <% } %>
-
-        <label>Current Password:</label>
-        <input type="password" name="currentPassword" placeholder="Enter current password">
+    <label>Current Password:</label>
+    <input type="password" name="currentPassword" placeholder="Enter current password">
                
-        <br>
-        <label>New Password:</label>
-        <input type="password" name="newPassword" placeholder="Enter new password">
+    <br>
+    <label>New Password:</label>
+    <input type="password" name="newPassword" placeholder="Enter new password">
 
     <br>
     <label>Confirm New Password:</label>
@@ -61,9 +52,6 @@
   </form>
 
   <br>
-  <% if (user.role === 'admin') { %>
-  <a href="/admin-profile">Back to Admin Profile</a>
-  <% } else { %>
-  <a href="/user-profile">Back to Profile</a>
-  <% } %>
+  <a href="/profile">Back to Profile</a>
 </body>
+</html>

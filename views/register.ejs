@@ -12,21 +12,19 @@
 <body>
   <h1>Register</h1>
 
-  <% if (error) { %>
-  <h3><%= error %></h3>
-  <% } %>
+  <%- include('partial/messages', { errors: errors, success: success }) %>
 
   <form action="/register" method="POST">
     <label>Username:</label>
-    <input type="text" name="username" placeholder="Username" required>
+    <input type="text" name="username" placeholder="Enter Username" required>
     <br>
 
     <label>Email Address:</label>
-    <input type="email" name="email" placeholder="Email" required>
+    <input type="email" name="email" placeholder="Enter Email" required>
     <br>
 
     <label>Password:</label>
-    <input type="password" name="password" placeholder="Password" required>
+    <input type="password" name="password" placeholder="Enter Password" required>
     <br>
 
     <label>Confirm Password:</label>
