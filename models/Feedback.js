@@ -3,6 +3,7 @@
 // sentBy: ObjectId
 // type: String ['feedback', 'bug', 'report']
 // status: String ['pending', 'resolved'] 
+// url: String
 // notes: String [max: 256]
 // createdAt: Date
 // updatedAt: Date

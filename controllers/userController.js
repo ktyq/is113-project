@@ -1,24 +1,25 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 
-//--REGISTER--//
+// Get register page
 exports.registerGet = (req, res) => {
     res.render('register', { error: null });
 };
 
+// Register new user
 exports.registerPost = async (req, res) => {
+    const { username, email, password, confirmPassword, role } = req.body;
+
+    if (!username || !email || !password || !confirmPassword) {
+        return res.render('register', { error: 'All fields are required' });
+    }
+
+    if (password !== confirmPassword) {
+        return res.render('register', { error: 'Passwords do not match' });
+    }
+
     try {
-        const { username, email, password, confirmPassword, role } = req.body;
-
-        if (!username || !email || !password || !confirmPassword) {
-            return res.render('register', { error: 'All fields are required' });
-        }
-
-        if (password !== confirmPassword) {
-            return res.render('register', { error: 'Passwords do not match' });
-        }
-
-        //Check if username or email already exists
+        // Check if username or email already exists
         const existingUser = await User.findOne({ $or: [{ username: username }, { email: email }] });
         if (existingUser) {
             return res.render('register', { error: 'Username or email already exists' });
@@ -44,11 +45,12 @@ exports.registerPost = async (req, res) => {
     }
 };
 
-//--LOGIN--//
+// Get login page
 exports.loginGet = (req, res) => {
     res.render('login', { error: null });
 };
 
+// Log in user
 exports.loginPost = async (req, res) => {
     const { email, password } = req.body;
 
@@ -88,21 +90,26 @@ exports.loginPost = async (req, res) => {
     }
 };
 
-//--GET PROFILE--//
+// Display user profile
 exports.profile = (req, res) => {
-    res.render('user-profile', { user: req.session.user });
+    const { user } = req.session;
+    res.render('user-profile', { user });
 };
 
+// Display admin profile
 exports.adminProfile = (req, res) => {
-    res.render('admin-profile', { user: req.session.user });
+    const { user } = req.session;
+    res.render('admin-profile', { user });
 };
 
-//--UPDATE PROFILE--//
+// Display profile details
 exports.editProfileGet = async (req, res) => {
+    const { user } = req.session;
+
     try {
-        const user = await User.findById(req.session.user.id);
+        const userId = await User.findById(user.id);
         res.render('edit-profile', {
-            user: user,
+            user: userId,
             error: null,
             success: null,
             passwordError: null,
@@ -114,26 +121,28 @@ exports.editProfileGet = async (req, res) => {
     }
 };
 
+// Edit profile details
 exports.editProfilePost = async (req, res) => {
+    const { username, email, currentPassword, newPassword, confirmNewPassword, watchlistPrivacy } = req.body;
+
     try {
-        const { username, email, currentPassword, newPassword, confirmNewPassword, watchlistPrivacy } = req.body; // Added watchlistPrivacy
         const user = await User.findById(req.session.user.id);
 
         if (!user) return res.redirect('/login');
 
-        //Function rerender
+        // Function: rerender page
         const rerender = (error, success, passwordError, passwordVerified = false) => {
             return res.render('edit-profile', { user, error, success, passwordError, passwordVerified });
         };
 
         let changesMade = false; // Track if any changes were made
 
-        //--Username validation---------------------------------------------------------------------------------------------------------------
+        // Validate new username
         if (username && username.trim() !== '') {
             if (username === user.username) {
                 return rerender('New username cannot be the same as the current one.', null, null);
             }
-            //Check new username not taken by others
+            // Check new username not taken by others
             const taken = await User.findOne({ username: username });
             if (taken) {
                 return rerender('Username is already in use', null, null);
@@ -142,12 +151,12 @@ exports.editProfilePost = async (req, res) => {
             changesMade = true;
         }
 
-        //--Email validation----------------------------------------------------------------------------------------------------------------
+        // Validate new email
         if (email && email.trim() !== '') {
             if (email === user.email) {
                 return rerender('New email cannot be the same as the current one.', null, null);
             }
-            //Check new email not taken by others
+            // Check new email not taken by others
             if (email !== user.email) {
                 const taken = await User.findOne({ email: email });
                 if (taken) {
@@ -158,28 +167,27 @@ exports.editProfilePost = async (req, res) => {
             changesMade = true;
         }
 
-
         user.username = username || user.username;
         user.email = email || user.email;
         user.watchlistPrivacy = watchlistPrivacy || user.watchlistPrivacy; // Update privacy setting
 
-        //--Password validation----------------------------------------------------------------------------------------------------------------
+        // Validate new password
         if (currentPassword) {
             const oldMatch = await bcrypt.compare(currentPassword, user.password);
             if (!oldMatch) {
-                //Save username/email changes made before returning error
+                // Save username/email changes made before returning error
                 if (changesMade) await user.save();
                 return rerender(null, null, 'Current password is incorrect', false);
             }
 
-            //Current password verified - now check new password
+            // Current password verified - now check new password
             if (!newPassword || newPassword.trim() === '') {
                 //Password verified but no new password typed yet - show new fields
                 if (changesMade) await user.save();
                 return rerender(null, changesMade ? 'Profile updated successfully' : null, null, true);
             }
 
-            //Block setting same password
+            // Block setting same password
             const newMatch = await bcrypt.compare(newPassword, user.password);
             if (newMatch) {
                 return rerender(null, null, 'New password cannot be the same as the current one.', true);
@@ -207,19 +215,17 @@ exports.editProfilePost = async (req, res) => {
         console.log("Profile updated:", user.username);
 
         return rerender(null, 'Profile updated successfully', null, false);
-
     } catch (err) {
         console.error(err);
         res.redirect('/user-profile');
     }
 };
 
-//--DELETE PROFILE--//
+// Delete user profile
 exports.deleteProfile = async (req, res) => {
+    const { username, id } = req.session.user;
     try {
-        const username = req.session.user.username;
-
-        await User.findByIdAndDelete(req.session.user.id);
+        await User.findByIdAndDelete(id);
         req.session.destroy(() => {
             console.log("User deleted:", username);
             res.redirect('/register');
@@ -230,9 +236,9 @@ exports.deleteProfile = async (req, res) => {
     }
 };
 
-//--LOGOUT--//
+// Log out
 exports.logout = (req, res) => {
-    const user = req.session.user;
+    const { user } = req.session;
     req.session.destroy(() => {
         
         res.redirect('/login');
@@ -245,10 +251,11 @@ exports.logout = (req, res) => {
 
 // GET admin & user profiles
 exports.manageAccountsGet = async (req, res) => {
+    const { user } = req.session;
     try {
         const users = await User.find({ role: 'user' }).sort({ createdAt: -1 });
         const admins = await User.find({ role: 'admin' }).sort({ createdAt: -1 });
-        res.render('manage-accounts', { user: req.session.user, users, admins, error: null, success: null });
+        res.render('manage-accounts', { user, users, admins, error: null, success: null });
     } catch (err) {
         console.error(err);
         res.redirect('/admin-profile');
@@ -257,8 +264,8 @@ exports.manageAccountsGet = async (req, res) => {
 
 // UPDATE user role (admin <-> user)
 exports.promoteToAdmin = async (req, res) => {
+    const { userId } = req.body;
     try {
-        const { userId } = req.body;
         await User.findByIdAndUpdate(userId, { role: 'admin' });
         console.log("User promoted to Admin:", userId);
         res.redirect('/manage-accounts');
@@ -269,8 +276,8 @@ exports.promoteToAdmin = async (req, res) => {
 };
 
 exports.demoteToUser = async (req, res) => {
+    const { userId } = req.body;
     try {
-        const { userId } = req.body;
         await User.findByIdAndUpdate(userId, { role: 'user' });
         console.log("Admin demoted to User:", userId);
         res.redirect('/manage-accounts');

@@ -1,14 +1,12 @@
 const Movie = require('../models/Movie');
 const List = require('../models/Watchlist');
-const listController = require('./listController');
 
-// --- DISPLAY ALL MOVIES ---
+// Display all movies
 exports.getAllMovies = async (req, res) => {
     const search = req.query.search || "";
+    let query = {};
 
     try {
-        let query = {};
-
         if (search.trim() !== "") {
             query.title = { $regex: search, $options: "i" }; // case-insensitive
         }
@@ -18,9 +16,8 @@ exports.getAllMovies = async (req, res) => {
         res.render('index', {
             movies,
             user: req.session.user || null,
-            search 
+            search
         });
-
     } catch (err) {
         console.error(err);
         res.status(500).send("Error fetching movies");

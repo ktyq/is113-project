@@ -5,11 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= movie.title %> - Reviews</title>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="stylesheet" href="/public/default.css">
+  <link rel="stylesheet" href="/default.css">
 </head>
 
 <body>
+  <%- include('partial/header', {user}) %>
+
   <h1><%= movie.title %></h1>
   <hr>
   <!-- write review -->
@@ -56,9 +57,10 @@
     <a href="/login">Log in</a> to write a review.
   </p>
   <% } %>
+
+
   <!-- reviews -->
   <section>
-    <hr>
     <h2>Reviews (<%= pagination.totalReviews %>)</h2>
     <!-- if there is no review -->
     <% if (reviews.length===0) { %>
@@ -66,30 +68,25 @@
     <%} else {%>
     <% reviews.forEach(function(review){%>
     <div>
-      <!-- if there are reviews -->
-      <p><strong>Rating</strong> <%= review.rating %> / 5 </p>
-      <p>
+      <p><strong><%= review.rating %> / 5</strong> - by
         <% if (review.isAnonymous) { %>
         Anonymous
         <% } else { %>
         <%= review.userID.username %>
         <% } %>
         <%= new Date(review.createdAt).toLocaleDateString()%>
+        - <a href="/contact/report?reviewId=<%= review.id %>&movieId=<%= movie.id %>"> Report </a>
       </p>
     </div>
     <% if (review.comment) {%>
     <p><%= review.comment%></p>
-    <%}%>
-            <div>
-                <a href="/contact/report?reviewID=<%= review.id %>&id=<%= movie.id %>">
-    Report
-    </a>
+    <%}%>     
     <% if (currentUser && currentUser.id===review.userID.id.toString()){%>
     <details>
       <summary>Edit</summary>
       <form action="/reviews/edit" method="POST">
-        <input type="hidden" name="reviewID" value="<%=review.id%>">
-        <input type="hidden" name="movieID" value="<%=movie.id%>">
+        <input type="hidden" name="reviewId" value="<%=review.id%>">
+        <input type="hidden" name="movieId" value="<%=movie.id%>">
 
         <div>
           <label for="edit-rating-<%=review.id%>">Rating</label>
@@ -133,14 +130,14 @@
     <section>
       <div>
         <% if (pagination.hasPrevPage) { %>
-        <a href="?id=<%= movie.id %>&page=<%= pagination.currentPage - 1 %>">
+        <a href="?movieId=<%= movie.id %>&page=<%= pagination.currentPage - 1 %>">
           <button>Previous</button>
         </a>
         <span>
           <p>Page <%=pagination.currentPage%> of <%=pagination.totalPages%></p>
         </span>
         <% if (pagination.hasNextPage) {%>
-        <a href="?id=<%= movie.id %>&page=<%= pagination.currentPage + 1 %>"><button>Next</button></a>
+        <a href="?movieId=<%= movie.id %>&page=<%= pagination.currentPage + 1 %>"><button>Next</button></a>
         <%}%>
             <%}%>
 

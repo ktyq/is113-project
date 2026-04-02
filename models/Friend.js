@@ -1,44 +1,43 @@
-// models/Friend.js
-// Bidirectional friend request model
-// requestor = user who sent the friend request
-// requestee = user who received the friend request
-// nickname1 = nickname given to requestor by requestee (only requestee can update)
-// nickname2 = nickname given to requestee by requestor (only requestor can update)
-// status = pending (awaiting requestee response) | accepted (are friends)
-// friendsSince = timestamp when status changed to 'accepted'
+// friendSchema
+// _id: ObjectId
+// requestor: ObjectId 
+// requestee: ObjectId 
+// nickname1: String
+// nickname2: String 
+// status: String ['pending', 'accepted']
+// friendsSince: Date
+// createdAt: Date
+// updatedAt: Date
 
 const mongoose = require('mongoose');
 
 const friendSchema = new mongoose.Schema({
-  requestor: {
+  requestor: { // user who sent the friend request
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: [true, 'Requestor is required']
   },
-  requestee: {
+  requestee: { // user who received the friend request
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: [true, 'Requestee is required']
   },
-  nickname1: {
-    // Nickname for requestor, given by requestee (only requestee can edit)
+  nickname1: { // nickname given to requestor by requestee (only requestee can update)
     type: String,
     default: ''
   },
-  nickname2: {
-    // Nickname for requestee, given by requestor (only requestor can edit)
+  nickname2: { // nickname given to requestee by requestor (only requestor can update)
     type: String,
     default: ''
   },
-  status: {
+  status: { // pending (awaiting requestee response) | accepted (are friends)
     // 'declined' removed — decline and remove both delete the entry entirely
     type: String,
     enum: ['pending', 'accepted'],
     required: true,
     default: 'pending'
   },
-  friendsSince: {
-    // Timestamp when status changed to 'accepted'
+  friendsSince: { // timestamp when status changed to 'accepted'
     type: Date,
     default: null
   }

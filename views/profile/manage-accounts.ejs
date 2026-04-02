@@ -1,80 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Accounts</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="stylesheet" href="/default.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Accounts</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/default.css">
 </head>
+
 <body>
-    <%- include('partial/header', { user: user }) %>
+  <%- include('partial/header', { user: user }) %>
 
-    <h1>Manage Accounts</h1>
+  <h1>Manage Accounts</h1>
 
-    <% if (error) { %>
-        <h3><%= error %></h3>
-    <% } %>
-    <% if (success) { %>
-        <h3><%= success %></h3>
-    <% } %>
+  <% if (error) { %>
+  <h3><%= error %></h3>
+  <% } %>
+  <% if (success) { %>
+  <h3><%= success %></h3>
+  <% } %>
 
-    <!-- Admin List-->
-    <h2>Admins</h2>
-    <% if (admins.length === 0) { %>
-        <p>No admins found.</p>
-    <% } else { %>
-        <table border="1">
-            <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Actions</th>
-            </tr>
-            <% admins.forEach(a => { %>
-                <tr>
-                    <td><%= a.username %></td>
-                    <td><%= a.email %></td>
-                    <td>
-                        <!-- Demote admin to user-->
-                        <form action="/manage-accounts/demote" method="POST">
-                            <input type="hidden" name="userId" value="<%= a._id %>">
-                            <button type="submit">Demote to User</button>
-                        </form>
-                    </td>
-                </tr>
-            <% }) %>
-        </table>
-    <% } %>
+  <!-- Admin List-->
+  <h2>Admins</h2>
+  <% if (admins.length === 0) { %>
+  <p>No admins found.</p>
+  <% } else { %>
+  <table border="1">
+    <tr>
+      <th>Username</th>
+      <th>Email</th>
+      <th>Actions</th>
+    </tr>
+    <% admins.forEach(a => { %>
+    <tr>
+      <td><%= a.username %></td>
+      <td><%= a.email %></td>
+      <td>
+        <!-- Demote admin to user-->
+        <form action="/manage-accounts/demote" method="POST">
+          <input type="hidden" name="userId" value="<%= a._id %>">
+          <button type="submit">Demote to User</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+  </table>
+  <% } %>
 
-    <br><br>
+  <br><br>
 
-    <!-- User List-->
-    <h2>Users</h2>
-    <% if (users.length === 0) { %>
-        <p>No users found.</p>  
-    <% } else { %>
-        <table border="1">
-            <tr>
-                <td>Username</td>
-                <td>Email</td>
-                <td>Actions</td>
-            </tr>
+  <!-- User List-->
+  <h2>Users</h2>
+  <% if (users.length === 0) { %>
+  <p>No users found.</p>
+  <% } else { %>
+  <table border="1">
+    <tr>
+      <td>Username</td>
+      <td>Email</td>
+      <td>Actions</td>
+    </tr>
 
-            <% users.forEach(u => { %>
-                <tr>
-                    <td><%= u.username %></td>
-                    <td><%= u.email %></td>
-                    <td>
-                        <!-- Promote user to admin-->
-                        <form action="/manage-accounts/promote" method="POST">
-                            <input type="hidden" name="userId" value="<%= u._id %>">
-                            <button type="submit">Promote to Admin</button>
-                        </form>
-                    </td>
-                </tr>
-            <% }) %>
-        </table>
-    <% } %>
+    <% users.forEach(u => { %>
+    <tr>
+      <td><%= u.username %></td>
+      <td><%= u.email %></td>
+      <td>
+        <!-- Promote user to admin-->
+        <form action="/manage-accounts/promote" method="POST">
+          <input type="hidden" name="userId" value="<%= u._id %>">
+          <button type="submit">Promote to Admin</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+  </table>
+  <% } %>
 
-    <br><br>
-    <a href="/admin-profile">Back to Admin Profile</a>
+  <br><br>
+  <a href="/admin-profile">Back to Admin Profile</a>

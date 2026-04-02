@@ -1,36 +1,36 @@
 <!-- views/partial/watchlist-row.ejs -->
 <!-- photo -->
 <td>
-    <a href="/movie/<%= movie.movieID._id %>">
-        <img src="/../uploads/<%= movie.movieID.imageRef %>" style="width:60px;height:90px;object-fit:cover;">
-    </a>
+  <a href="index/view?movieId=<%= movie.movieID._id %>">
+    <img src="/../uploads/<%= movie.movieID.imageRef %>" style="width:60px;height:90px;object-fit:cover;">
+  </a>
 </td>
 
 <!-- title -->
 <td>
-    <a href="/movie/<%= movie.movieID._id %>">
-        <%= movie.movieID.title %>
-    </a>
+  <a href="index/view?movieId=<%= movie.movieID._id %>">
+    <%= movie.movieID.title %>
+  </a>
 </td>
 
 <!-- notes -->
 <td>
-    <!-- <textarea name="notes"><%= movie.notes %></textarea> -->
-    Notes: <%= movie.notes || "—" %>
-        <br>
-        <small>added: <%= new Date(movie.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short',
+  <!-- <textarea name="notes"><%= movie.notes %></textarea> -->
+  Notes: <%= movie.notes || "—" %>
+  <br>
+  <small>added: <%= new Date(movie.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short',
                 year:'2-digit' }) %></small>
 </td>
 
 <!-- priority -->
 <td>
-    <%= movie.priority %>
-    <!-- <input type="number" disabled name="priority" value="<%= movie.priority %>" style="width:60px;"><br> -->
+  <%= movie.priority %>
+  <!-- <input type="number" disabled name="priority" value="<%= movie.priority %>" style="width:60px;"><br> -->
 </td>
 
 <!-- actions -->
 <td>
-    <a href="/list?edit=<%= movie.movieID._id %>">Edit</a>
-    <a href="/list?remove=<%= movie.movieID._id %>">Remove</a>
+  <a href="/list?edit=<%= movie.movieID._id %>">Edit</a>
+  <a href="/list?remove=<%= movie.movieID._id %>">Remove</a>
 </td>
 </tr>

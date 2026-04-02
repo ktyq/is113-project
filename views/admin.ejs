@@ -2,184 +2,180 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Movie Management</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="/default.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Movie Management</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="/default.css">
 
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
 
-        h2 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-        }
+    h2 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+    }
 
-        section {
-            background-color: #fff;
-            padding: 20px;
-            margin-bottom: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
+    section {
+      background-color: #fff;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
 
-        form label {
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-        }
+    form label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
 
-        form input[type="text"],
-        form input[type="number"],
-        form textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
+    form input[type="text"],
+    form input[type="number"],
+    form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
 
-        form textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
+    form textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
 
-        section form button {
-            margin-top: 20px;
-            padding: 12px 20px;
-            border: none;
-            background-color: #3498db;
-            color: white;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+    section form button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
 
-        section form button:hover {
-            background-color: #2980b9;
-        }
+    section form button:hover {
+      background-color: #2980b9;
+    }
 
-        ul {
-            list-style: none;
-            padding: 0;
-        }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
 
-        li {
-            background-color: #ecf0f1;
-            margin-bottom: 10px;
-            padding: 12px 15px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background-color 0.2s ease;
-        }
+    li {
+      background-color: #ecf0f1;
+      margin-bottom: 10px;
+      padding: 12px 15px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.2s ease;
+    }
 
-        li:hover {
-            background-color: #dcdde1;
-        }
+    li:hover {
+      background-color: #dcdde1;
+    }
 
-        li a {
-            margin-left: 10px;
-            text-decoration: none;
-            color: #2980b9;
-            font-weight: bold;
-            transition: color 0.2s ease;
-        }
+    li a {
+      margin-left: 10px;
+      text-decoration: none;
+      color: #2980b9;
+      font-weight: bold;
+      transition: color 0.2s ease;
+    }
 
-        li a:hover {
-            color: #e74c3c;
-        }
+    li a:hover {
+      color: #e74c3c;
+    }
 
-        /* Responsive */
-        @media (max-width: 600px) {
-            form input[type="text"],
-            form input[type="number"],
-            form textarea {
-                font-size: 16px;
-            }
+    /* Responsive */
+    @media (max-width: 600px) {
 
-            section form button {
-                width: 100%;
-            }
-        }
-    </style>
+      form input[type="text"],
+      form input[type="number"],
+      form textarea {
+        font-size: 16px;
+      }
+
+      section form button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <%- include('partial/header', { user: user }) %>
+  <%- include('partial/header', { user: user }) %>
 
-    <section>
+  <section>
     <h2>Search Movies</h2>
 
     <form method="GET" action="/admin">
-        <input 
-            type="text" 
-            name="search" 
-            placeholder="Search by title..." 
-            value="<%= search || '' %>"
-        >
-        <button type="submit">Search</button>
+      <input type="text" name="search" placeholder="Search by title..." value="<%= search || '' %>">
+      <button type="submit">Search</button>
     </form>
-    </section>
-    <section>
-        <h2>Add New Movie</h2>
+  </section>
+  <section>
+    <h2>Add New Movie</h2>
 
-        <form action="/admin/add" method="POST" enctype="multipart/form-data">
-            <label>Title</label>
-            <input type="text" name="title" required>
+    <form action="/admin/add" method="POST" enctype="multipart/form-data">
+      <label>Title</label>
+      <input type="text" name="title" required>
 
-            <label>Image URL</label>
-            <input type="file" name="image" accept="image/*" required>
+      <label>Image URL</label>
+      <input type="file" name="image" accept="image/*" required>
 
-            <label>Genre</label>
-            <input type="text" name="genre" placeholder="Action, Drama" required>
+      <label>Genre</label>
+      <input type="text" name="genre" placeholder="Action, Drama" required>
 
-            <label>Release Year</label>
-            <input type="number" name="release_year" required>
+      <label>Release Year</label>
+      <input type="number" name="release_year" required>
 
-            <label>Duration (minutes)</label>
-            <input type="number" name="movieLength" required>
+      <label>Duration (minutes)</label>
+      <input type="number" name="movieLength" required>
 
-            <label>Director</label>
-            <input type="text" name="director" placeholder="Comma separated" required>
+      <label>Director</label>
+      <input type="text" name="director" placeholder="Comma separated" required>
 
-            <label>Cast</label>
-            <input type="text" name="cast" placeholder="Comma separated" required>
+      <label>Cast</label>
+      <input type="text" name="cast" placeholder="Comma separated" required>
 
-            <label>Overview</label>
-            <textarea name="overview" required></textarea>
+      <label>Overview</label>
+      <textarea name="overview" required></textarea>
 
-            <button type="submit">Add Movie</button>
-        </form>
+      <button type="submit">Add Movie</button>
+    </form>
 
-    </section>
+  </section>
 
-    <section>
-        <h2>Movie List</h2>
-        <ul>
-            <% if (movies) { %>
-                <% movies.forEach(movie => { %>
-                    <li>
-                        <span><%= movie.title %> (<%= movie.release_year %>)</span>
-                        <span>
-                            <a href="/admin/edit?id=<%= movie._id %>">Edit</a>
-                            <a href="/admin/delete?id=<%= movie._id %>">Delete</a>
-                        </span>
-                    </li>
-                <% }) %>
-            <% } %>
-        </ul>
-    </section>
+  <section>
+    <h2>Movie List</h2>
+    <ul>
+      <% if (movies) { %>
+      <% movies.forEach(movie => { %>
+      <li>
+        <span><%= movie.title %> (<%= movie.release_year %>)</span>
+        <span>
+          <a href="/admin/edit?id=<%= movie._id %>">Edit</a>
+          <a href="/admin/delete?id=<%= movie._id %>">Delete</a>
+        </span>
+      </li>
+      <% }) %>
+      <% } %>
+    </ul>
+  </section>
 
 </body>
 
