@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../models/user');
 const bcrypt = require('bcrypt');
 
 //--REGISTER--//
@@ -30,7 +30,7 @@ exports.registerPost = async (req, res) => {
         const user = new User({
             username: username,
             email: email,
-            password: hashedPassword,
+            password: password,
             role: role
         });
 
