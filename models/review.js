@@ -21,7 +21,6 @@ const reviewSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Movie",
       required: [true, "Movie is required"],
-      // unique: true
     },
     rating: {
       type: Number,
@@ -45,4 +44,5 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// export the schema as a model
 module.exports = mongoose.models.Review || mongoose.model('Review', reviewSchema);

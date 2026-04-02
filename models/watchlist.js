@@ -1,5 +1,3 @@
-// models/Watchlist.js
-
 // watchlistSchema
 // _id: ObjectId
 // userID: ObjectId
@@ -55,7 +53,7 @@ const watchlistSchema = new mongoose.Schema({
 watchlistSchema.index({ userID: 1, movieID: 1 }, { unique: true });
 watchlistSchema.index({ userID: 1, status: 1, priority: -1 });
 
-// reed
+// Get filtered list of movies
 watchlistSchema.statics.getListsByUser = async function (user, page = 1, number = 10, status = null, settings = null, search = '') {
     const userID = typeof user === 'string' ? new ObjectId(user) : user;
 
@@ -86,13 +84,13 @@ watchlistSchema.statics.getListsByUser = async function (user, page = 1, number 
         })
         .lean();
 
-        console.log(result)
+    console.log(result);
     result = result.filter(item => item.movieID); // remove non matching titles
     // console.log('Titles:', result.map(item => item.movieID?.title));
     return result;
 };
 
-// reed
+// Get single watchlist item
 watchlistSchema.statics.getWatchlistItem = async function (user, movie) {
     const userID = typeof user === 'string' ? new ObjectId(user) : user;
     const movieID = typeof movie === 'string' ? new ObjectId(movie) : movie;
@@ -106,6 +104,8 @@ watchlistSchema.statics.getWatchlistItem = async function (user, movie) {
         .lean();
     return result || null;
 };
+
+// Get watchlist of movie
 watchlistSchema.statics.getMovieStatus = async function (user, movie) {
     const userID = typeof user === 'string' ? new ObjectId(user) : user;
     const movieID = typeof movie === 'string' ? new ObjectId(movie) : movie;
@@ -116,7 +116,8 @@ watchlistSchema.statics.getMovieStatus = async function (user, movie) {
         .lean();
     return entry?.status || null;
 };
-// updat
+
+// Update watchlist record
 watchlistSchema.statics.updateWatchlistMovie = async function (user, movie, updates) {
     const userID = typeof user === 'string' ? new ObjectId(user) : user;
     const movieID = typeof movie === 'string' ? new ObjectId(movie) : movie;
@@ -138,7 +139,7 @@ watchlistSchema.statics.updateWatchlistMovie = async function (user, movie, upda
         ).populate('movieID', 'title');
 };
 
-// creat
+// Add movie to user watchlist
 watchlistSchema.statics.createUserList = async function (user, movie, status = 'planning') {
     const userID = typeof user === 'string' ? new ObjectId(user) : user;
     const movieID = typeof movie === 'string' ? new ObjectId(movie) : movie;
@@ -151,7 +152,7 @@ watchlistSchema.statics.createUserList = async function (user, movie, status = '
     return await newEntry.populate('movieID', 'title');
 };
 
-// delet
+// Delete movie from user watchlist
 watchlistSchema.statics.deleteFromUserList = async function (user, movie) {
     const userID = typeof user === 'string' ? new ObjectId(user) : user;
     const movieID = typeof movie === 'string' ? new ObjectId(movie) : movie;
@@ -164,4 +165,5 @@ watchlistSchema.statics.deleteFromUserList = async function (user, movie) {
 
 const Watchlist = mongoose.model('Watchlist', watchlistSchema);
 
+// export the schema as a model
 module.exports = Watchlist; // blehhhh 
