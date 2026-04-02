@@ -42,18 +42,24 @@
                                 <td><%= fb.notes %></td>
                                 <td>
                                     <% if (fb.url) { %>
-                                        <a href="<%= fb.url %>">Link</a>
+                                        <a href="<%= fb.url %>" target="_blank">Link</a>
                                     <% } else { %>
                                         -
                                     <% } %>
                                 </td>
-                                <td><%= fb.status %></td>
+                                <td>
+                                    <strong><%= fb.status %></strong>
+                                </td>
                                 <td><%= fb.createdAt.toLocaleDateString() %></td>
                                 <td>
                                     <form action="/feedback/resolve/<%= fb._id %>" method="POST" style="display:inline;">
                                         <select name="status">
-                                            <option value="pending" <%= fb.status === 'pending' ? 'selected' : '' %>>Pending</option>
-                                            <option value="resolved" <%= fb.status === 'resolved' ? 'selected' : '' %>>Resolved</option>
+                                            <option value="pending" <%= fb.status === 'pending' ? 'selected' : '' %>>
+                                                Pending
+                                            </option>
+                                            <option value="resolved" <%= fb.status === 'resolved' ? 'selected' : '' %>>
+                                                Resolved
+                                            </option>
                                         </select>
                                         <button type="submit">Update</button>
                                     </form>
@@ -63,7 +69,7 @@
                     </tbody>
                 </table>
             <% } else { %>
-                <p>No feedback found.</p>
+                <p>No feedback found. <a href="/dashboard">Back to Dashboard</a></p>
             <% } %>
         </section>
     </main>

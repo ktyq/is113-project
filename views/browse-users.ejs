@@ -11,141 +11,114 @@
 
 <body>
   <%- include('partial/header', {user: user}) %>
+  <main>
+    <h1>Browse Users</h1>
 
-    <main>
-      <h1>Browse Users</h1>
+    <!-- ===== FILTER / SORT CONTROLS ===== -->
+    <form method="GET" action="/friends/browse">
+      <label>
+        Search
+        <input type="text" name="search" value="<%= search || '' %>" placeholder="Search by username" />
+      </label>
 
-      <!-- ===== FILTER / SORT CONTROLS ===== -->
-      <form method="GET" action="/friends/browse">
-        <label>
-          Search
-          <input type="text" name="search" value="<%= search || '' %>" placeholder="Search by username" />
-        </label>
+      &nbsp;
 
-        &nbsp;
+      <label>
+        Sort By
+        <select name="sort">
+          <option value="az"     <%= sort === 'az'     ? 'selected' : '' %>>A → Z</option>
+          <option value="za"     <%= sort === 'za'     ? 'selected' : '' %>>Z → A</option>
+          <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest accounts</option>
+          <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>>Oldest accounts</option>
+        </select>
+      </label>
 
-        <label>
-          Sort By
-          <select name="sort">
-            <option value="az" <%=sort==='az' ? 'selected' : '' %>>A → Z</option>
-            <option value="za" <%=sort==='za' ? 'selected' : '' %>>Z → A</option>
-            <option value="newest" <%=sort==='newest' ? 'selected' : '' %>>Newest accounts</option>
-            <option value="oldest" <%=sort==='oldest' ? 'selected' : '' %>>Oldest accounts</option>
-          </select>
-        </label>
+      &nbsp;
 
-        &nbsp;
+      <label>
+        Show
+        <select name="limit">
+          <option value="5"   <%= limit == 5   ? 'selected' : '' %>>5</option>
+          <option value="10"  <%= limit == 10  ? 'selected' : '' %>>10</option>
+          <option value="20"  <%= limit == 20  ? 'selected' : '' %>>20</option>
+          <option value="50"  <%= limit == 50  ? 'selected' : '' %>>50</option>
+          <option value="100" <%= limit == 100 ? 'selected' : '' %>>100</option>
+        </select>
+      </label>
 
-        <label>
-          Show
-          <select name="limit">
-            <option value="5" <%=limit==5 ? 'selected' : '' %>>5</option>
-            <option value="10" <%=limit==10 ? 'selected' : '' %>>10</option>
-            <option value="20" <%=limit==20 ? 'selected' : '' %>>20</option>
-            <option value="50" <%=limit==50 ? 'selected' : '' %>>50</option>
-            <option value="100" <%=limit==100 ? 'selected' : '' %>>100</option>
-          </select>
-        </label>
+      &nbsp;
 
-        &nbsp;
+      <label>
+        Page
+        <input type="number" name="page" value="<%= page || 1 %>" min="1" max="<%= totalPages %>" style="width: 60px;" />
+      </label>
 
-        <label>
-          Page
-          <input type="number" name="page" value="<%= page || 1 %>" min="1" max="<%= totalPages %>"
-            style="width: 60px;" />
-        </label>
+      &nbsp;
 
-        &nbsp;
+      <button type="button" onclick="window.location.href='/friends/browse'">Reset</button>
+      <button type="submit">Apply</button>
+    </form>
 
-        <button type="button" onclick="window.location.href='/friends/browse'">Reset</button>
-        <button type="submit">Apply</button>
-      </form>
+    <p style="margin-top: 0.5rem;">
+      Showing <%= users.length %> of <%= totalUsers %> users
+      (Page <%= page %> of <%= totalPages %>)
+    </p>
 
-      <p style="margin-top: 0.5rem;">
-        Showing <%= users.length %> of <%= totalUsers %> users
-            (Page <%= page %> of <%= totalPages %>)
-      </p>
+    <!-- ===== USERS TABLE ===== -->
+    <% if (!users || users.length === 0) { %>
+    <p>No users found.</p>
+    <% } else { %>
+    <table>
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Joined</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% users.forEach(function(u) { %>
+        <tr>
+          <td>
+            <a href="/list/<%= u._id %>"><%= u.username %></a>
+          </td>
+          <td>
+            <%= u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB') : '' %>
+          </td>
+          <td>
+            <form method="POST" action="/friends/send?redirect=/friends/browse<%= queryString %>">
+              <input type="hidden" name="friendId" value="<%= u._id %>" />
+              <button type="submit">Send Friend Request</button>
+            </form>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <% } %>
 
-      <!-- ===== USERS TABLE ===== -->
-      <% if (!users || users.length===0) { %>
-        <p>No users found.</p>
-        <% } else { %>
+    <!-- ===== PAGINATION ===== -->
+    <div style="margin-top: 1rem;">
+      <% if (page > 1) { %>
+      <a href="/friends/browse?search=<%= encodeURIComponent(search||'') %>&sort=<%= sort %>&limit=<%= limit %>&page=<%= page - 1 %>">
+        &laquo; Prev
+      </a>
+      &nbsp;
+      <% } %>
 
-          <table>
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Joined</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+      Page <%= page %> of <%= totalPages %>
 
-            <tbody>
+      <% if (page < totalPages) { %>
+      &nbsp;
+      <a href="/friends/browse?search=<%= encodeURIComponent(search||'') %>&sort=<%= sort %>&limit=<%= limit %>&page=<%= page + 1 %>">
+        Next &raquo;
+      </a>
+      <% } %>
+    </div>
 
-              <% /* Precompute sets ONCE (fast lookups) */ %>
-                <% const friendSet=new Set((friendIds || []).map(id=> id.toString()));
-                  const sentSet = new Set((sentRequestIds || []).map(id => id.toString()));
-                  const pendingSet = new Set((pendingRequestIds || []).map(id => id.toString()));
-                  %>
-
-                  <% users.forEach(function(u) { %>
-
-                    <% const uid=u._id.toString(); const isSelf=uid===currentUserId.toString(); const
-                      isFriend=friendSet.has(uid); const hasSentRequest=sentSet.has(uid); const
-                      hasPendingRequest=pendingSet.has(uid); const shouldShow=!(isSelf || isFriend || hasSentRequest ||
-                      hasPendingRequest); %>
-
-                      <% if (shouldShow) { %>
-                        <tr>
-                          <td>
-                            <a href="/list/<%= u._id %>">
-                              <%= u.username %>
-                            </a>
-                          </td>
-                          <td>
-                            <%= u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB') : '' %>
-                          </td>
-                          <td>
-                            <form method="POST"
-                              action="/friends/send/<%= u._id %>?redirect=/friends/browse<%= queryString %>">
-                              <button type="submit">Send Friend Request</button>
-                            </form>
-                          </td>
-                        </tr>
-                        <% } %>
-
-                          <% }); %>
-
-            </tbody>
-          </table>
-
-          <% } %>
-
-            <!-- ===== PAGINATION ===== -->
-            <div style="margin-top: 1rem;">
-              <% if (page> 1) { %>
-                <a
-                  href="/friends/browse?search=<%= encodeURIComponent(search||'') %>&sort=<%= sort %>&limit=<%= limit %>&page=<%= page - 1 %>">
-                  &laquo; Prev
-                </a>
-                &nbsp;
-                <% } %>
-
-                  Page <%= page %> of <%= totalPages %>
-
-                      <% if (page < totalPages) { %>
-                        &nbsp;
-                        <a
-                          href="/friends/browse?search=<%= encodeURIComponent(search||'') %>&sort=<%= sort %>&limit=<%= limit %>&page=<%= page + 1 %>">
-                          Next &raquo;
-                        </a>
-                        <% } %>
-            </div>
-
-            <br>
-            <a href="/friends"><button type="button">Back to Friends</button></a>
-
-    </main>
+    <br>
+    <a href="/friends"><button type="button">Back to Friends</button></a>
+  </main>
 </body>
 
 </html>

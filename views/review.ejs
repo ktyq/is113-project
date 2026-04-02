@@ -2,152 +2,146 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reviews</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="../public/default.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= movie.title %> - Reviews</title>
+  <link rel="stylesheet" href="/default.css">
 </head>
 
 <body>
-    <section>
-        <div class="movie-detail">
+  <%- include('partial/header', {user}) %>
 
-            <img src="<%= movie.imageRef %>" alt="<%= movie.title %>">
+  <h1><%= movie.title %></h1>
+  <hr>
+  <!-- write review -->
+  <h2>Write a Review</h2>
+  <% if (errors & errors.length>0) {%>
+  <ul style="color: red">
+    <% errors.forEach(function(e) {%>
+    <li>
+      <%=e%>
+    </li>
+    <%})%>
+  </ul>
+  <%}%>
+  <% if(currentUser){%>
+  <form action="/reviews/add" method="POST">
+    <input type="hidden" name="movieID" value="<%= movie.id %>">
+    <div>
+      <select name="rating" id="rating" required>
+        <option value="">Select rating</option>
+        <option value="1">⭐️</option>
+        <option value="2">⭐️⭐️</option>
+        <option value="3">⭐️⭐️⭐️</option>
+        <option value="4">⭐️⭐️⭐️⭐️</option>
+        <option value="5">⭐️⭐️⭐️⭐️⭐️</option>
+      </select>
+    </div>
 
-            <div>
-                <h2><%= movie.title %></h2>
-                <p><%= movie.release_year %> — <%= movie.movieLength %> mins</p>
+    <div>
+      <label for="comment">Comment</label>
+      <br>
+      <textarea name="comment" id="comment" rows="5" placeholder="Share your thoughts..."></textarea>
+    </div>
 
-                <div class="movie-meta">
-                    <div>Genre: <%= movie.genre.join(", ") %></div>
-                </div>
+    <div>
+      <input type="checkbox" name="isAnonymous" id="isAnonymous">
+      <label for="isAnonymous">Post anonymously</label>
+    </div>
 
-                <p><%= movie.overview %></p>
+    <button type="submit">Submit your review!</button>
+  </form>
+  <!-- if not logged in refer to login page -->
+  <% } else { %>
+  <p>
+    <a href="/login">Log in</a> to write a review.
+  </p>
+  <% } %>
 
-                <p><strong>Directed By</strong> <%= movie.director.join(", ") %></p>
 
-                <p><strong>Cast</strong> <%= movie.cast.join(", ") %></p>
-
-                <div class="button-row">
-                    <a href="/watchlist"><button>Add to Watchlist</button></a>
-                    <a href="/watched"><button>Mark as Watched</button></a>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <section>
-        <h2>Add Review</h2>
-
-        <% if (errors && errors.length > 0) { %>
-            <ul style="color: red;">
-                <% errors.forEach(function(e) { %>
-                    <li><%= e %></li>
-                <% }) %>
-            </ul>
-        <% } %>
-
-        <% if (currentUser) { %>
-            <form action="/reviews/add" method="POST">
-                <input type="hidden" name="movieID" value="<%= movie._id %>">
-
-                <div class="review-form-row">
-                    <label>Rating</label>
-                    <select name="rating">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                    </select>
-                </div>
-
-                <label>Comment</label>
-                <textarea name="comment"></textarea>
-
-                <div class="review-form-row">
-                    <input type="checkbox" name="isAnonymous">
-                    <label>Post anonymously</label>
-                </div>
-
-                <button type="submit">Post Review</button>
-            </form>
+  <!-- reviews -->
+  <section>
+    <h2>Reviews (<%= pagination.totalReviews %>)</h2>
+    <!-- if there is no review -->
+    <% if (reviews.length===0) { %>
+    <p>No reviews yet. Be the first to share your thoughts!</p>
+    <%} else {%>
+    <% reviews.forEach(function(review){%>
+    <div>
+      <p><strong><%= review.rating %> / 5</strong> - by
+        <% if (review.isAnonymous) { %>
+        Anonymous
         <% } else { %>
-            <p><a href="/auth/login">Log in</a> to write a review.</p>
+        <%= review.userID.username %>
         <% } %>
+        <%= new Date(review.createdAt).toLocaleDateString()%>
+        - <a href="/contact/report?reviewId=<%= review.id %>&movieId=<%= movie.id %>"> Report </a>
+      </p>
+    </div>
+    <% if (review.comment) {%>
+    <p><%= review.comment%></p>
+    <%}%>     
+    <% if (currentUser && currentUser.id===review.userID.id.toString()){%>
+    <details>
+      <summary>Edit</summary>
+      <form action="/reviews/edit" method="POST">
+        <input type="hidden" name="reviewId" value="<%=review.id%>">
+        <input type="hidden" name="movieId" value="<%=movie.id%>">
 
-        <hr>
-    </section>
+        <div>
+          <label for="edit-rating-<%=review.id%>">Rating</label>
+          <select name="rating" id="edit-rating-<%=review.id%>" required>
+            <option value="">Select rating</option>
+            <option value="1" <%= review.rating === 1 ? 'selected' : '' %>>⭐️</option>
+            <option value="2" <%= review.rating === 2 ? 'selected' : '' %>>⭐️⭐️</option>
+            <option value="3" <%= review.rating === 3 ? 'selected' : '' %>>⭐️⭐️⭐️</option>
+            <option value="4" <%= review.rating === 4 ? 'selected' : '' %>>⭐️⭐️⭐️⭐️</option>
+            <option value="5" <%= review.rating === 5 ? 'selected' : '' %>>⭐️⭐️⭐️⭐️⭐️</option>
+          </select>
+        </div>
 
+        <div>
+          <label for="edit-comment-<%=review.id%>">Comment</label>
+          <br>
+          <textarea name="comment" id="edit-comment-<%=review.id%>" rows="5" placeholder="Share your thoughts..."><%= review.comment || '' %></textarea>
+        </div>
+
+        <div>
+          <input type="checkbox" name="isAnonymous" id="edit-anon-<%=review.id%>" <%= review.isAnonymous ? 'checked' : '' %>>
+          <label for="edit-anon-<%=review.id%>">Post anonymously</label>
+        </div>
+
+        <button type="submit">Save changes</button>
+      </form>
+    </details>
+
+    <form action="/reviews/del" method="POST" style="display: inline;" onsubmit="return confirm('Delete this review?')">
+      <input type="hidden" name="reviewID" value="<%= review.id %>">
+      <button type="submit">Delete</button>
+    </form>
+    <%}%>
+    </div>
+    <hr>
+    <%})%>
+    <%}%>
+  </section>
+  
+  <% if (pagination.totalPages>1){%>
     <section>
-        <h2>Reviews (<%= reviews.length %>)</h2>
+      <div>
+        <% if (pagination.hasPrevPage) { %>
+        <a href="?movieId=<%= movie.id %>&page=<%= pagination.currentPage - 1 %>">
+          <button>Previous</button>
+        </a>
+        <span>
+          <p>Page <%=pagination.currentPage%> of <%=pagination.totalPages%></p>
+        </span>
+        <% if (pagination.hasNextPage) {%>
+        <a href="?movieId=<%= movie.id %>&page=<%= pagination.currentPage + 1 %>"><button>Next</button></a>
+        <%}%>
+            <%}%>
 
-        <% if (reviews.length === 0) { %>
-            <p>No reviews yet. Be the first!</p>
-        <% } %>
-
-        <% reviews.forEach(function(review) { %>
-            <div>
-                <p>Rating: <%= review.rating %> / 5</p>
-                <p><%= review.comment %></p>
-                <p>
-                    <i>
-                        <% if (review.isAnonymous) { %>
-                            Anonymous
-                        <% } else { %>
-                            <%= review.userID.username %>
-                        <% } %>
-                        , <%= review.createdAt.toDateString() %>
-                    </i>
-                </p>
-
-                <% if (currentUser && currentUser._id.toString() === review.userID._id.toString()) { %>
-
-                    <details>
-                        <summary>Edit</summary>
-                        <form action="/reviews/edit" method="POST">
-                            <input type="hidden" name="reviewID" value="<%= review._id %>">
-                            <input type="hidden" name="movieID"  value="<%= movie._id %>">
-
-                            <div class="review-form-row">
-                                <label>Rating</label>
-                                <select name="rating">
-                                    <% for (var i = 1; i <= 5; i++) { %>
-                                        <option value="<%= i %>" <%= review.rating === i ? 'selected' : '' %>>
-                                            <%= i %>
-                                        </option>
-                                    <% } %>
-                                </select>
-                            </div>
-
-                            <label>Comment</label>
-                            <textarea name="comment"><%= review.comment %></textarea>
-
-                            <div class="review-form-row">
-                                <input type="checkbox" name="isAnonymous" <%= review.isAnonymous ? 'checked' : '' %>>
-                                <label>Post anonymously</label>
-                            </div>
-
-                            <button type="submit">Save Changes</button>
-                        </form>
-                    </details>
-
-                    <form action="/reviews/del" method="POST"
-                          onsubmit="return confirm('Delete this review?')">
-                        <input type="hidden" name="reviewID" value="<%= review._id %>">
-                        <button type="submit">Delete</button>
-                    </form>
-
-                <% } %>
-
-                <hr>
-            </div>
-        <% }) %>
-
+      </div>
     </section>
-
+    <%}%>
 </body>
-
-</html>

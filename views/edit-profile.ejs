@@ -2,69 +2,68 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="../public/default.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Profile</title>
+  <link rel="stylesheet" href="default.css">
 </head>
 
 <body>
-    <%- include('partial/header', {user: user}) %>
+  <%- include('partial/header', {user: user}) %>
 
-    <h1>Edit Profile</h1>
+  <h1>Edit Profile</h1>
 
-    <% if (error) { %>
-        <h3><%= error %></h3>
+  <% if (error) { %>
+  <h3><%= error %></h3>
+  <% } %>
+  <% if (success) { %>
+  <h3><%= success %></h3>
+  <% } %>
+
+  <form action="/edit-profile" method="POST">
+    <label>New Username:</label>
+    <input type="text" name="username" placeholder="<%= user.username %>">
+    <br>
+
+    <label>New Email Address:</label>
+    <input type="email" name="email" placeholder="<%= user.email %>">
+    <br>
+
+    <!-- Watchlist privacy setting -->
+    <label>Watchlist Privacy:</label>
+    <select name="watchlistPrivacy">
+      <option value="public" <%= user.watchlistPrivacy === 'public' ? 'selected' : '' %>>Public (All can view)</option>
+      <option value="friends" <%= user.watchlistPrivacy === 'friends' ? 'selected' : '' %>>Friends only</option>
+      <option value="private" <%= user.watchlistPrivacy === 'private' ? 'selected' : '' %>>Private (No one)</option>
+    </select>
+    <br><br>
+
+    <h3>Change password</h3>
+    <p>Verify your current password to change it.</p>
+
+    <label>Current Password:</label>
+    <input type="password" name="currentPassword" placeholder="Enter current password">
+
+    <% if (passwordError) { %>
+    <p><%= passwordError %></p>
     <% } %>
-    <% if (success) { %>
-        <h3><%= success %></h3>
-    <% } %>
-
-    <form action="/edit-profile" method="POST">
-        <label>New Username:</label>
-        <input type="text" name="username" placeholder="<%= user.username %>">
-        <br><br>
-
-        <label>New Email Address:</label>
-        <input type="email" name="email" placeholder="<%= user.email %>">
-        <br><br>
-
-        <!-- Watchlist privacy setting -->
-        <label>Watchlist Privacy:</label>
-        <select name="watchlistPrivacy">
-            <option value="public" <%= user.watchlistPrivacy === 'public' ? 'selected' : '' %>>Public (All can view)</option>
-            <option value="friends" <%= user.watchlistPrivacy === 'friends' ? 'selected' : '' %>>Friends only</option>
-            <option value="private" <%= user.watchlistPrivacy === 'private' ? 'selected' : '' %>>Private (No one)</option>
-        </select>
-        <br><br>
-
-        <h3>Change password</h3>
-        <p>Verify your current password to change it.</p>
-
-        <label>Current Password:</label>
-        <input type="password" name="currentPassword" placeholder="Enter current password">
-
-        <% if (passwordError) { %>
-            <p><%= passwordError %></p>
-        <% } %>
-        
-        <br>
-        <label>New Password:</label>
-        <input type="password" name="newPassword" placeholder="Enter new password">
-
-        <br>
-        <label>Confirm New Password:</label>
-        <input type="password" name="confirmNewPassword" placeholder="Confirm new password">
-
-        <br><br>
-        <button type="submit">Save Changes</button>
-    </form>
 
     <br>
-    <% if (user.role === 'admin') { %>
-        <a href="/admin-profile">Back to Admin Profile</a>
-    <% } else { %>  
-        <a href="/user-profile">Back to Profile</a>
-    <% } %>
+    <label>New Password:</label>
+    <input type="password" name="newPassword" placeholder="Enter new password">
+
+    <br>
+    <label>Confirm New Password:</label>
+    <input type="password" name="confirmNewPassword" placeholder="Confirm new password">
+
+    <br><br>
+    <button type="submit">Save Changes</button>
+  </form>
+
+  <br>
+  <% if (user.role === 'admin') { %>
+  <a href="/admin-profile">Back to Admin Profile</a>
+  <% } else { %>
+  <a href="/user-profile">Back to Profile</a>
+  <% } %>
 </body>

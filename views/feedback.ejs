@@ -12,40 +12,41 @@
 <body>
     <%- include('partial/header', { user: user }) %>
 
-    <header>
-        <h1>Feedback</h1>
-    </header>
+    <h1>Feedback</h1>
 
     <main>
         <section>
             <h2>Submit Feedback</h2>
-            <hr>
             <form action="/feedback" method="POST">
-                <label>Type:</label><br>
-                <select name="type" required>
-                    <option value="" disabled selected>Select type</option>
-                    <option value="feedback">Feedback</option>
-                    <option value="bug">Bug Report</option>
-                    <option value="report">User Report</option>
-                </select>
-                <br>
+                <div class="row">
+                    <label>Type</label>
+                    <select name="type" required>
+                        <option value="" disabled selected>Select type</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="bug">Bug Report</option>
+                        <option value="report">User Report</option>
+                    </select>
+                </div>
 
-                <label>Related URL (optional):</label><br>
-                <input type="text" name="url" placeholder="e.g. /movie/view?id=...">
-                <br>
+                <div class="row">
+                    <label>Related URL</label>
+                    <input type="text" name="url" placeholder="e.g. /movie/view?id=...">
+                </div>
 
-                <label>Notes:</label><br>
-                <textarea name="notes" maxlength="256" placeholder="Describe your feedback..." required style="width: 100%; min-height: 80px;"></textarea>
-                <br>
+                <div class="row">
+                    <label>Notes</label><br>
+                    <textarea name="notes" maxlength="256" placeholder="Describe your feedback..." required style="width: 100%; min-height: 80px;"></textarea>
+                </div>
 
                 <button type="submit">Submit Feedback</button>
             </form>
         </section>
 
-        <br>
+        <hr>
 
         <section>
-            <h2>My Feedback History</h2>
+            <h2>My Past Feedback</h2>
+
             <% if (feedbacks && feedbacks.length > 0) { %>
                 <table border="1">
                     <thead>
@@ -61,7 +62,7 @@
                     <tbody>
                         <% feedbacks.forEach(function(fb) { %>
                             <tr>
-                                <td><%= fb.type %></td>
+                                <td><strong><%= fb.type %></strong></td>
                                 <td><%= fb.notes %></td>
                                 <td>
                                     <% if (fb.url) { %>
@@ -74,7 +75,7 @@
                                 <td><%= fb.createdAt.toLocaleDateString() %></td>
                                 <td>
                                     <form action="/feedback/delete/<%= fb._id %>" method="POST" onsubmit="return confirm('Delete this feedback?')">
-                                        <button type="submit">Delete</button>
+                                        <button type="submit" style="color: red;">Delete</button>
                                     </form>
                                 </td>
                             </tr>

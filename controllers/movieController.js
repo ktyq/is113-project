@@ -1,11 +1,10 @@
 const Movie = require('../models/Movie');
-const mongoose = require('mongoose');
 const listController = require('./listController');
 
 // --- CREATE MOVIE ---
 exports.createMovie = async (req, res) => {
+    const { title, movieLength, release_year, genre, overview, director, cast } = req.body;
     try {
-        const { title, movieLength, release_year, genre, overview, director, cast } = req.body;
 
         // check req.file instead of imageRef
         if (!title || !movieLength || !release_year || !genre || !overview || !director || !cast || !req.file) {
@@ -45,8 +44,8 @@ exports.getAllMoviesAdmin = async (req, res) => {
 
         const movies = await Movie.find(query).sort({ createdAt: -1 });
 
-        res.render('admin', { 
-            movies, 
+        res.render('admin', {
+            movies,
             search,
             user: req.session.user
         });
@@ -74,9 +73,10 @@ exports.getEditMovie = async (req, res) => {
         const movie = await Movie.findById(req.query.id);
         if (!movie) return res.send("Movie not found");
 
-        res.render('editMovie', { movie,
+        res.render('editMovie', {
+            movie,
             user: req.session.user
-         });
+        });
     } catch (err) {
         console.error(err);
         res.send("Error loading edit page");

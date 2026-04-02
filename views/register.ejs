@@ -1,41 +1,41 @@
+<!-- views/register.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="../public/default.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration</title>
+  <link rel="stylesheet" href="default.css">
 </head>
 
 <body>
-    <h1>Register</h1>
+  <h1>Register</h1>
 
-    <% if (error) { %>
-        <h3><%= error %></h3>
-    <% } %>
+  <% if (error) { %>
+  <h3><%= error %></h3>
+  <% } %>
 
-    <form action="/register" method="POST">
-        <label>Username:</label>
-        <input type="text" name="username" placeholder="Username" required>
-        <br><br>
-
-        <label>Email Address:</label>
-        <input type="email" name="email" placeholder="Email" required>
-        <br><br>
-        
-        <label>Password:</label>   
-        <input type="password" name="password" placeholder="Password" required>
-        <br><br>
-
-        <label>Confirm Password:</label>
-        <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
-        <br><br>
-
-        <button type="submit">Register</button>
-    </form>
-
+  <form action="/register" method="POST">
+    <label>Username:</label>
+    <input type="text" name="username" placeholder="Username" required>
     <br>
-    <p>Already have an account? <a href="/login">Login here</a></p>
+
+    <label>Email Address:</label>
+    <input type="email" name="email" placeholder="Email" required>
+    <br>
+
+    <label>Password:</label>
+    <input type="password" name="password" placeholder="Password" required>
+    <br>
+
+    <label>Confirm Password:</label>
+    <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
+    <br>
+
+    <button type="submit">Register</button>
+  </form>
+
+  <br>
+  <p>Already have an account? <a href="/login">Login here</a></p>
 </body>

@@ -1,9 +1,6 @@
-const fs = require('fs/promises');
-
 const List = require('../models/Watchlist');
-const User = require('../models/user');
+const User = require('../models/User');
 const Friend = require('../models/Friend');
-const TEST_USER = '69c39ce645385a80651325ed';
 
 // Helper function to resolve current user ID from various sources
 // FIX: Guard req.body, and extract .id from session.user object instead of returning the whole object
@@ -115,7 +112,8 @@ exports.viewOtherUserList = async (req, res) => {
             search,
             editMovieId: null,
             removeMovieId: null,
-            viewingUser: targetUser
+            viewingUser: targetUser,
+            user: req.session.user || null  // FIX: pass user to template for header partial
         });
 
     } catch (error) {

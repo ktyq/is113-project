@@ -1,8 +1,11 @@
-// Watchlist (kt)
+// routes/watchlist.js
 
 const express = require('express');
 const listController = require('./../controllers/listController');
+const authMiddleware = require('../middleware/authentication');
 const router = express.Router();
+
+router.use(authMiddleware.isLoggedIn)
 
 // view planned , watched
 router.get("/", listController.viewUserList); // user, list type (planned, watched), order

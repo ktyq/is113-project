@@ -7,7 +7,7 @@
 // - browse all users with search, sort, and pagination
 
 const mongoose = require('mongoose');
-const User = require('../models/user');
+const User = require('../models/User');
 const Friend = require('../models/Friend');
 
 // Resolve user identity from request data (query/body/session fallback)
@@ -33,7 +33,6 @@ function toObjectId(id) {
 }
 
 // GET /friends
-// Renders the friends page with four sections: Friends, Sent Requests, Received Requests, Recommended
 exports.getFriendsPage = async (req, res) => {
   try {
     const userId = await resolveCurrentUser(req);
@@ -75,8 +74,6 @@ exports.getFriendsPage = async (req, res) => {
 };
 
 // GET /friends/browse
-// Browse all users with search, sort, and pagination.
-// Passes relationship state arrays so the template can show the correct action per user.
 exports.browseUsers = async (req, res) => {
   try {
     const userId = await resolveCurrentUser(req);
@@ -85,18 +82,32 @@ exports.browseUsers = async (req, res) => {
     const user = await User.findById(userObjectId);
     if (!user) return res.status(404).send('User not found');
 
-    // Query params with defaults
     const search = (req.query.search || '').trim();
     const sort = req.query.sort || 'az';
     const limit = Math.min(parseInt(req.query.limit) || 10, 100);
     const page = Math.max(parseInt(req.query.page) || 1, 1);
 
-    // Build search filter
-    const filter = search
-      ? { username: { $regex: search, $options: 'i' } }
-      : {};
+    const allRelationships = await Friend.find({
+      $or: [
+        { requestor: userObjectId },
+        { requestee: userObjectId }
+      ]
+    });
 
-    // Sort mapping
+    const excludedIds = new Set([userObjectId.toString()]);
+    for (const r of allRelationships) {
+      const otherId = r.requestor.equals(userObjectId)
+        ? r.requestee.toString()
+        : r.requestor.toString();
+      excludedIds.add(otherId);
+    }
+    const excludedObjectIds = [...excludedIds].map(id => toObjectId(id));
+
+    const filter = {
+      _id: { $nin: excludedObjectIds },
+      ...(search && { username: { $regex: search, $options: 'i' } }),
+    };
+
     const sortMap = {
       az:     { username:  1 },
       za:     { username: -1 },
@@ -116,28 +127,6 @@ exports.browseUsers = async (req, res) => {
       .limit(limit)
       .select('username createdAt _id');
 
-    // Fetch all relationship entries involving the current user for status checks
-    const allRelationships = await Friend.find({
-      $or: [
-        { requestor: userObjectId },
-        { requestee: userObjectId }
-      ]
-    });
-
-    // Build ID sets for template lookups
-    const friendIds = allRelationships
-      .filter(r => r.status === 'accepted')
-      .map(r => r.requestor.equals(userObjectId) ? r.requestee : r.requestor);
-
-    const sentRequestIds = allRelationships
-      .filter(r => r.status === 'pending' && r.requestor.equals(userObjectId))
-      .map(r => r.requestee);
-
-    const pendingRequestIds = allRelationships
-      .filter(r => r.status === 'pending' && r.requestee.equals(userObjectId))
-      .map(r => r.requestor);
-
-    // Rebuild query string for redirect-back links (e.g. cancel/send from this page)
     const queryString = new URLSearchParams({
       ...(search && { search }),
       sort,
@@ -155,9 +144,6 @@ exports.browseUsers = async (req, res) => {
       page: safePage,
       totalPages,
       totalUsers,
-      friendIds,
-      sentRequestIds,
-      pendingRequestIds,
       queryString: queryString ? `&${queryString}` : '',
     });
   } catch (error) {
@@ -165,11 +151,12 @@ exports.browseUsers = async (req, res) => {
   }
 };
 
-// POST /friends/send/:friendId
+// POST /friends/send
+// friendId read from req.body
 exports.sendRequest = async (req, res) => {
   try {
     const requestor = toObjectId(await resolveCurrentUser(req));
-    const requestee = toObjectId(req.params.friendId);
+    const requestee = toObjectId(req.body.friendId);
 
     if (requestor.equals(requestee)) return res.status(400).send('Cannot friend yourself');
 
@@ -189,11 +176,12 @@ exports.sendRequest = async (req, res) => {
   }
 };
 
-// POST /friends/cancel/:requesteeId
+// POST /friends/cancel
+// requesteeId read from req.body
 exports.cancelRequest = async (req, res) => {
   try {
     const requestor = toObjectId(await resolveCurrentUser(req));
-    const requestee = toObjectId(req.params.requesteeId);
+    const requestee = toObjectId(req.body.requesteeId);
 
     await Friend.cancelRequest(requestor, requestee);
     res.redirect(req.query.redirect || '/friends');
@@ -202,11 +190,12 @@ exports.cancelRequest = async (req, res) => {
   }
 };
 
-// POST /friends/accept/:requestorId
+// POST /friends/accept
+// requestorId read from req.body
 exports.acceptRequest = async (req, res) => {
   try {
     const requestee = toObjectId(await resolveCurrentUser(req));
-    const requestor = toObjectId(req.params.requestorId);
+    const requestor = toObjectId(req.body.requestorId);
 
     const friendship = await Friend.findOne({ requestor, requestee, status: 'pending' });
     if (!friendship) return res.status(404).send('Request not found');
@@ -218,11 +207,12 @@ exports.acceptRequest = async (req, res) => {
   }
 };
 
-// POST /friends/decline/:requestorId
+// POST /friends/decline
+// requestorId read from req.body
 exports.declineRequest = async (req, res) => {
   try {
     const requestee = toObjectId(await resolveCurrentUser(req));
-    const requestor = toObjectId(req.params.requestorId);
+    const requestor = toObjectId(req.body.requestorId);
 
     await Friend.declineRequest(requestor, requestee);
     res.redirect('/friends');
@@ -231,11 +221,12 @@ exports.declineRequest = async (req, res) => {
   }
 };
 
-// POST /friends/remove/:friendId
+// POST /friends/remove
+// friendId read from req.body
 exports.removeFriend = async (req, res) => {
   try {
     const userId = toObjectId(await resolveCurrentUser(req));
-    const friendId = toObjectId(req.params.friendId);
+    const friendId = toObjectId(req.body.friendId);
 
     await Friend.removeFriend(userId, friendId);
     res.redirect('/friends');
@@ -244,12 +235,13 @@ exports.removeFriend = async (req, res) => {
   }
 };
 
-// POST /friends/nickname/:friendId
+// POST /friends/nickname
+// friendId and nickname read from req.body
 exports.updateNickname = async (req, res) => {
   try {
     const userId = toObjectId(await resolveCurrentUser(req));
-    const friendId = toObjectId(req.params.friendId);
-    const newNickname = (req.body && req.body.nickname ? req.body.nickname : '').trim();
+    const friendId = toObjectId(req.body.friendId);
+    const newNickname = (req.body.nickname || '').trim();
 
     const friendship = await Friend.findOne({
       $or: [
@@ -269,23 +261,3 @@ exports.updateNickname = async (req, res) => {
   }
 };
 
-// GET /friends/profile/:userId
-exports.viewUserProfile = async (req, res) => {
-  try {
-    const userId = toObjectId(req.params.userId);
-    const currentUserId = toObjectId(await resolveCurrentUser(req));
-
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).send('User not found');
-
-    const isOwnProfile = user._id.equals(currentUserId);
-
-    res.render('user-profile', {
-      user,
-      currentUserId,
-      isOwnProfile,
-    });
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-};

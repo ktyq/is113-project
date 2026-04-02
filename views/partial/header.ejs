@@ -1,32 +1,32 @@
 <header>
-    <h1>Movie App</h1>
-    <nav>
-        <a href="/index">Home</a>
-        &nbsp;|&nbsp;
-        <a href="/list">Watchlist</a>
-        &nbsp;|&nbsp;
-        <a href="/friends">Friends</a>
-        &nbsp;|&nbsp;
-        
-        <% if (user) { %>
-            <% if (user.role === 'admin') { %>
-                <a href="/feedback/admin">Feedback</a>
-        &nbsp;|&nbsp;
-                <a href="/admin-profile">Admin</a>
-            <% } else { %>
-                <a href="/feedback">Feedback</a>
-        &nbsp;|&nbsp;
-                <a href="/user-profile">Account</a>
-            <% } %>
-                
-            <form action="/logout" method="POST" style="display:inline;">
-                <button type="submit">Logout</button>
-            </form>
-        <% } else { %> 
-            <a href="/login"><button type="submit">Login</button></a>
-        <% } %>         
-       
-       
-    </nav>
-    <hr>
+  <h1>Movie App</h1>
+  <nav>
+    <a href="/index">Home</a>
+
+    <% if (user) { %>
+    &nbsp;|&nbsp;
+    <a href="/list">Watchlist</a>
+    &nbsp;|&nbsp;
+    <a href="/friends">Friends</a>
+    &nbsp;|&nbsp;
+
+    <% if (user.role === 'admin') { %>
+    <a href="/feedback/admin">Feedback</a>
+    &nbsp;|&nbsp;
+    <a href="/admin-profile">Admin</a>
+    <% } else { %>
+    <a href="/feedback">Feedback</a>
+    &nbsp;|&nbsp;
+    <a href="/user-profile">Account</a>
+    <% } %>
+
+    <form action="/logout" method="POST" style="display:inline;">
+      <button type="submit">Logout</button>
+    </form>
+    <% } else { %>
+    <a href="/login"><button type="submit">Login</button></a>
+    <a href="/register"><button type="submit">Register</button></a>
+    <% } %>
+  </nav>
+  <hr>
 </header>

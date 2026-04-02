@@ -1,8 +1,4 @@
-// Profile (hazel)
-// C: 
-// R: 
-// U: Update profile
-// D: delete profile
+// routes/profile.js - hazel
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');

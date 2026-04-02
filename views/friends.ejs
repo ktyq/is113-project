@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Friends</title>
-  <link rel="stylesheet" href="../public/default.css">
+  <link rel="stylesheet" href="/default.css">
 </head>
+
 <body>
   <%- include('partial/header', {user: user}) %>
   <main>
@@ -15,49 +17,51 @@
     <section>
       <h2>Friends</h2>
       <% if (!friends || friends.length === 0) { %>
-        <p>No friends :(</p>
+      <p>No friends :(</p>
       <% } else { %>
-        <table>
-          <thead>
-            <tr>
-              <th>Friend</th>
-              <th>Change Nickname</th>
-              <th>Remove</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% friends.forEach(function(f) { %>
-            <%
+      <table>
+        <thead>
+          <tr>
+            <th>Friend</th>
+            <th>Change Nickname</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% friends.forEach(function(f) { %>
+          <%
               let isRequestor = f.requestor._id.toString() === currentUserId.toString();
               let otherUser = isRequestor ? f.requestee : f.requestor;
               let myNickname = isRequestor ? f.nickname2 : f.nickname1;
               let friendsSinceStr = f.friendsSince ? new Date(f.friendsSince).toLocaleDateString('en-GB') : '';
             %>
-            <tr>
-              <td>
-                <a href="/list/<%= otherUser._id %>"><%= otherUser.username %></a>
-                <% if (myNickname) { %>
-                  (<%= myNickname %>)
-                <% } %>
-                <% if (friendsSinceStr) { %>
-                  <br><small>Friends since: <%= friendsSinceStr %></small>
-                <% } %>
-              </td>
-              <td>
-                <form method="POST" action="/friends/nickname/<%= otherUser._id %>">
-                  <input type="text" name="nickname" value="<%= myNickname || '' %>" placeholder="Set nickname" />
-                  <button type="submit">Update</button>
-                </form>
-              </td>
-              <td>
-                <form method="POST" action="/friends/remove/<%= otherUser._id %>">
-                  <button type="submit">Remove Friend</button>
-                </form>
-              </td>
-            </tr>
-            <% }); %>
-          </tbody>
-        </table>
+          <tr>
+            <td>
+              <a href="/list/<%= otherUser._id %>"><%= otherUser.username %></a>
+              <% if (myNickname) { %>
+              (<%= myNickname %>)
+              <% } %>
+              <% if (friendsSinceStr) { %>
+              <br><small>Friends since: <%= friendsSinceStr %></small>
+              <% } %>
+            </td>
+            <td>
+              <form method="POST" action="/friends/nickname">
+                <input type="hidden" name="friendId" value="<%= otherUser._id %>" />
+                <input type="text" name="nickname" value="<%= myNickname || '' %>" placeholder="Set nickname" />
+                <button type="submit">Update</button>
+              </form>
+            </td>
+            <td>
+              <form method="POST" action="/friends/remove">
+                <input type="hidden" name="friendId" value="<%= otherUser._id %>" />
+                <button type="submit">Remove Friend</button>
+              </form>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
       <% } %>
     </section>
 
@@ -65,30 +69,31 @@
     <section style="margin-top: 2rem;">
       <h2>Sent Friend Requests</h2>
       <% if (!sentRequests || sentRequests.length === 0) { %>
-        <p>No pending sent requests.</p>
+      <p>No pending sent requests.</p>
       <% } else { %>
-        <table>
-          <thead>
-            <tr>
-              <th>To</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% sentRequests.forEach(function(r) { %>
-            <tr>
-              <td>
-                <a href="/list/<%= r.requestee._id %>"><%= r.requestee.username %></a>
-              </td>
-              <td>
-                <form method="POST" action="/friends/cancel/<%= r.requestee._id %>">
-                  <button type="submit">Cancel Request</button>
-                </form>
-              </td>
-            </tr>
-            <% }); %>
-          </tbody>
-        </table>
+      <table>
+        <thead>
+          <tr>
+            <th>To</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% sentRequests.forEach(function(r) { %>
+          <tr>
+            <td>
+              <a href="/list/<%= r.requestee._id %>"><%= r.requestee.username %></a>
+            </td>
+            <td>
+              <form method="POST" action="/friends/cancel">
+                <input type="hidden" name="requesteeId" value="<%= r.requestee._id %>" />
+                <button type="submit">Cancel Request</button>
+              </form>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
       <% } %>
     </section>
 
@@ -96,33 +101,35 @@
     <section style="margin-top: 2rem;">
       <h2>Friend Requests</h2>
       <% if (!requests || requests.length === 0) { %>
-        <p>No pending friend requests.</p>
+      <p>No pending friend requests.</p>
       <% } else { %>
-        <table>
-          <thead>
-            <tr>
-              <th>From</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% requests.forEach(function(req) { %>
-            <tr>
-              <td>
-                <a href="/list/<%= req.requestor._id %>"><%= req.requestor.username %></a>
-              </td>
-              <td>
-                <form method="POST" action="/friends/accept/<%= req.requestor._id %>" style="display:inline;">
-                  <button type="submit">Accept</button>
-                </form>
-                <form method="POST" action="/friends/decline/<%= req.requestor._id %>" style="display:inline;">
-                  <button type="submit">Decline</button>
-                </form>
-              </td>
-            </tr>
-            <% }); %>
-          </tbody>
-        </table>
+      <table>
+        <thead>
+          <tr>
+            <th>From</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% requests.forEach(function(req) { %>
+          <tr>
+            <td>
+              <a href="/list/<%= req.requestor._id %>"><%= req.requestor.username %></a>
+            </td>
+            <td>
+              <form method="POST" action="/friends/accept" style="display:inline;">
+                <input type="hidden" name="requestorId" value="<%= req.requestor._id %>" />
+                <button type="submit">Accept</button>
+              </form>
+              <form method="POST" action="/friends/decline" style="display:inline;">
+                <input type="hidden" name="requestorId" value="<%= req.requestor._id %>" />
+                <button type="submit">Decline</button>
+              </form>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
       <% } %>
     </section>
 
@@ -132,30 +139,31 @@
       <a href="/friends"><button type="button">Refresh Recommendations</button></a>
       <div id="suggestions-area">
         <% if (!suggestions || suggestions.length === 0) { %>
-          <p>No recommendations available.</p>
+        <p>No recommendations available.</p>
         <% } else { %>
-          <table>
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% suggestions.forEach(function(suggestedUser) { %>
-              <tr>
-                <td>
-                  <a href="/list/<%= suggestedUser._id %>"><%= suggestedUser.username %></a>
-                </td>
-                <td>
-                  <form method="POST" action="/friends/send/<%= suggestedUser._id %>">
-                    <button type="submit">Send Friend Request</button>
-                  </form>
-                </td>
-              </tr>
-              <% }); %>
-            </tbody>
-          </table>
+        <table>
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% suggestions.forEach(function(suggestedUser) { %>
+            <tr>
+              <td>
+                <a href="/list/<%= suggestedUser._id %>"><%= suggestedUser.username %></a>
+              </td>
+              <td>
+                <form method="POST" action="/friends/send">
+                  <input type="hidden" name="friendId" value="<%= suggestedUser._id %>" />
+                  <button type="submit">Send Friend Request</button>
+                </form>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
         <% } %>
       </div>
     </section>
@@ -168,4 +176,5 @@
     </section>
   </main>
 </body>
+
 </html>

@@ -1,42 +1,52 @@
-//disable this section after testing
+// Disable this section after testing
 const dns = require('node:dns');
 dns.setServers(['8.8.8.8', '8.8.4.4']); // Use Google DNS
 
+// Import required libraries
 const express = require("express");
 const session = require("express-session");
 const dotenv = require("dotenv");
-dotenv.config({ path: "./config.env" });
 const mongoose = require("mongoose");
 const path = require("path");
-// const fs = require('fs');
 
-// const friendController = require("./controllers/friendController");
 const server = express();
-server.set("view engine", "ejs");
-server.set('views', path.join(__dirname, 'views')); 
 
-// Middleware
+// Specify the path to the environment variable file 'config.env'
+dotenv.config({ path: "./config.env" });
+
+// Set view engine
+server.set("view engine", "ejs");
+server.set('views', path.join(__dirname, 'views'));
+
+// ===== MIDDLEWARE =====
 server.use(express.urlencoded({ extended: true }));
-server.use("/", express.static(path.join(__dirname, "public")));
 server.use(express.json());
 server.use(session({
-    secret: process.env.SECRET, 
-    resave: false, 
-    saveUninitialized: false  
+  secret: process.env.SECRET, // sign session cookie
+  resave: false, // do not resave unmodified session
+  saveUninitialized: false  // prevent empty session
 }));
-// server.get("/", (req, res) => res.status(200).send(`success!`));
 
-//routes
+// ===== ROUTES =====
+server.use("/", express.static(path.join(__dirname, "public")));
+server.get('/index.html', (req, res) => {
+  res.redirect('/index');
+});
+
 server.use("/", require("./routes/profile"));
+server.use('/index', require('./routes/index'));
 server.use("/list", require("./routes/watchlist"));
 server.use("/reviews", require("./routes/reviews"));
+
 server.use("/friends", require("./routes/friends"));
 server.use('/admin', require('./routes/movies'));
-server.use('/movie', require('./routes/index'));
-server.use('/index', require('./routes/index'));
 server.use('/feedback', require("./routes/feedback"));
-// Direct profile view route (for viewing other users' profiles via friends)
-server.get('/friends/profile/:userId', require('./controllers/friendController').viewUserProfile);
+
+// Set default route (no valid route found)
+// server.use((req, res) => {
+//   res.redirect("/");
+//   // res.status(404).render('error', { message: 'Page not found' });
+// });
 
 async function connectDB() {
   try {
@@ -59,4 +69,4 @@ function startServer() {
   });
 }
 
-connectDB().then(startServer);
+connectDB().then(startServer); 
