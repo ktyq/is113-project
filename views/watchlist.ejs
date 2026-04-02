@@ -17,7 +17,8 @@
 
     <!-- Filter results  -->
     <section>
-      <form action="<%= viewingUser ? '/list/' + viewingUser._id : '/list' %>" method="get">
+      <form action="/list" method="get">
+        <input type="hidden" name="userId" value="<%= viewingUser ? viewingUser._id : '' %>">
         <div class="row">
           <input type="text" name="search" value="<%= search %>" placeholder="Search by title">
         </div>
@@ -57,7 +58,7 @@
           <label>Page</label>
           <input type="number" name="page" value="<%= page %>" style="width:60px;" min="1">
 
-          <a href="/list" style="text-decoration: none;">
+          <a href="<%= viewingUser ? '/list?userId=' + viewingUser._id : '/list' %>" style="text-decoration: none;">
             <button type="button">Reset</button>
           </a>
           <button type="submit">Apply</button>
@@ -80,14 +81,16 @@
             <th colspan="2">Movie</th>
             <th>Notes</th>
             <th>Priority</th>
+            <% if (!viewingUser) { %>
             <th>Action</th>
+            <% } %>
           </tr>
         </thead>
 
         <tbody>
           <% watchlist.forEach(function(movie){ %>
           <%- include("partial/watchlist-row", { movie, editMovieId: editMovieId,
-                                        removeMovieId: removeMovieId }) %>
+                                        removeMovieId: removeMovieId, viewingUser }) %>
           <% }) %>
         </tbody>
       </table>
@@ -103,9 +106,11 @@
 
 <script>
   const statusDropdown = document.getElementById('statusDropdown');
-  statusDropdown.addEventListener('change', () => {
-    statusDropdown.form.submit();
-  });
+  if (statusDropdown) {
+    statusDropdown.addEventListener('change', () => {
+      statusDropdown.form.submit();
+    });
+  }
 </script>
 
 </html>

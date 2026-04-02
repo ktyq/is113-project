@@ -8,7 +8,7 @@ dotenv.config({ path: "./config.env" });
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-const User = require('../models/user');
+const User = require('../models/User');
 const Movie = require('../models/Movie');
 const Watchlist = require('../models/Watchlist');
 const Friend = require('../models/Friend');
@@ -95,36 +95,36 @@ async function seedDatabase() {
         }
 
         // CREATE FRIENDS
-        console.log('\n🤝 Creating friendships...');
-        const friendEntries = [];
+        // console.log('\n🤝 Creating friendships...');
+        // const friendEntries = [];
 
-        for (const f of friendsData) {
-            const requestor = userMap[f.requestorUsername];
-            const requestee = userMap[f.requesteeUsername];
+        // for (const f of friendsData) {
+        //     const requestor = userMap[f.requestorUsername];
+        //     const requestee = userMap[f.requesteeUsername];
 
-            if (requestor && requestee) {
-                friendEntries.push({
-                    requestor,
-                    requestee,
-                    status: f.status,
-                    friendsSince: f.status === 'accepted' ? new Date() : null
-                });
-            } else {
-                console.log(`   ⚠️ Skipped friendship: ${f.requestorUsername} - ${f.requesteeUsername}`);
-            }
-        }
+        //     if (requestor && requestee) {
+        //         friendEntries.push({
+        //             requestor,
+        //             requestee,
+        //             status: f.status,
+        //             friendsSince: f.status === 'accepted' ? new Date() : null
+        //         });
+        //     } else {
+        //         console.log(`   ⚠️ Skipped friendship: ${f.requestorUsername} - ${f.requesteeUsername}`);
+        //     }
+        // }
 
-        if (friendEntries.length > 0) {
-            await Friend.insertMany(friendEntries);
-            console.log(`✅ ${friendEntries.length} friendships created`);
-        }
+        // if (friendEntries.length > 0) {
+        //     await Friend.insertMany(friendEntries);
+        //     console.log(`✅ ${friendEntries.length} friendships created`);
+        // }
 
         // FINAL STATS
         console.log('\n📊 FINAL STATS');
         console.log(`Users: ${await User.countDocuments()}`);
         console.log(`Movies: ${await Movie.countDocuments()}`);
         console.log(`Watchlist: ${await Watchlist.countDocuments()}`);
-        console.log(`Friends: ${await Friend.countDocuments()}`);
+        // console.log(`Friends: ${await Friend.countDocuments()}`);
 
         console.log('\n✅ Seeding completed');
 
