@@ -140,6 +140,36 @@
       </a>
     </div>
   </section>
+  <section>
+    <h3>Reviews</h3>
+
+    <% if (!reviews || reviews.length === 0) { %>
+      <p>No reviews yet.</p>
+    <% } else { %>
+
+      <% reviews.forEach(review => { %>
+        <div style="margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+          
+          <p>
+            <strong><%= review.rating %> / 5</strong> - 
+            <% if (review.isAnonymous) { %>
+              Anonymous
+            <% } else { %>
+              <%= review.userID.username %>
+            <% } %>
+            (<%= new Date(review.createdAt).toLocaleDateString() %>)
+          </p>
+
+          <% if (review.comment) { %>
+            <p><%= review.comment %></p>
+          <% } %>
+
+        </div>
+      <% }) %>
+
+    <% } %>
+  </section>
+
 </body>
 
 </html>
