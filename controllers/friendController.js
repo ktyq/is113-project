@@ -63,7 +63,7 @@ exports.getFriendsPage = async (req, res) => {
 // GET /friends/browse
 exports.browseUsers = async (req, res) => {
   try {
-    const userId = await resolveCurrentUser(req);
+    const userId = req.session && req.session.user ? (req.session.user.id || req.session.user._id) : null;;
     const userObjectId = toObjectId(userId);
 
     const user = await User.findById(userObjectId);
@@ -142,7 +142,7 @@ exports.browseUsers = async (req, res) => {
 // friendId read from req.body
 exports.sendRequest = async (req, res) => {
   try {
-    const requestor = toObjectId(await resolveCurrentUser(req));
+    const requestor = toObjectId(req.session && req.session.user ? (req.session.user.id || req.session.user._id) : null);
     const requestee = toObjectId(req.body.friendId);
 console.log(requestor, requestee, "t")
     if (requestor.equals(requestee)) return res.status(400).send('Cannot friend yourself');
@@ -168,7 +168,7 @@ console.log(requestor, requestee, "t")
 // requesteeId read from req.body
 exports.cancelRequest = async (req, res) => {
   try {
-    const requestor = toObjectId(await resolveCurrentUser(req));
+    const requestor = toObjectId(req.session && req.session.user ? (req.session.user.id || req.session.user._id) : null);
     const requestee = toObjectId(req.body.requesteeId);
 
     await Friend.cancelRequest(requestor, requestee);
@@ -182,7 +182,7 @@ exports.cancelRequest = async (req, res) => {
 // requestorId read from req.body
 exports.acceptRequest = async (req, res) => {
   try {
-    const requestee = toObjectId(await resolveCurrentUser(req));
+    const requestee = toObjectId(req.session && req.session.user ? (req.session.user.id || req.session.user._id) : null);
     const requestor = toObjectId(req.body.requestorId);
 
     const friendship = await Friend.findOne({ requestor, requestee, status: 'pending' });
@@ -199,7 +199,7 @@ exports.acceptRequest = async (req, res) => {
 // requestorId read from req.body
 exports.declineRequest = async (req, res) => {
   try {
-    const requestee = toObjectId(await resolveCurrentUser(req));
+    const requestee = toObjectId(req.session && req.session.user ? (req.session.user.id || req.session.user._id) : null);
     const requestor = toObjectId(req.body.requestorId);
 
     await Friend.declineRequest(requestor, requestee);
@@ -213,7 +213,7 @@ exports.declineRequest = async (req, res) => {
 // friendId read from req.body
 exports.removeFriend = async (req, res) => {
   try {
-    const userId = toObjectId(await resolveCurrentUser(req));
+    const userId = toObjectId(req.session && req.session.user ? (req.session.user.id || req.session.user._id) : null);
     const friendId = toObjectId(req.body.friendId);
 
     await Friend.removeFriend(userId, friendId);
@@ -227,7 +227,7 @@ exports.removeFriend = async (req, res) => {
 // friendId and nickname read from req.body
 exports.updateNickname = async (req, res) => {
   try {
-    const userId = toObjectId(await resolveCurrentUser(req));
+    const userId = toObjectId(req.session && req.session.user ? (req.session.user.id || req.session.user._id) : null);
     const friendId = toObjectId(req.body.friendId);
     const newNickname = (req.body.nickname || '').trim();
 
