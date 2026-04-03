@@ -85,7 +85,7 @@ exports.getEditMovie = async (req, res) => {
         const movie = await Movie.findById(req.query.id);
         if (!movie) return res.send("Movie not found");
 
-        res.render('editMovie', {
+        res.render('edit-movie', {
             movie,
             user: req.session.user
         });
