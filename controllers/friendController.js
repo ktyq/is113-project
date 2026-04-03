@@ -47,25 +47,27 @@ exports.getFriendsPage = async (req, res) => {
         { requestee: userObjectId, status: 'accepted' }
       ]
     }).populate('requestor requestee', 'username _id');
+    const validFriends = friends.filter(f => f.requestor !== null && f.requestee !== null);
 
     const requests = await Friend.find({
       requestee: userObjectId,
       status: 'pending'
     }).populate('requestor', 'username _id');
+    const validRequests = requests.filter(req => req.requestor !== null);
 
     const sentRequests = await Friend.find({
       requestor: userObjectId,
       status: 'pending'
     }).populate('requestee', 'username _id');
-
+    const validSentRequests = sentRequests.filter(req => req.requestee !== null);
     const suggestions = await Friend.findSuggestedUsers(userObjectId, 5);
 
     res.render('friends', {
       user,
       currentUserId: userObjectId,
-      friends,
-      requests,
-      sentRequests,
+      validFriends,
+      validRequests,
+      validSentRequests,
       suggestions,
     });
   } catch (error) {
