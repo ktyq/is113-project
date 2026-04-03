@@ -1,8 +1,6 @@
-// import express and create router
+// routes/feedback.js
 const express = require("express");
 const router = express.Router();
-
-// import controller file (CRUD)
 const feedbackController = require("../controllers/feedbackController");
 const { isLoggedIn, isAdmin } = require("../middleware/authentication");
 
@@ -11,7 +9,7 @@ router.post('/', isLoggedIn, feedbackController.createFeedback);
 
 // Read feedback, loads and displays all the feedback
 router.get('/', isLoggedIn, feedbackController.readFeedback);
-router.get('/admin', isAdmin ,feedbackController.readFeedbackAdmin);
+router.get('/admin', isAdmin, feedbackController.readFeedbackAdmin);
 
 // Update feedback (admin mark as resolved)
 router.post('/resolve/:id', isAdmin, feedbackController.updateFeedback);
@@ -19,4 +17,4 @@ router.post('/resolve/:id', isAdmin, feedbackController.updateFeedback);
 // Delete feedback from user
 router.post('/delete/:id', isLoggedIn, feedbackController.deleteFeedback);
 
-module.exports = router
+module.exports = router;

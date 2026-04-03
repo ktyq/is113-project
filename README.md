@@ -29,7 +29,10 @@ is113-project/
 │   ├── movieController.js  
 │   ├── reviewController.js  
 │   └── userController.js  
-├── middleware/                   # utility functions  
+├── data/                          #Test Data
+│   └── seed.js
+│   └── testData.js 
+├── middleware/                   # Utility Functions  
 │   └── authentication.js  
 ├── models/                       # MongoDB Models  
 │   ├── Feedback.js  
@@ -38,7 +41,7 @@ is113-project/
 │   ├── review.js  
 │   ├── user.js  
 │   └── watchlist.js  
-├── public/                       # static assets  
+├── public/                       # Static Assets  
 │   ├── default.css  
 │   ├── js/  
 │   └── uploads/  
@@ -87,10 +90,10 @@ is113-project/
 │   ├── register.ejs  
 │   ├── review.ejs  
 │   └── watchlist.ejs  
-├── server.js                     # Main application file  
+├── server.js                     # Main Application File  
 ├── package.json  
 ├── package-lock.json  
-├── config.env                    # Environment variables  
+├── config.env                    # Environment Variables  
 └── README.md  
 
 Models: Define data structures in the models/ directory  
@@ -101,9 +104,9 @@ Public: Access public files in the public/ directory
 
 ## Installation
 1. Clone the repository
-   
 2. Install dependencies
-   
+
+   - Open terminal in main folder
    npm install
    
 3. Set up MongoDB
@@ -112,10 +115,12 @@ Public: Access public files in the public/ directory
   - Update the DB in config.env file
 
 4. Import data
+
+   node data/seed.js
    
 5. Start application
 
-   npm start
+   nodemon server.js
    
 6. Launch browser
 

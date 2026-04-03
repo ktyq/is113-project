@@ -24,7 +24,11 @@ exports.getFriendsPage = async (req, res) => {
     const userObjectId = toObjectId(userId);
 
     const user = await User.findById(userObjectId);
-    if (!user) return res.status(404).send('User not found');
+    if (!user) {
+      return req.session.destroy(() => {
+        res.redirect('/index');
+      });
+    } // Redirect to home if somehow user not found 
 
     const friends = await Friend.find({
       $or: [
@@ -67,7 +71,11 @@ exports.browseUsers = async (req, res) => {
     const userObjectId = toObjectId(userId);
 
     const user = await User.findById(userObjectId);
-    if (!user) return res.status(404).send('User not found');
+    if (!user) {
+      return req.session.destroy(() => {
+        res.redirect('/index');
+      });
+    } // Redirect to home if somehow user not found  // Redirect to home if somehow user not found (shouldn't happen if auth middleware is working)
 
     const search = (req.query.search || '').trim();
     const sort = req.query.sort || 'az';
@@ -96,10 +104,10 @@ exports.browseUsers = async (req, res) => {
     };
 
     const sortMap = {
-      az:     { username:  1 },
-      za:     { username: -1 },
+      az: { username: 1 },
+      za: { username: -1 },
       newest: { createdAt: -1 },
-      oldest: { createdAt:  1 },
+      oldest: { createdAt: 1 },
     };
     const sortQuery = sortMap[sort] || sortMap.az;
 
@@ -144,7 +152,7 @@ exports.sendRequest = async (req, res) => {
   try {
     const requestor = toObjectId(req.session && req.session.user ? (req.session.user.id || req.session.user._id) : null);
     const requestee = toObjectId(req.body.friendId);
-console.log(requestor, requestee, "t")
+    console.log(requestor, requestee, "t")
     if (requestor.equals(requestee)) return res.status(400).send('Cannot friend yourself');
 
     const reverseRequest = await Friend.findOne({
@@ -152,7 +160,7 @@ console.log(requestor, requestee, "t")
       requestee: requestor,
       status: 'pending'
     });
-    
+
     if (reverseRequest) {
       return res.redirect(req.query.redirect || '/friends');
     }
