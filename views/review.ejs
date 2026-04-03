@@ -2,100 +2,137 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= movie.title %> - Reviews</title>
-    <link rel="stylesheet" href="/default.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= movie.title %> - Reviews</title>
+  <link rel="stylesheet" href="/default.css">
 </head>
 
 <body>
-    <%- include('partial/header', {user}) %>
+  <%- include('partial/header', {user}) %>
 
-    <h1><%= movie.title %></h1>
-    <hr>
-    <h2>Write a Review</h2>
-    <% if (errors && errors.length > 0) {%>
-    <ul style="color: red">
-        <% errors.forEach(function(e) {%>
-        <li>
-            <%=e%>
-        </li>
-        <%})%>
-    </ul>
-    <%}%>
+  <h1><%= movie.title %></h1>
+  <hr>
+  <h2>Write a Review</h2>
+  <% if (errors && errors.length > 0) {%>
+  <ul style="color: red">
+    <% errors.forEach(function(e) {%>
+    <li>
+      <%=e%>
+    </li>
+    <%})%>
+  </ul>
+  <%}%>
     <% if(currentUser){%>
-    <form action="/reviews/add" method="POST">
-        <input type="hidden" name="movieID" value="<%= movie.id %>">
-        <div>
-            <select name="rating" id="rating" required>
-                <option value="">Select rating</option>
-                <option value="1">⭐️</option>
-                <option value="2">⭐️⭐️</option>
-                <option value="3">⭐️⭐️⭐️</option>
-                <option value="4">⭐️⭐️⭐️⭐️</option>
-                <option value="5">⭐️⭐️⭐️⭐️⭐️</option>
-            </select>
-        </div>
+  <form action="/reviews/add" method="POST">
+    <input type="hidden" name="movieId" value="<%= movie.id %>">
+    <div>
+      <select name="rating" id="rating" required>
+        <option value="">Select rating</option>
+        <option value="1">⭐️</option>
+        <option value="2">⭐️⭐️</option>
+        <option value="3">⭐️⭐️⭐️</option>
+        <option value="4">⭐️⭐️⭐️⭐️</option>
+        <option value="5">⭐️⭐️⭐️⭐️⭐️</option>
+      </select>
+    </div>
 
-        <div>
-            <label for="comment">Comment</label>
-            <br>
-            <textarea name="comment" id="comment" rows="5" placeholder="Share your thoughts..."></textarea>
-        </div>
+    <div>
+      <label for="comment">Comment</label>
+      <br>
+      <textarea name="comment" id="comment" rows="5" placeholder="Share your thoughts..."></textarea>
+    </div>
 
-        <div>
-            <input type="checkbox" name="isAnonymous" id="isAnonymous">
-            <label for="isAnonymous">Post anonymously</label>
-        </div>
+    <div>
+      <input type="checkbox" name="isAnonymous" id="isAnonymous">
+      <label for="isAnonymous">Post anonymously</label>
+    </div>
 
-        <button type="submit">Submit your review!</button>
-    </form>
-    <% } else { %>
-    <p>
-        <a href="/login">Log in</a> to write a review.
-    </p>
-    <% } %>
+    <button type="submit">Submit your review!</button>
+  </form>
+  <% } else { %>
+  <p>
+    <a href="/login">Log in</a> to write a review.
+  </p>
+  <% } %>
 
 
-    <section>
-        <h2>Reviews (<%= pagination.totalReviews %>)</h2>
-        <% if (reviews.length===0) { %>
-        <p>No reviews yet. Be the first to share your thoughts!</p>
-        <%} else {%>
-        <% reviews.forEach(function(review){%>
-        <div>
-            <p><strong><%= review.rating %> / 5</strong> - by
-                <% if (review.isAnonymous) { %>
-                Anonymous
-                <% } else { %>
-                <%= review.userID.username %>
-                <% } %>
-                <%= new Date(review.createdAt).toLocaleDateString()%>
-                </p>
-        </div>
-        <% if (review.comment) {%>
-        <p><%= review.comment%></p>
-        <%}%>        
+  <section>
+    <h2>Reviews (<%= pagination.totalReviews %>)</h2>
+    <% if (reviews.length===0) { %>
+    <p>No reviews yet. Be the first to share your thoughts!</p>
+    <%} else {%>
+    <% reviews.forEach(function(review){%>
+    <div>
+      <p><strong><%= review.rating %> / 5</strong> - by
+        <% if (review.isAnonymous) { %>
+        Anonymous
+        <% } else { %>
+        <%= review.userID.username %>
+        <% } %>
+        <%= new Date(review.createdAt).toLocaleDateString()%>
+      </p>
+    </div>
+    <% if (review.comment) {%>
+    <p><%= review.comment%></p>
+    <%}%>        
         <% if (currentUser && currentUser.id===review.userID.id.toString()){%>
-        <details>
-            <summary>Edit</summary>
-            <form action="/reviews/edit" method="POST">
-                <input type="hidden" name="reviewId" value="<%=review.id%>">
-                <input type="hidden" name="movieId" value="<%=movie.id%>">
+    <details>
+      <summary>Edit</summary>
+      <form action="/reviews/edit" method="POST">
+        <input type="hidden" name="movieId" value="<%= movie._id %>">
+        <input type="hidden" name="reviewId" value="<%= review._id %>">
 
-                <div>
-                    <label for="edit-rating-<%=review.id%>">Rating</label>
-                    <select name="rating" id="edit-rating-<%=review.id%>" required>
-                        <option value="">Select rating</option>
-                        <option value="1" <%= review.rating === 1 ? 'selected' : '' %>>⭐️</option>
-                        <option value="2" <%= review.rating === 2 ? 'selected' : '' %>>⭐️⭐️</option>
-                        <option value="3" <%= review.rating === 3 ? 'selected' : '' %>>⭐️⭐️⭐️</option>
-                        <option value="4" <%= review.rating === 4 ? 'selected' : '' %>>⭐️⭐️⭐️⭐️</option>
-                        <option value="5" <%= review.rating === 5 ? 'selected' : '' %>>⭐️⭐️⭐️⭐️⭐️</option>
-                    </select>
-                </div>
+        <div>
+          <label for="edit-rating-<%=review.id%>">Rating</label>
+          <select name="rating" id="edit-rating-<%=review.id%>" required>
+            <option value="">Select rating</option>
+            <option value="1" <%= review.rating === 1 ? 'selected' : '' %>>⭐️</option>
+            <option value="2" <%= review.rating === 2 ? 'selected' : '' %>>⭐️⭐️</option>
+            <option value="3" <%= review.rating === 3 ? 'selected' : '' %>>⭐️⭐️⭐️</option>
+            <option value="4" <%= review.rating === 4 ? 'selected' : '' %>>⭐️⭐️⭐️⭐️</option>
+            <option value="5" <%= review.rating === 5 ? 'selected' : '' %>>⭐️⭐️⭐️⭐️⭐️</option>
+          </select>
+        </div>
 
-                <div>
-                    <label for="edit-comment-<%=review.id%>">Comment</label>
-                    <br>
-                    <textarea name="comment" id="edit-comment-<%=review.id%>" rows
+        <div>
+          <label for="edit-comment-<%=review.id%>">Comment</label>
+          <br>
+          <textarea name="comment" id="edit-comment-<%=review.id%>" rows="5" placeholder="Share your thoughts..."><%= review.comment || '' %></textarea>
+        </div>
+        <div>
+          <input type="checkbox" name="isAnonymous" id="edit-anon-<%=review.id%>" <%= review.isAnonymous ? 'checked' : '' %>>
+          <label for="edit-anon-<%=review.id%>">Post anonymously</label>
+        </div>
+        <button type="submit">Save changes</button>
+      </form>
+    </details>
+
+    <form action="/reviews/del" method="POST" style="display: inline;" onsubmit="return confirm('Delete this review?')">
+      <input type="hidden" name="reviewID" value="<%= review.id %>">
+      <button type="submit">Delete</button>
+    </form>
+    <%}%>
+    </div>
+    <hr>
+    <%})%>
+    <%}%>
+  </section>
+  
+  <% if (pagination.totalPages>1){%>
+    <div>
+      <% if (pagination.hasPrevPage) { %>
+      <a href="?movieId=<%= movie.id %>&page=<%= pagination.currentPage - 1 %>">
+        <button>Previous</button>
+      </a>
+      <span>
+        <p>Page <%=pagination.currentPage%> of <%=pagination.totalPages%></p>
+      </span>
+      <% if (pagination.hasNextPage) {%>
+      <a href="?movieId=<%= movie.id %>&page=<%= pagination.currentPage + 1 %>"><button>Next</button></a>
+      <%}%>
+    </div>
+    <%}%>
+  </section>
+  <%}%>
+</body>
