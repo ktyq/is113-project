@@ -139,6 +139,7 @@ exports.createReview = async (req, res) => {
   }
 };
 
+// update review
 exports.updateReview = async (req, res) => {
   const { reviewId, movieId, comment, rating, isAnonymous } = req.body;
   const { user } = req.session;
@@ -206,6 +207,7 @@ exports.updateReview = async (req, res) => {
   }
 };
 
+// delete review
 exports.deleteReview = async (req, res) => {
   const { reviewId } = req.body;
   const { user } = req.session;
