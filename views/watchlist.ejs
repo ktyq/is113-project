@@ -11,9 +11,12 @@
 
 <body>
   <%- include('partial/header', {user: user}) %>
-  <h1><%= viewingUser ? viewingUser.username + '\'s' : 'My' %> Watchlist</h1> <!-- Dynamic title for own vs others' watchlist -->
+  <%- include('partial/messages', { errors: errors, success: success }) %>
+  <% if (!private) { %>
+    <h1><%= viewingUser ? viewingUser.username + '\'s' : 'My' %> Watchlist</h1> <!-- Dynamic title for own vs others' watchlist -->
+  <% } %>
   <main>
-    <% if (!editMovieId && !removeMovieId) { %>
+    <% if (!editMovieId && !removeMovieId && !private) { %>
 
     <!-- Filter results  -->
     <section>
@@ -72,14 +75,15 @@
         <%= status==='planning' ? 'Planning to Watch' : 'Watched' %>
       </h2>
 
-      <% if (watchlist.length===0) { %>
+      <% if (watchlist != null && watchlist.length===0 && !private) { %>
       <% if (!viewingUser) { %>
       <p>No movies found. <a href="/">Add one now!</a></p>
       <% } else { %>
       <p>Looks like this user has no movies in this watchlist!</p>
       <% } %>
 
-      <% } else { %>
+
+      <% } else if (!private) { %>
       <table border="1">
         <thead>
           <tr>
@@ -103,8 +107,9 @@
     </section>
 
     <!-- Show edit partial when action clicked  -->
-    <% } else { %>
+    <% } else if (!private) { %>
     <%- include("partial/watchlist-edit", { editMovieId, removeMovieId, movie } )%>
+    <% } else { %>
     <% } %>
   </main>
 </body>

@@ -4,7 +4,7 @@ const dns = require('node:dns');
 dns.setServers(['8.8.8.8', '8.8.4.4']); // Use Google DNS
 
 const dotenv = require("dotenv");
-dotenv.config({ path: "../config.env" });
+dotenv.config({ path: "./config.env" });
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
