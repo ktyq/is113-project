@@ -21,7 +21,7 @@ Full-stack web application which allows users can add movies to a personal watch
 ## Project Structure
 
 is113-project/  
-├── controllers/          # MVC Controllers  
+├── controllers/                  # MVC Controllers  
 │   ├── feedbackController.js  
 │   ├── friendController.js  
 │   ├── indexController.js  
@@ -29,16 +29,16 @@ is113-project/
 │   ├── movieController.js  
 │   ├── reviewController.js  
 │   └── userController.js  
-├── middleware/           # utility functions  
+├── middleware/                   # utility functions  
 │   └── authentication.js  
-├── models/               # MongoDB Models  
+├── models/                       # MongoDB Models  
 │   ├── Feedback.js  
 │   ├── Friend.js  
 │   ├── movie.js  
 │   ├── review.js  
 │   ├── user.js  
 │   └── watchlist.js  
-├── public/               # static assets  
+├── public/                       # static assets  
 │   ├── default.css  
 │   ├── js/  
 │   └── uploads/  
@@ -58,7 +58,7 @@ is113-project/
 │       ├── the_social_network.jpg  
 │       ├── titanic.jpg  
 │       └── whiplash.jpg  
-├── routes/               # Express Routes  
+├── routes/                       # Express Routes  
 │   ├── feedback.js  
 │   ├── friends.js  
 │   ├── index.js  
@@ -66,7 +66,7 @@ is113-project/
 │   ├── profile.js  
 │   ├── reviews.js  
 │   └── watchlist.js  
-├── views/                # EJS Templates  
+├── views/                        # EJS Templates  
 │   ├── partial/  
 │   │   ├── header.ejs  
 │   │   ├── messages.ejs  
@@ -87,10 +87,10 @@ is113-project/
 │   ├── register.ejs  
 │   ├── review.ejs  
 │   └── watchlist.ejs  
-├── server.js             # Main application file  
+├── server.js                     # Main application file  
 ├── package.json  
 ├── package-lock.json  
-├── config.env            # Environment variables  
+├── config.env                    # Environment variables  
 └── README.md  
 
 Models: Define data structures in the models/ directory  
@@ -101,11 +101,25 @@ Public: Access public files in the public/ directory
 
 ## Installation
 1. Clone the repository
+   
 2. Install dependencies
+   
+   npm install
+   
 3. Set up MongoDB
+
+  - Install MongoDB locally or use MongoDB Atlas
+  - Update the DB in config.env file
+
 4. Import data
+   
 5. Start application
+
+   npm start
+   
 6. Launch browser
+
+   http://localhost:8000
 
 ## API Endpoints
 
