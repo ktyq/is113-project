@@ -18,11 +18,11 @@
 
   <form action="/register" method="POST">
     <label>Username:</label>
-    <input type="text" name="username" placeholder="Enter Username" required>
+    <input type="text" name="username" value="<%= kept.username %>" placeholder="Enter Username" required>
     <br>
 
     <label>Email Address:</label>
-    <input type="email" name="email" placeholder="Enter Email" required>
+    <input type="email" name="email" value="<%= kept.email %>" placeholder="Enter Email" required>
     <br>
 
     <label>Password:</label>

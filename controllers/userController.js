@@ -23,7 +23,7 @@ function validateUsername(username) {
 //--REGISTER----------------------------------------------------------------- //
 
 exports.registerGet = (req, res) => {
-    res.render('register', { errors: [], success: null });
+    res.render('register', { errors: [], success: null, kept: { username: '', email: '' } });
 };
 
 exports.registerPost = async (req, res) => {
@@ -40,14 +40,14 @@ exports.registerPost = async (req, res) => {
     }
 
     if (errors.length > 0) {
-        return res.render('register', { errors, success: null });
+        return res.render('register', { errors, success: null, kept: { username, email } });
     }
 
     try {
         // Check if username or email already exists
         const existingUser = await User.findOne({ $or: [{ username: username }, { email: email }] });
         if (existingUser) {
-            return res.render('register', { errors: ['Username or email already exists'], success: null });
+            return res.render('register', { errors: ['Username or email already exists'], success: null, kept: { username, email } });
         }
 
         // Hash password
@@ -67,13 +67,13 @@ exports.registerPost = async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.render('register', { errors: ['An error has occurred. Please try again.'], success: null });
+        res.render('register', { errors: ['An error has occurred. Please try again.'], success: null, kept: { username, email } });
     }
 };
 
 //--LOGIN----------------------------------------------------------------- //
 exports.loginGet = (req, res) => {
-    res.render('login', { errors: [], success: null, accNotFound: false, wrongPass: false, identifier: '' });
+    res.render('login', { errors: [], success: null, loginError: false, identifier: '' });
 };
 
 exports.loginPost = async (req, res) => {
@@ -83,8 +83,7 @@ exports.loginPost = async (req, res) => {
     const rerender = (extras) => res.render('login', {
         errors: null,
         success: null,
-        accNotFound: false,
-        wrongPass: false,
+        loginError: false,
         identifier : identifier || '', //pre-fill identifier field
         ...extras
     })
@@ -102,14 +101,15 @@ exports.loginPost = async (req, res) => {
         const user = await User.findOne(query);
 
         if (!user) {
-            console.log('Login attempt failed: Account not found for identifier:', identifier);
-            return rerender({ accNotFound: true});
+            console.log('Login attempt failed: Account not found for:', identifier);
+            return rerender({ loginError: true });
         }
+
 
         const match = await bcrypt.compare(password, user.password);
         if (!match) {
-            console.log('Login attempt failed: Incorrect password for', identifier);
-            return rerender({ wrongPass: true });
+            console.log('Login attempt failed: Incorrect password for:', identifier);
+            return rerender({ loginError: true });
         }
 
         req.session.user = {
@@ -318,6 +318,17 @@ exports.promoteToAdmin = async (req, res) => {
 exports.demoteToUser = async (req, res) => {
     try {
         const { userId } = req.body;
+        const targetUser = await User.findById(userId);
+        if (!targetUser) {
+            console.log('Demotion failed: User not found for ID:', userId);
+            return res.redirect('/manage-accounts');
+        }
+
+        // Prevent demotion of superadmin accounts
+        if (targetUser.role === 'superadmin') {
+            console.log('Demotion failed: Cannot demote a superadmin account:', userId);
+            return res.redirect('/manage-accounts');
+        }
 
         // Prevent self-demotion
         if (userId === req.session.user.id) {

@@ -1,26 +1,34 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Review = require("../models/Review");
 const Movie = require("../models/Movie");
 
 // Display all reviews
 exports.showReviews = async (req, res) => {
-  const movieID = req.query.movieId;
+  const movieId = req.query.movieId;
   const page = parseInt(req.query.page) || 1;
   const limit = 10;
   const skip = (page - 1) * limit;
   const { user } = req.session;
 
   try {
-    const movie = await Movie.findById(movieID);
+    const movie = await Movie.findById(movieId);
 
     if (!movie) {
       return res.status(404).send("Movie not found.");
     }
 
-    const totalReviews = await Review.countDocuments({ movieID: movieID });
+    let userReview = null;
+    if (user) {
+      userReview = await Review.findOne({
+        movieID: movieId,
+        userID: user.id,
+      });
+    }
+
+    const totalReviews = await Review.countDocuments({ movieID: movieId });
     const totalPages = Math.ceil(totalReviews / limit);
 
-    const reviews = await Review.find({ movieID: movieID })
+    const reviews = await Review.find({ movieID: movieId })
       .populate("userID", "username")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -30,6 +38,7 @@ exports.showReviews = async (req, res) => {
       movie,
       reviews,
       currentUser: req.session.user || null,
+      userReview,
       errors: [],
       pagination: {
         currentPage: page,
@@ -38,17 +47,17 @@ exports.showReviews = async (req, res) => {
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
       },
-      user
+      user,
     });
   } catch (err) {
     console.error("getMoviePage error: ", err);
-    res.status(500).render("error", { message: "Something went wrong. " });
+    return res.status(500).send("Something went wrong.");
   }
 };
 
 // Add new review
 exports.createReview = async (req, res) => {
-  const { movieID, comment, rating, isAnonymous } = req.body;
+  const { movieId, comment, rating, isAnonymous } = req.body;
   const { user } = req.session;
   const userId = user?.id;
   console.log("Session user:", user);
@@ -58,12 +67,20 @@ exports.createReview = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const skip = (page - 1) * limit;
+    const movie = await Movie.findById(movieId);
 
-    const movie = await Movie.findById(movieID);
-    const totalReviews = await Review.countDocuments({ movieID: movieID });
+    let userReview = null;
+    if (user) {
+      userReview = await Review.findOne({
+        movieID: movieId,
+        userID: user.id,
+      });
+    }
+
+    const totalReviews = await Review.countDocuments({ movieID: movieId });
     const totalPages = Math.ceil(totalReviews / limit);
 
-    const reviews = await Review.find({ movieID: movieID })
+    const reviews = await Review.find({ movieID: movieId })
       .populate("userID", "username")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -74,6 +91,7 @@ exports.createReview = async (req, res) => {
       reviews,
       errors,
       currentUser: req.session.user,
+      userReview,
       pagination: {
         currentPage: page,
         totalPages: totalPages,
@@ -81,15 +99,23 @@ exports.createReview = async (req, res) => {
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
       },
-      user
+      user,
     });
   };
 
+  const existingReview = await Review.findOne({
+    movieID: movieId,
+    userID: userId,
+  });
+
+  if (existingReview) {
+    return rerenderWithErrors([
+      "You have already written a review for this movie. Please edit your existing review instead.",
+    ]);
+  }
+
   const errors = [];
   const parsedRating = parseInt(rating);
-  if (!parsedRating || parsedRating < 1 || parsedRating > 5) {
-    errors.push("Rating must be a whole number between 1 and 5. ");
-  }
   if (comment && comment.length > 8000) {
     errors.push("Comment cannot exceed 8000 characters.");
   }
@@ -99,41 +125,34 @@ exports.createReview = async (req, res) => {
 
   try {
     await Review.create({
-      movieID: movieID,
+      movieID: movieId,
       userID: req.session.user.id,
       rating: parsedRating,
       comment: comment ? comment.trim() : "",
       isAnonymous: isAnonymous === "on",
     });
 
-    res.redirect(`/reviews?movieId=${movieID}`);
+    res.redirect(`/reviews?movieId=${movieId}`);
   } catch (err) {
     console.error("createReview error:", err);
     return rerenderWithErrors(["Could not save review. Please try again."]);
   }
 };
 
-// Edit review
 exports.updateReview = async (req, res) => {
-  const { reviewID, movieID, comment, rating, isAnonymous } = req.body;
+  const { reviewId, movieId, comment, rating, isAnonymous } = req.body;
   const { user } = req.session;
 
   try {
-    const review = await Review.findById(reviewID);
+    const review = await Review.findById(reviewId);
     if (!review) {
-      return res.status(404).render("error", { message: "Review not found." });
+      return res.redirect(`/reviews?movieId=${movieId}&err=not-found`);
     }
     if (review.userID.toString() !== req.session.user.id.toString()) {
-      return res
-        .status(403)
-        .render("error", { message: "You cannot edit this review.", user });
+      return res.redirect(`/reviews?movieId=${movieId}&err=unauthorized`);
     }
     const errors = [];
     const parsedRating = parseInt(rating);
-
-    if (!parsedRating || parsedRating < 1 || parsedRating > 5) {
-      errors.push("Rating must be a whole number between 1 and 5.");
-    }
     if (comment && comment.length > 8000) {
       errors.push("Comment cannot exceed 8000 characters.");
     }
@@ -142,8 +161,13 @@ exports.updateReview = async (req, res) => {
       const page = parseInt(req.query.page) || 1;
       const limit = 10;
       const skip = (page - 1) * limit;
-
       const movie = await Movie.findById(review.movieID);
+
+      let userReview = await Review.findOne({
+        movieID: review.movieID,
+        userID: user.id,
+      });
+
       const totalReviews = await Review.countDocuments({
         movieID: review.movieID,
       });
@@ -160,6 +184,7 @@ exports.updateReview = async (req, res) => {
         reviews,
         errors,
         currentUser: req.session.user,
+        userReview,
         pagination: {
           currentPage: page,
           totalPages: totalPages,
@@ -167,7 +192,7 @@ exports.updateReview = async (req, res) => {
           hasNextPage: page < totalPages,
           hasPrevPage: page > 1,
         },
-        user
+        user,
       });
     }
 
@@ -175,36 +200,30 @@ exports.updateReview = async (req, res) => {
     review.comment = comment ? comment.trim() : "";
     review.isAnonymous = isAnonymous === "on";
     await review.save();
-    res.redirect(`/reviews?id=${review.movieID}`);
+    res.redirect(`/reviews?movieId=${review.movieID}`);
   } catch (err) {
-    console.error("updateReview error:", err);
-    res.status(500).render("error", { message: "Could not update review." });
+    res.redirect(`/reviews?movieId=${movieId}&err=update-failed`);
   }
 };
 
 exports.deleteReview = async (req, res) => {
-  const { reviewID } = req.body;
+  const { reviewId } = req.body;
   const { user } = req.session;
 
   try {
-    const review = await Review.findById(reviewID);
+    const review = await Review.findById(reviewId);
 
     if (!review) {
-      return res.status(404).render("error", { message: "Review not found." });
+      return res.redirect(`/reviews?movieId=${reviewId}&err=not-found`);
     }
-
+    const movieId = review.movieID;
     if (review.userID.toString() !== req.session.user.id.toString()) {
-      return res
-        .status(403)
-        .render("error", { message: "You cannot delete this review.", user });
+      return res.redirect(`/reviews?movieId=${movieId}&err=unauthorized`);
     }
 
-    const movieID = review.movieID;
-    await Review.findByIdAndDelete(reviewID);
-
-    res.redirect(`/reviews?id=${movieID}`);
+    await Review.findByIdAndDelete(reviewId);
+    res.redirect(`/reviews?movieId=${movieId}`);
   } catch (err) {
-    console.error("deleteReview error:", err);
-    res.status(500).render("error", { message: "Could not delete review." });
+    res.redirect(`/reviews?err=delete-failed`);
   }
 };

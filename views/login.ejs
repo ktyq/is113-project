@@ -15,18 +15,13 @@
 
   <%- include('partial/messages', { errors: errors, success: success }) %>
 
-  <% if (typeof accNotFound !== 'undefined' && accNotFound) { %>
-    <p style="color: red;">
-      Could not find account. 
-      Try a different one or <a href="/register">create a new account</a>.
+  <% if (loginError) { %>
+    <div style="color: red; border: 1px solid red; padding: 8px 12px; margin-bottom: 12px; border-radius: 4px;">
+    <p style="margin: 0;">
+        Account does not exist or incorrect password.<br>
+        Click <a href="/register">here</a> to create a new account.
     </p>
-  <% } %>
-
-  <% if (typeof wrongPass !== 'undefined' && wrongPass) { %>
-    <p style="color: red;">
-      Incorrect password. Please try again.
-      If you forgot your password, please contact admin or <a href="/register">create a new account</a>.
-    </p>
+    </div>
   <% } %>
 
   <form action="/login" method="POST">

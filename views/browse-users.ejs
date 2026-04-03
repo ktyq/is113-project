@@ -96,7 +96,7 @@
     </table>
     <% } %>
 
-    <!-- ===== PAGINATION ===== -->
+    <!-- ===== Remove users that are the user themself, already friends and have a pending request with the user (either way) ===== -->
     <div style="margin-top: 1rem;">
       <% if (page > 1) { %>
       <a href="/friends/browse?search=<%= encodeURIComponent(search||'') %>&sort=<%= sort %>&limit=<%= limit %>&page=<%= page - 1 %>">

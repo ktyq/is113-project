@@ -8,7 +8,7 @@ router.use(authMiddleware.isLoggedIn)
 // Friends page with all sections (Friends, Sent Requests, Received Requests, Recommended)
 router.get('/', friendController.getFriendsPage);
 
-// Browse all users with search, sort, and pagination
+// Browse all users who are not friends or pending requests, with search and sorting
 router.get('/browse', friendController.browseUsers);
 
 // Send friend request
@@ -23,7 +23,7 @@ router.post('/accept', friendController.acceptRequest);
 // Decline friend request
 router.post('/decline', friendController.declineRequest);
 
-// Remove friend —
+// Remove friend 
 router.post('/remove', friendController.removeFriend);
 
 // Update nickname

@@ -2,30 +2,15 @@
 // Controller for bidirectional friend request system:
 // - render friends page with 4 sections (Friends, Sent Requests, Received Requests, Recommended)
 // - send/accept/decline/cancel friend requests
-// - manage nicknames (only respective user can update theirs)
-// - view user profile
+// - manage nicknames (only respective user can update their nickname for the friend)
+// - view other user's watchlist (as permitted by their privacy settings)
 // - browse all users with search, sort, and pagination
 
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const Friend = require('../models/Friend');
 
-// Resolve user identity from request data (query/body/session fallback)
-// For early development where auth is absent, fall back to first user in DB.
-// FIX: session.user is an object {id, username, email, role} - extract .id safely
-async function resolveCurrentUser(req) {
-  if (req.session && req.session.user) {
-    const sid = req.session.user.id || req.session.user._id;
-    if (sid) return typeof sid === 'object' ? sid.toString() : sid;
-  }
-  if (req.query && req.query.userId) return req.query.userId;
-  if (req.body && req.body.userId) return req.body.userId;
-  if (req.user && req.user._id) return req.user._id;
 
-  const firstUser = await User.findOne().sort({ createdAt: 1 });
-  if (!firstUser) throw new Error('No users exist in database');
-  return firstUser._id;
-}
 
 // Cast a value to a Mongoose ObjectId safely.
 function toObjectId(id) {
@@ -35,7 +20,7 @@ function toObjectId(id) {
 // GET /friends
 exports.getFriendsPage = async (req, res) => {
   try {
-    const userId = await resolveCurrentUser(req);
+    const userId = req.session && req.session.user ? (req.session.user.id || req.session.user._id) : null;
     const userObjectId = toObjectId(userId);
 
     const user = await User.findById(userObjectId);
@@ -47,25 +32,27 @@ exports.getFriendsPage = async (req, res) => {
         { requestee: userObjectId, status: 'accepted' }
       ]
     }).populate('requestor requestee', 'username _id');
+    const validFriends = friends.filter(f => f.requestor !== null && f.requestee !== null);
 
     const requests = await Friend.find({
       requestee: userObjectId,
       status: 'pending'
     }).populate('requestor', 'username _id');
+    const validRequests = requests.filter(req => req.requestor !== null);
 
     const sentRequests = await Friend.find({
       requestor: userObjectId,
       status: 'pending'
     }).populate('requestee', 'username _id');
-
+    const validSentRequests = sentRequests.filter(req => req.requestee !== null);
     const suggestions = await Friend.findSuggestedUsers(userObjectId, 5);
 
     res.render('friends', {
       user,
       currentUserId: userObjectId,
-      friends,
-      requests,
-      sentRequests,
+      validFriends,
+      validRequests,
+      validSentRequests,
       suggestions,
     });
   } catch (error) {
@@ -157,7 +144,7 @@ exports.sendRequest = async (req, res) => {
   try {
     const requestor = toObjectId(await resolveCurrentUser(req));
     const requestee = toObjectId(req.body.friendId);
-
+console.log(requestor, requestee, "t")
     if (requestor.equals(requestee)) return res.status(400).send('Cannot friend yourself');
 
     const reverseRequest = await Friend.findOne({
@@ -165,6 +152,7 @@ exports.sendRequest = async (req, res) => {
       requestee: requestor,
       status: 'pending'
     });
+    
     if (reverseRequest) {
       return res.redirect(req.query.redirect || '/friends');
     }

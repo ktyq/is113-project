@@ -15,7 +15,7 @@
     <!-- ===== FRIENDS SECTION ===== -->
     <section>
       <h2>Friends</h2>
-      <% if (!friends || friends.length === 0) { %>
+      <% if (!validFriends || validFriends.length === 0) { %>
       <p>No friends :(</p>
       <% } else { %>
       <table border="1">
@@ -27,7 +27,7 @@
           </tr>
         </thead>
         <tbody>
-          <% friends.forEach(function(f) { %>
+          <% validFriends.forEach(function(f) { %>
           <%
               let isRequestor = f.requestor._id.toString() === currentUserId.toString();
               let otherUser = isRequestor ? f.requestee : f.requestor;
@@ -67,7 +67,7 @@
     <!-- ===== SENT REQUESTS SECTION ===== -->
     <section style="margin-top: 2rem;">
       <h2>Sent Friend Requests</h2>
-      <% if (!sentRequests || sentRequests.length === 0) { %>
+      <% if (!validSentRequests || validSentRequests.length === 0) { %>
       <p>No pending sent requests.</p>
       <% } else { %>
       <table border="1">
@@ -78,7 +78,7 @@
           </tr>
         </thead>
         <tbody>
-          <% sentRequests.forEach(function(r) { %>
+          <% validSentRequests.forEach(function(r) { %>
           <tr>
             <td>
               <a href="/list?userId=<%= r.requestee._id %>"><%= r.requestee.username %></a>
@@ -99,7 +99,7 @@
     <!-- ===== RECEIVED REQUESTS SECTION ===== -->
     <section style="margin-top: 2rem;">
       <h2>Friend Requests</h2>
-      <% if (!requests || requests.length === 0) { %>
+      <% if (!validRequests || validRequests.length === 0) { %>
       <p>No pending friend requests.</p>
       <% } else { %>
       <table border="1">
@@ -110,7 +110,7 @@
           </tr>
         </thead>
         <tbody>
-          <% requests.forEach(function(req) { %>
+          <% validRequests.forEach(function(req) { %>
           <tr>
             <td>
               <a href="/list?userId=<%= req.requestor._id %>"><%= req.requestor.username %></a>
