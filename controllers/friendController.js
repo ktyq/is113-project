@@ -25,7 +25,7 @@ exports.getFriendsPage = async (req, res) => {
 
     const user = await User.findById(userObjectId);
     if (!user) {
-      req.session.destroy(() => {
+      return req.session.destroy(() => {
         res.redirect('/index');
       });
     } // Redirect to home if somehow user not found 
@@ -72,7 +72,7 @@ exports.browseUsers = async (req, res) => {
 
     const user = await User.findById(userObjectId);
     if (!user) {
-      req.session.destroy(() => {
+      return req.session.destroy(() => {
         res.redirect('/index');
       });
     } // Redirect to home if somehow user not found  // Redirect to home if somehow user not found (shouldn't happen if auth middleware is working)
