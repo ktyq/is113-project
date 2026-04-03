@@ -116,9 +116,6 @@ exports.createReview = async (req, res) => {
 
   const errors = [];
   const parsedRating = parseInt(rating);
-  if (!parsedRating || parsedRating < 1 || parsedRating > 5) {
-    errors.push("Rating must be a whole number between 1 and 5. ");
-  }
   if (comment && comment.length > 8000) {
     errors.push("Comment cannot exceed 8000 characters.");
   }
@@ -156,9 +153,6 @@ exports.updateReview = async (req, res) => {
     }
     const errors = [];
     const parsedRating = parseInt(rating);
-    if (!parsedRating || parsedRating < 1 || parsedRating > 5) {
-      errors.push("Rating must be a whole number between 1 and 5. ");
-    }
     if (comment && comment.length > 8000) {
       errors.push("Comment cannot exceed 8000 characters.");
     }
