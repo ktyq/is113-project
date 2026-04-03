@@ -151,6 +151,8 @@ nodemon server.js
 * **User:** jane_smith | jane@example.com
 * **Admin:** admin | admin@example.com
 
+* **Password:** 123123
+
 ---
 
 ## Common errors
