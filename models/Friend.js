@@ -67,8 +67,7 @@ friendSchema.statics.getSentRequestsForUser = function (userId) {
 };
 
 // Suggest random users not in any active friend relationship with userId.
-// Users who have declined or been removed are eligible to appear again
-// since those entries are deleted — only exclude accepted/pending pairs.
+// Users who have declined or been removed are eligible to appear again, only exclude accepted/pending pairs.
 friendSchema.statics.findSuggestedUsers = async function (userId, limit = 5) {
   const User = this.model('User');
 
@@ -123,7 +122,7 @@ friendSchema.statics.declineRequest = function (requestorId, requesteeId) {
 };
 
 // Remove friend — deletes the accepted relationship entry completely so both
-// users can appear in each other's suggestions pool again
+// can appear in each other's suggestions pool again
 friendSchema.statics.removeFriend = function (userId1, userId2) {
   return this.deleteOne({
     $or: [
@@ -152,5 +151,4 @@ friendSchema.statics.updateNickname = function (userId, friendId, nicknameValue,
   }
 };
 
-// export the schema as a model
 module.exports = mongoose.model('Friend', friendSchema);

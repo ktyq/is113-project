@@ -2,8 +2,8 @@
 // Controller for bidirectional friend request system:
 // - render friends page with 4 sections (Friends, Sent Requests, Received Requests, Recommended)
 // - send/accept/decline/cancel friend requests
-// - manage nicknames (only respective user can update theirs)
-// - view user profile
+// - manage nicknames (only respective user can update their nickname for the friend)
+// - view other user's watchlist (as permitted by their privacy settings)
 // - browse all users with search, sort, and pagination
 
 const mongoose = require('mongoose');
