@@ -30,7 +30,11 @@ exports.createFeedback = async (req, res) => {
 // READ all feedback by user (if on normal user account can only read their own feedback)
 exports.readFeedback = async (req, res) => {
     try {
-        const user = req.session.user
+        const user = req.session.user;
+
+        if (user.role === 'admin' || user.role === 'superadmin') {
+            return res.redirect("/feedback/admin");
+        }
 
         // if admin, redirect to admin feedback page
 

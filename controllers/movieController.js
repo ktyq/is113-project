@@ -86,7 +86,7 @@ exports.getEditMovie = async (req, res) => {
         const movie = await Movie.findById(req.query.id);
         if (!movie) return res.send("Movie not found");
 
-        res.render('editMovie', {
+        res.render('edit-movie', {
             movie,
             user: req.session.user
         });
@@ -101,12 +101,12 @@ exports.updateMovie = async (req, res) => {
     try {
         const { title, movieLength, release_year, genre, overview, director, cast } = req.body;
 
-        // ✅ Validation
+        // Validation
         if (!title || !movieLength || !release_year || !genre || !overview || !director || !cast) {
             return res.send("All fields are required!");
         }
 
-        // ✅ Prepare updated data
+        // Prepare updated data
         let updatedData = {
             title,
             movieLength: Number(movieLength),
@@ -118,15 +118,15 @@ exports.updateMovie = async (req, res) => {
             updatedAt: new Date()
         };
 
-        // ✅ If new image uploaded → update imageRef
+        // If new image uploaded → update imageRef
         if (req.file) {
             updatedData.imageRef = req.file.filename;
         }
 
-        // ✅ Update in DB
+        // Update in DB
         await Movie.findByIdAndUpdate(req.query.id, updatedData);
 
-        // ✅ Redirect back to admin page
+        // Redirect back to admin page
         res.redirect('/admin');
 
     } catch (err) {
