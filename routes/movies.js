@@ -40,15 +40,4 @@ router.post('/edit', upload.single('image'), movieController.updateMovie);
 // --- DELETE MOVIE ---
 router.get('/delete', movieController.deleteMovie);
 
-
-// Add movie to watchlist
-router.post('/movie/add', listController.addToUserList);
-
-// Update movie status / notes
-router.post('/list/edit', listController.editUserListItem);
-
-// Remove movie from watchlist
-router.post('/list/remove', listController.deleteFromUserList);
-
-
 module.exports = router;
