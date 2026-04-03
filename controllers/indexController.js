@@ -1,3 +1,4 @@
+// controllers/indexController.js
 const Movie = require('../models/Movie');
 const List = require('../models/Watchlist');
 const Review = require('../models/Review');

@@ -1,3 +1,4 @@
+// controllers/reviewController.js
 const mongoose = require("mongoose");
 const Review = require("../models/Review");
 const Movie = require("../models/Movie");
@@ -139,6 +140,7 @@ exports.createReview = async (req, res) => {
   }
 };
 
+// update review
 exports.updateReview = async (req, res) => {
   const { reviewId, movieId, comment, rating, isAnonymous } = req.body;
   const { user } = req.session;
@@ -206,6 +208,7 @@ exports.updateReview = async (req, res) => {
   }
 };
 
+// delete review
 exports.deleteReview = async (req, res) => {
   const { reviewId } = req.body;
   const { user } = req.session;

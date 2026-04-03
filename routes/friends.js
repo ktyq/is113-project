@@ -3,7 +3,7 @@ const express = require('express');
 const friendController = require('../controllers/friendController');
 const authMiddleware = require('../middleware/authentication');
 const router = express.Router();
-router.use(authMiddleware.isLoggedIn)
+router.use(authMiddleware.isLoggedIn);
 
 // Friends page with all sections (Friends, Sent Requests, Received Requests, Recommended)
 router.get('/', friendController.getFriendsPage);
