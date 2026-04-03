@@ -44,7 +44,8 @@ exports.viewUserList = async (req, res) => {
     let sort = req.query.sort || 'priority_asc';
     const search = (req.query.search || '').toString().trim();
     let watchlist = null;
-
+    let errors = req.query.error || null;
+    console.log(errors);
     let settings = {};
     switch (sort) {
         case 'priority_asc': settings.priority = 1; break;
@@ -65,11 +66,10 @@ exports.viewUserList = async (req, res) => {
         removeMovieId = null;
     }
 
-
     try {
         if (targetUserId && targetUserId != currentUserId) {
             const friendship = await checkUserPrivacy(targetUserId, currentUserId);
-            
+
             if (friendship.error) {
                 return res.render("watchlist", {
                     watchlist,
@@ -85,7 +85,6 @@ exports.viewUserList = async (req, res) => {
                     errors: friendship.error, success: null, private: true
                 });
             }
-
             // allowed
             watchlist = await List.getListsByUser(targetUserId, page, total, status, settings, search);
             return res.render("watchlist", {
@@ -99,14 +98,14 @@ exports.viewUserList = async (req, res) => {
                 removeMovieId: null,
                 viewingUser: friendship.user,
                 user,
-                errors: null, success: null, private: null
+                errors, success: null, private: null
             });
         }
 
         if (!editMovieId && !removeMovieId) {
             watchlist = await List.getListsByUser(user, page, total, status, settings, search);
             return res.render("watchlist", {
-                watchlist, page, total, status, sort, search, editMovieId, removeMovieId, viewingUser: null, user: req.session.user || null, errors: null, success: null, private: false
+                watchlist, page, total, status, sort, search, editMovieId, removeMovieId, viewingUser: null, user: req.session.user || null, errors, success: null, private: false
             });
         }
 
@@ -171,12 +170,7 @@ exports.editUserListItem = async (req, res) => {
         }
         return res.redirect('/list');
     } catch (error) {
-        // res.status(500).json({ error: error.message });
-        return res.render("watchlist", {
-            editMovieId: movie,
-            removeMovieId: null, movie: existing, viewingUser: null, user, errors: "Failed to edit watchlist item.", success: null, private: false
-        });
-
+        res.redirect('/list?error=' + encodeURIComponent("Failed to edit watchlist item"));
     }
 };
 
@@ -191,7 +185,7 @@ exports.addToUserList = async (req, res) => {
         let newItem = await List.createUserList(user, movie, list, notes);
         res.redirect('/list');
     } catch (error) {
-        res.status(500).json({ errors: "Failed to add movie to watchlist." });
+        res.status(500).json({ errors: `Failed to add movie to watchlist.` });
     }
 };
 
@@ -200,6 +194,7 @@ exports.deleteFromUserList = async (req, res) => {
     const user = req.session?.user?.id || req.session?.user?._id || null;
     const movie = req.body.movieId;
     let existing = null;
+
     try {
         existing = await List.getWatchlistItem(user, movie);
         if (!existing) {
@@ -208,9 +203,6 @@ exports.deleteFromUserList = async (req, res) => {
         await List.deleteFromUserList(user, movie);
         return res.redirect('/list');
     } catch (error) {
-        return res.render("watchlist", {
-            editMovieId: null,
-            removeMovieId: movie, movie: existing, viewingUser: null, user, errors: "Failed to delete watchlist item.", success: null, private: false
-        });
+        res.redirect('/list?error=' + encodeURIComponent("Failed to delete watchlist item"));
     }
 };

@@ -1,7 +1,9 @@
 <!-- views/partial/watchlist-edit.ejs -->
 <section>
-  <%- include('messages', { errors, success }) %>
   <h2><%= editMovieId ? 'Edit Movie' : 'Remove Movie' %></h2>
+<% if (!movie) { %>
+  <p></p>
+<% } else { %>
 
   <form action="<%= editMovieId ? '/list/edit' : '/list/remove' %>" method="post">
     <input type="hidden" name="movieId" value="<%= movie.movieID._id %>">
@@ -50,4 +52,5 @@
       </tbody>
     </table>
   </form>
+  <% } %>
 </section>
