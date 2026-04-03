@@ -8,7 +8,7 @@
 </head>
 <body>
   <%- include('partial/header', {user}) %>
-  <h1><%= movie.title %></h1>
+  <a href="index/view?movieId=<%= movie.id %>"><h1><%= movie.title %></h1></a>
   <hr>
 <!-- write a review -->
   <% if (currentUser) { %>
