@@ -22,15 +22,6 @@
       margin-bottom: 15px;
     }
 
-    section {
-      background-color: #fff;
-      padding: 20px;
-      padding-left: 50px;
-      margin-bottom: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
     form label {
       display: block;
       margin-top: 15px;
@@ -122,7 +113,6 @@
 <body>
   <%- include('partial/header', { user: user }) %>
 
-  <section>
     <h2>Add New Movie</h2>
 
     <form action="/admin/add" method="POST" enctype="multipart/form-data">
@@ -206,7 +196,6 @@
     </table>
 
     <% } %>
-  </section>
 
 </body>
 
