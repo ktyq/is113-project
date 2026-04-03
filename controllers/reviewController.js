@@ -17,6 +17,14 @@ exports.showReviews = async (req, res) => {
       return res.status(404).send("Movie not found.");
     }
 
+    let userReview = null;
+    if (user) {
+      userReview = await Review.findOne({
+        movieID: movieId,
+        userID: user.id,
+      });
+    }
+
     const totalReviews = await Review.countDocuments({ movieID: movieId });
     const totalPages = Math.ceil(totalReviews / limit);
 
@@ -30,6 +38,7 @@ exports.showReviews = async (req, res) => {
       movie,
       reviews,
       currentUser: req.session.user || null,
+      userReview,
       errors: [],
       pagination: {
         currentPage: page,
@@ -58,8 +67,16 @@ exports.createReview = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
     const skip = (page - 1) * limit;
-
     const movie = await Movie.findById(movieId);
+
+    let userReview = null;
+    if (user) {
+      userReview = await Review.findOne({
+        movieID: movieId,
+        userID: user.id,
+      });
+    }
+
     const totalReviews = await Review.countDocuments({ movieID: movieId });
     const totalPages = Math.ceil(totalReviews / limit);
 
@@ -74,6 +91,7 @@ exports.createReview = async (req, res) => {
       reviews,
       errors,
       currentUser: req.session.user,
+      userReview,
       pagination: {
         currentPage: page,
         totalPages: totalPages,
@@ -85,11 +103,16 @@ exports.createReview = async (req, res) => {
     });
   };
 
-  const errors = [];
-  const parsedRating = parseInt(rating);
-  if (!parsedRating || parsedRating < 1 || parsedRating > 5) {
-    errors.push("Rating must be a whole number between 1 and 5. ");
+  const existingReview = await Review.findOne({
+    movieID: movieId,
+    userID: userId,
+  });
+
+  if (existingReview) {
+    return rerenderWithErrors(["You have already written a review for this movie. Please edit your existing review instead."]);
   }
+  
+  const errors = [];
   if (comment && comment.length > 8000) {
     errors.push("Comment cannot exceed 8000 characters.");
   }
@@ -126,11 +149,6 @@ exports.updateReview = async (req, res) => {
       return res.redirect(`/reviews?movieId=${movieId}&err=unauthorized`);
     }
     const errors = [];
-    const parsedRating = parseInt(rating);
-
-    if (!parsedRating || parsedRating < 1 || parsedRating > 5) {
-      errors.push("Rating must be a whole number between 1 and 5.");
-    }
     if (comment && comment.length > 8000) {
       errors.push("Comment cannot exceed 8000 characters.");
     }
@@ -139,8 +157,13 @@ exports.updateReview = async (req, res) => {
       const page = parseInt(req.query.page) || 1;
       const limit = 10;
       const skip = (page - 1) * limit;
-
       const movie = await Movie.findById(review.movieID);
+
+      let userReview = await Review.findOne({ 
+        movieID: review.movieID, 
+        userID: user.id 
+      });
+
       const totalReviews = await Review.countDocuments({
         movieID: review.movieID,
       });
@@ -157,6 +180,7 @@ exports.updateReview = async (req, res) => {
         reviews,
         errors,
         currentUser: req.session.user,
+        userReview,
         pagination: {
           currentPage: page,
           totalPages: totalPages,
