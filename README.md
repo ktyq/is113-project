@@ -152,8 +152,8 @@ nodemon server.js
 * **User:** john_doe | john@example.com
 * **User:** jane_smith | jane@example.com
 * **Admin:** admin | admin@example.com
-* 
-* **Password:*** 123123
+
+* **Password:** 123123
 
 ---
 
