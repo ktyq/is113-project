@@ -157,7 +157,7 @@ exports.sendRequest = async (req, res) => {
   try {
     const requestor = toObjectId(await resolveCurrentUser(req));
     const requestee = toObjectId(req.body.friendId);
-
+console.log(requestor, requestee, "t")
     if (requestor.equals(requestee)) return res.status(400).send('Cannot friend yourself');
 
     const reverseRequest = await Friend.findOne({
@@ -165,6 +165,7 @@ exports.sendRequest = async (req, res) => {
       requestee: requestor,
       status: 'pending'
     });
+    
     if (reverseRequest) {
       return res.redirect(req.query.redirect || '/friends');
     }

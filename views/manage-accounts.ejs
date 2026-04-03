@@ -33,7 +33,7 @@
       <td><%= a.email %></td>
       <td>
         <!-- Demote admin to user-->
-         <% if (a._id.toString() !== user.id.toString()) { %>
+         <% if (a._id.toString() !== user.id.toString() && a.role !== 'superadmin') { %>
           <form action="/manage-accounts/demote" method="POST">
             <input type="hidden" name="userId" value="<%= a._id %>">
             <button type="submit">Demote to User</button>
