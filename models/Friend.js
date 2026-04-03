@@ -99,7 +99,7 @@ friendSchema.statics.sendRequest = function (requestorId, requesteeId) {
   return this.findOneAndUpdate(
     { requestor: requestorId, requestee: requesteeId },
     { requestor: requestorId, requestee: requesteeId, status: 'pending' },
-    { upsert: true, setDefaultsOnInsert: true, new: true }
+    { upsert: true, setDefaultsOnInsert: true, returnDocument: 'after' }
   );
 };
 
