@@ -14,8 +14,6 @@ exports.getAllMovies = async (req, res) => {
 
         const movies = await Movie.find(query).sort({ createdAt: -1 }).lean();
 
-        const Review = require('../models/Review');
-
         for (let movie of movies) {
             const reviews = await Review.find({ movieID: movie._id });
 
@@ -54,11 +52,22 @@ exports.getMovieById = async (req, res) => {
 
         const reviewCount = await Review.countDocuments({ movieID: movie._id });
 
+        const reviews = await Review.find({ movieID: movie._id })
+        .populate("userID", "username")
+        .sort({ createdAt: -1 });
+
+        if (reviews.length === 0) {
+            movie.averageRating = null;
+        } else {
+            const total = reviews.reduce((sum, r) => sum + r.rating, 0);
+            movie.averageRating = (total / reviews.length).toFixed(1);
+        }
         res.render('movie', {
             movie,
             user: req.session.user || null,
             status,
-            reviewCount   // pass to EJS
+            reviewCount,
+            reviews   // pass to EJS
         });
 
     } catch (err) {
