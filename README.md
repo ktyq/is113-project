@@ -240,4 +240,4 @@ server.use('/feedback', require("./routes/feedback"));
 ## AI Declaration
 - Generating boilerplate code for frontend ejs files
 - Generating sample database data and script for automatic populating of data
-- 
+
