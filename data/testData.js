@@ -1,5 +1,4 @@
 // data/testData.js
-// testData.js
 
 const users = [
     {
@@ -19,7 +18,7 @@ const users = [
         watchlistPrivacy: 'friends'
     },
     {
-        username: 'adminr',
+        username: 'admin',
         email: 'admin@example.com',
         password: '123123',
         role: 'admin',

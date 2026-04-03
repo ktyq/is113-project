@@ -19,7 +19,7 @@ Full-stack web application which allows users can add movies to a personal watch
 - **Environment**: Node.js
 
 ## Project Structure
-
+```
 is113-project/  
 ├── controllers/                  # MVC Controllers  
 │   ├── feedbackController.js  
@@ -37,13 +37,12 @@ is113-project/
 ├── models/                       # MongoDB Models  
 │   ├── Feedback.js  
 │   ├── Friend.js  
-│   ├── movie.js  
+│   ├── Movie.js  
 │   ├── review.js  
-│   ├── user.js  
-│   └── watchlist.js  
+│   ├── User.js  
+│   └── Watchlist.js  
 ├── public/                       # Static Assets  
 │   ├── default.css  
-│   ├── js/  
 │   └── uploads/  
 │       ├── avatar.jpg  
 │       ├── avengers.jpg  
@@ -75,11 +74,11 @@ is113-project/
 │   │   ├── messages.ejs  
 │   │   ├── watchlist-edit.ejs  
 │   │   └── watchlist-row.ejs  
-│   ├── admin.ejs  
 │   ├── admin-feedback.ejs  
+│   ├── admin.ejs  
 │   ├── browse-users.ejs  
 │   ├── edit-profile.ejs  
-│   ├── editMovie.ejs  
+│   ├── edit-movie.ejs  
 │   ├── feedback.ejs  
 │   ├── friends.ejs  
 │   ├── index.ejs  
@@ -90,58 +89,160 @@ is113-project/
 │   ├── register.ejs  
 │   ├── review.ejs  
 │   └── watchlist.ejs  
-├── server.js                     # Main Application File  
-├── package.json  
-├── package-lock.json  
+├── .gitignore  
 ├── config.env                    # Environment Variables  
+├── package-lock.json  
+├── package.json  
+├── server.js                     # Main Application File  
 └── README.md  
+```
 
 Models: Define data structures in the models/ directory  
 Controllers: Handle business logic in the controllers/ directory  
 Routes: Define API endpoints in the routes/ directory  
 Views: Create EJS templates in the views/ directory  
 Public: Access public files in the public/ directory  
+Here’s a cleaned-up version of your installation instructions with formatting fixes and minor clarifications:
+
+---
 
 ## Installation
-1. Clone the repository
-2. Install dependencies
 
-   - Open terminal in main folder
-   npm install
-   
-3. Set up MongoDB
+1. **Clone the repository**
 
-  - Install MongoDB locally or use MongoDB Atlas
-  - Update the DB in config.env file
+```bash
+git clone <repository-url>
+cd is113-project
+```
 
-4. Import data
+2. **Install dependencies**
 
-   node data/seed.js
-   
-5. Start application
+```bash
+npm install
+```
 
-   nodemon server.js
-   
-6. Launch browser
+3. **Set up environment variables**
+   Create a `config.env` file in the root folder with the following content:
 
-   http://localhost:8000
+```
+DB=<connection string to your database>
+SECRET=<secure secret>
+```
+
+4. **Import sample data**
+
+```bash
+node data/seed.js
+```
+
+*You may need to adjust the path to `config.env` inside `seed.js` if required.*
+
+5. **Start the application**
+
+```bash
+nodemon server.js
+```
+
+6. **Launch in browser**
+
+   Open [http://localhost:8000](http://localhost:8000)
+
+7. **Log in with sample accounts**
+
+* **User:** john_doe | john@example.com
+* **User:** jane_smith | jane@example.com
+* **Admin:** admin | admin@example.com
+
+---
+
+## API Endpoints
+Here’s a structured summary of the API endpoints based on your routes and controllers. This can serve as documentation or reference for your front-end or Postman testing.
+
+---
 
 ## API Endpoints
 
-GET /reviews - Get all reviews
-GET /reviews/create - Get review form to provide review
-POST /reviews/create - Create new review
+### **Profile / User**
 
-server.use("/", require("./routes/profile"));
-server.use('/index', require('./routes/index'));
-server.use("/list", require("./routes/watchlist"));
-server.use("/reviews", require("./routes/reviews"));
+* `GET /` – Redirects to `/profile` if logged in or `/index` if not
+* `GET /register` – Show registration form.
+* `POST /register` – Submit new user registration
+* `GET /login` – Show login form
+* `POST /login` – Submit login credentials
+* `GET /profile` – View user profile (requires login)
+* `GET /edit-profile` – Get profile edit form (requires login)
+* `POST /edit-profile` – Submit profile updates (requires login)
+* `POST /delete-profile` – Delete user profile (requires login)
+* `POST /logout` – Log out user
+* `GET /manage-accounts` – Superadmin view all accounts (requires admin)
+* `POST /manage-accounts/promote` – Promote a user to admin (requires admin)
+* `POST /manage-accounts/demote` – Demote admin to user (requires admin)
 
-server.use("/friends", require("./routes/friends"));
-server.use('/admin', require('./routes/movies'));
-server.use('/feedback', require("./routes/feedback"));
+---
 
+### **Movies / Index**
 
+* `GET /index` – List all movies
+* `GET /index/view?movieId=<id>` – View details of a single movie
+
+---
+
+### **Watchlist**
+
+* `GET /list` – View user watchlist (planned/watched, sorting, pagination)
+* `GET /list/status` – Get status of a movie in user's watchlist
+* `POST /list/edit` – Update a movie in watchlist (status, notes, priority)
+* `POST /list/remove` – Remove a movie from watchlist
+* `POST /list/add` – Add a movie to watchlist
+
+---
+
+### **Reviews**
+
+* `GET /reviews` – Show all reviews
+* `POST /reviews/add` – Add a review (requires login)
+* `POST /reviews/edit` – Edit a review (requires login)
+* `POST /reviews/del` – Delete a review (requires login)
+
+---
+
+### **Friends**
+
+* `GET /friends` – View friends page (Friends, Sent Requests, Received Requests, Recommended)
+* `GET /friends/browse` – Browse all users not friends/pending, with search and sort
+* `POST /friends/send` – Send friend request
+* `POST /friends/cancel` – Cancel sent friend request
+* `POST /friends/accept` – Accept a friend request
+* `POST /friends/decline` – Decline a friend request
+* `POST /friends/remove` – Remove a friend
+* `POST /friends/nickname` – Update nickname for a friend
+
+---
+
+### **Admin / Movies**
+
+* `GET /admin` – Admin dashboard listing all movies
+* `POST /admin/add` – Add a new movie 
+* `GET /admin/edit?movieId=<id>` – Get edit form for movie
+* `POST /admin/edit` – Update movie details (with optional image)
+* `GET /admin/delete?movieId=<id>` – Delete movie
+
+---
+
+### **Feedback**
+
+* `POST /feedback` – Create/submit feedback (requires login)
+* `GET /feedback` – Read user feedback (requires login)
+* `GET /feedback/admin` – Read all feedback for admin
+* `POST /feedback/resolve/:id` – Admin marks feedback as resolved
+* `POST /feedback/delete/:id` – Delete user feedback
+
+---
+
+### **Static / Misc**
+
+* `GET /index.html` – Redirect to `/index`.
+* `GET /` – Serve static files from `public` directory.
 
 ## Database Schema
 
@@ -240,4 +341,4 @@ server.use('/feedback', require("./routes/feedback"));
 ## AI Declaration
 - Generating boilerplate code for frontend ejs files
 - Generating sample database data and script for automatic populating of data
-- 
+- Create partial README.md file (formatting)

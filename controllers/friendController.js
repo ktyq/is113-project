@@ -1,4 +1,4 @@
-// friendController.js
+// controllers/friendController.js
 // Controller for bidirectional friend request system:
 // - render friends page with 4 sections (Friends, Sent Requests, Received Requests, Recommended)
 // - send/accept/decline/cancel friend requests

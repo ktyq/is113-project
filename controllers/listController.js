@@ -1,3 +1,4 @@
+// controllers/listController.js
 const List = require('../models/Watchlist');
 const User = require('../models/User');
 const Friend = require('../models/Friend');

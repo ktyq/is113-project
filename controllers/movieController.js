@@ -1,3 +1,4 @@
+// controllers/movieController.js
 const Movie = require('../models/Movie');
 const listController = require('./listController');
 
