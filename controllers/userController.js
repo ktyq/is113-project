@@ -142,9 +142,9 @@ exports.editProfileGet = async (req, res) => {
     const { user } = req.session;
 
     try {
-        const userId = await User.findById(user.id);
+        const user = await User.findById(user.id);
         res.render('edit-profile', {
-            user: userId,
+            user: user,
             errors: [],
             success: null,
         });
@@ -247,7 +247,7 @@ exports.editProfilePost = async (req, res) => {
         req.session.user.email = user.email;
         console.log("Profile updated:", user.username);
 
-        return res.render('edit-profile', { user, errors: null, success: 'Profile updated successfully' });
+        return res.render('edit-profile', { user, errors: [], success: 'Profile updated successfully' });
     } catch (err) {
         console.error(err);
         res.redirect('/profile');
@@ -302,7 +302,7 @@ exports.promoteToAdmin = async (req, res) => {
         const { userId } = req.body;
 
         // Prevent self-promotion to admin
-        if (userId === req.session.user.id) {
+        if (userId === req.session.user.id.toString()) {
             return res.redirect('/manage-accounts');
         }
 
@@ -331,7 +331,7 @@ exports.demoteToUser = async (req, res) => {
         }
 
         // Prevent self-demotion
-        if (userId === req.session.user.id) {
+        if (userId === req.session.user.id.toString()) {
             return res.redirect('/manage-accounts');
         }
 
