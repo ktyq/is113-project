@@ -28,14 +28,31 @@ exports.isLoggedIn = async (req, res, next) => {
     next();
 }
 
-exports.isAdmin = (req, res, next) => {
+exports.isAdmin = async (req, res, next) => {
     if (!req.session.user) {
         console.log("User not logged in");
         return res.redirect('/login');
     }
-    if (req.session.user.role !== 'admin' && req.session.user.role !== 'superadmin') {
+    try {
+        //Re-check role from DB in case it was changed since login
+        const user = await require('../models/User').findById(req.session.user.id);
+        if (!user) {
+            console.log("User no longer exists, not found in database");
+            return req.session.destroy(() => res.redirect('/login'));
+        }
+
+        //Refresh role in session
+        req.session.user.role = user.role;
+
+        if (user.role !== 'admin' && user.role !== 'superadmin') {
         console.log("Access denied: User is not admin");
-        return res.redirect('/index');
+        return res.redirect('/profile');
     }
+
     next();
+    } catch (error) {
+        console.error("isAdmin middleware error", error);
+        return res.redirect('/login');
+    }
+    
 }
