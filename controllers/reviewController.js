@@ -109,10 +109,16 @@ exports.createReview = async (req, res) => {
   });
 
   if (existingReview) {
-    return rerenderWithErrors(["You have already written a review for this movie. Please edit your existing review instead."]);
+    return rerenderWithErrors([
+      "You have already written a review for this movie. Please edit your existing review instead.",
+    ]);
   }
-  
+
   const errors = [];
+  const parsedRating = parseInt(rating);
+  if (!parsedRating || parsedRating < 1 || parsedRating > 5) {
+    errors.push("Rating must be a whole number between 1 and 5. ");
+  }
   if (comment && comment.length > 8000) {
     errors.push("Comment cannot exceed 8000 characters.");
   }
@@ -149,6 +155,10 @@ exports.updateReview = async (req, res) => {
       return res.redirect(`/reviews?movieId=${movieId}&err=unauthorized`);
     }
     const errors = [];
+    const parsedRating = parseInt(rating);
+    if (!parsedRating || parsedRating < 1 || parsedRating > 5) {
+      errors.push("Rating must be a whole number between 1 and 5. ");
+    }
     if (comment && comment.length > 8000) {
       errors.push("Comment cannot exceed 8000 characters.");
     }
@@ -159,9 +169,9 @@ exports.updateReview = async (req, res) => {
       const skip = (page - 1) * limit;
       const movie = await Movie.findById(review.movieID);
 
-      let userReview = await Review.findOne({ 
-        movieID: review.movieID, 
-        userID: user.id 
+      let userReview = await Review.findOne({
+        movieID: review.movieID,
+        userID: user.id,
       });
 
       const totalReviews = await Review.countDocuments({
