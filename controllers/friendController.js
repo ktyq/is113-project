@@ -10,22 +10,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Friend = require('../models/Friend');
 
-// Resolve user identity from request data (query/body/session fallback)
-// For early development where auth is absent, fall back to first user in DB.
-// FIX: session.user is an object {id, username, email, role} - extract .id safely
-async function resolveCurrentUser(req) {
-  if (req.session && req.session.user) {
-    const sid = req.session.user.id || req.session.user._id;
-    if (sid) return typeof sid === 'object' ? sid.toString() : sid;
-  }
-  if (req.query && req.query.userId) return req.query.userId;
-  if (req.body && req.body.userId) return req.body.userId;
-  if (req.user && req.user._id) return req.user._id;
 
-  const firstUser = await User.findOne().sort({ createdAt: 1 });
-  if (!firstUser) throw new Error('No users exist in database');
-  return firstUser._id;
-}
 
 // Cast a value to a Mongoose ObjectId safely.
 function toObjectId(id) {
@@ -35,7 +20,7 @@ function toObjectId(id) {
 // GET /friends
 exports.getFriendsPage = async (req, res) => {
   try {
-    const userId = await resolveCurrentUser(req);
+    const userId = req.session && req.session.user ? (req.session.user.id || req.session.user._id) : null;
     const userObjectId = toObjectId(userId);
 
     const user = await User.findById(userObjectId);
