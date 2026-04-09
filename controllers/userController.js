@@ -140,6 +140,7 @@ exports.profile = (req, res) => {
 
 //--UPDATE PROFILE----------------------------------------------------------------- //
 exports.editProfileGet = async (req, res) => {
+    
     try {
         const user = await User.findById(req.session.user.id);
         res.render('edit-profile', {

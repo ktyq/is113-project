@@ -14,7 +14,7 @@ exports.isLoggedIn = async (req, res, next) => {
 
         // Refresh session user data with latest from database
         req.session.user = {
-            id: user._id.toString(),
+            id: user._id,
             username: user.username,
             email: user.email,
             role: user.role,
