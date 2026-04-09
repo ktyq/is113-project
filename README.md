@@ -135,8 +135,6 @@ SECRET=<secure secret>
 node data/seed.js
 ```
 
-*You may need to adjust the path to `config.env` inside `seed.js` if required.*
-
 5. **Start the application**
 
 ```bash
@@ -157,10 +155,21 @@ nodemon server.js
 
 ---
 
-## API Endpoints
-Here’s a structured summary of the API endpoints based on your routes and controllers. This can serve as documentation or reference for your front-end or Postman testing.
+## Common errors
+1. Error connecting to database
+```
+// disable this section after testing
+const dns = require('node:dns');
+dns.setServers(['8.8.8.8', '8.8.4.4']); // Use Google DNS
+```
+Check whether commenting in or out will allow connection to database in `server.js` & `data/seed.js`
 
----
+2. Not injecting config.env
+```
+dotenv.config({ path: "./config.env" });
+```
+You may need to adjust the path to `config.env` inside `seed.js` (try .. instead of .)
+
 
 ## API Endpoints
 
